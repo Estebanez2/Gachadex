@@ -1,0 +1,111 @@
+{
+  "@@locale": "es",
+  "appTitle": "Gachadex",
+  "@appTitle": {
+    "description": "Nombre visible de la aplicacion."
+  },
+  "home": "Inicio",
+  "@home": {
+    "description": "Etiqueta de la seccion principal."
+  },
+  "collections": "Colecciones",
+  "@collections": {
+    "description": "Etiqueta de la seccion de colecciones."
+  },
+  "create": "Crear",
+  "@create": {
+    "description": "Etiqueta de la seccion de creacion."
+  },
+  "settings": "Ajustes",
+  "@settings": {
+    "description": "Etiqueta de la seccion de ajustes."
+  },
+  "theme": "Tema",
+  "@theme": {
+    "description": "Titulo del selector de tema."
+  },
+  "system": "Sistema",
+  "@system": {
+    "description": "Opcion para usar el tema del sistema."
+  },
+  "light": "Claro",
+  "@light": {
+    "description": "Opcion para usar tema claro."
+  },
+  "dark": "Oscuro",
+  "@dark": {
+    "description": "Opcion para usar tema oscuro."
+  },
+  "retry": "Reintentar",
+  "@retry": {
+    "description": "Etiqueta de accion para volver a intentar una operacion."
+  },
+  "screenErrorTitle": "No se ha podido mostrar esta pantalla.",
+  "@screenErrorTitle": {
+    "description": "Titulo seguro para errores de presentacion."
+  },
+  "noCollections": "Todavía no hay colecciones.",
+  "@noCollections": {
+    "description": "Estado vacio de la pantalla Colecciones."
+  },
+  "comingSoon": "Próximamente",
+  "@comingSoon": {
+    "description": "Etiqueta para funciones aun no disponibles."
+  },
+  "homePackMessage": "Aquí aparecerán los sobres disponibles.",
+  "@homePackMessage": {
+    "description": "Mensaje provisional de la pantalla Inicio."
+  },
+  "collectionsEmptyDescription": "Aquí aparecerán las colecciones instaladas y los proyectos creados.",
+  "@collectionsEmptyDescription": {
+    "description": "Descripcion del estado vacio de colecciones."
+  },
+  "createDescription": "Aquí se crearán colecciones cuando la fase de creador esté lista.",
+  "@createDescription": {
+    "description": "Descripcion provisional de la pantalla Crear."
+  },
+  "controlledError": "Error controlado",
+  "@controlledError": {
+    "description": "Titulo de la pantalla de error controlado."
+  },
+  "controlledErrorDescription": "Esta pantalla comprueba que los errores se muestran con un mensaje seguro.",
+  "@controlledErrorDescription": {
+    "description": "Descripcion segura del error controlado."
+  },
+  "openControlledError": "Ver error controlado",
+  "@openControlledError": {
+    "description": "Boton para abrir la ruta de error controlado."
+  },
+  "openControlledErrorTooltip": "Abre la pantalla de error controlado",
+  "@openControlledErrorTooltip": {
+    "description": "Tooltip del boton que abre el error controlado."
+  },
+  "notFoundTitle": "Página no encontrada",
+  "@notFoundTitle": {
+    "description": "Titulo para rutas desconocidas."
+  },
+  "notFoundDescription": "La ruta solicitada no existe en Gachadex.",
+  "@notFoundDescription": {
+    "description": "Descripcion segura de pagina no encontrada."
+  },
+  "loading": "Cargando",
+  "@loading": {
+    "description": "Etiqueta accesible del estado de carga."
+  },
+  "appInfo": "Información de la aplicación",
+  "@appInfo": {
+    "description": "Titulo de la informacion basica de la app."
+  },
+  "phaseOneStatus": "Fase 1: base técnica ejecutable.",
+  "@phaseOneStatus": {
+    "description": "Estado actual del proyecto."
+  },
+  "themeSessionOnly": "La preferencia de tema se mantiene durante la sesión. La persistencia llegará cuando exista infraestructura local.",
+  "@themeSessionOnly": {
+    "description": "Nota sobre la persistencia futura del tema."
+  },
+  "createDisabledAction": "Crear colección",
+  "@createDisabledAction": {
+    "description": "Boton deshabilitado de creacion futura."
+  }
+}

@@ -2,344 +2,200 @@
 
 Fecha: 2026-08-05
 
-Este documento concreta la arquitectura objetivo para Friend Cards sin implementar todavia funcionalidades de producto. La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`.
+Este documento describe el estado técnico tras la Fase 1: fundación Flutter ejecutable. La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`; esta fase no implementa todavía colecciones, cartas, sobres, probabilidades, temporizadores, monedas, multimedia, base de datos, importación ni exportación.
 
 ## Principios
 
-- La aplicacion funciona localmente y sin conexion.
+- La aplicación funciona localmente y sin conexión.
 - No hay cuentas, servidor, Firebase, Supabase ni servicios equivalentes.
-- El contenido compartible vive en archivos `.friendpack` autosuficientes.
-- Las fotos, videos y miniaturas se guardan como archivos internos, nunca como BLOB en SQLite.
-- La base de datos guarda UUID, rutas relativas y metadatos.
-- La definicion de contenido es independiente del progreso del jugador.
-- Los proyectos editables son distintos de las colecciones instaladas e inmutables.
-- No se reutilizan nombres, logos, marcos, imagenes, fuentes ni recursos oficiales o de terceros sin licencia revisada.
+- No se usan nombres, logotipos, marcos, recursos ni patrones visuales oficiales de Pokémon.
+- Los textos visibles se preparan para internacionalización y arrancan en español.
+- No se crean modelos de producto ni datos falsos que parezcan persistentes.
+- No se añaden capas vacías, repositorios falsos ni casos de uso sin lógica.
 
-## Capas
-
-### Presentacion
-
-Contendra pantallas, widgets, formularios, navegacion, animaciones, mensajes de error, controles de accesibilidad y ciclo de vida de reproductores de video. No ejecutara consultas SQLite directamente y no contendra reglas de negocio.
-
-### Aplicacion
-
-Contendra casos de uso coordinadores. Ejemplos: crear proyecto, guardar borrador, crear rareza, crear carta, finalizar coleccion, abrir sobre, vender duplicado, recalcular temporizadores, importar y exportar. Orquestara transacciones, repositorios y servicios, pero no dependera de widgets.
-
-### Dominio
-
-Contendra entidades, value objects, reglas y errores tipados independientes de Flutter. Ejemplos: `CollectionId`, `CardId`, `Rarity`, `PackSlotRule`, `ProbabilityDistribution`, `PackOpeningResult`, `CoinTransaction` y validadores.
-
-### Datos e infraestructura
-
-Contendra Drift/SQLite, sistema de archivos, seleccion de archivos, procesamiento multimedia, ZIP, JSON, checksums, notificaciones locales y adaptadores de plugins. Toda dependencia cambiante se encapsulara detras de interfaces propias.
-
-## Modulos
-
-Estructura objetivo:
+## Estructura creada
 
 ```text
 lib/
+  main.dart
+
   app/
     app.dart
-    router.dart
-    theme.dart
+    localization/
+      app_localizations.dart
+    observers/
+      app_provider_observer.dart
+    router/
+      app_router.dart
+      app_routes.dart
+    theme/
+      app_theme.dart
+      app_theme_mode.dart
+      theme_controller.dart
 
   core/
-    database/
+    constants/
+      app_constants.dart
     errors/
-    files/
-    media/
-    notifications/
-    serialization/
-    utils/
+      app_exception.dart
+      app_failure.dart
+      error_mapper.dart
+    logging/
+      app_logger.dart
     widgets/
+      app_empty_view.dart
+      app_error_view.dart
+      app_loading_view.dart
+      app_scaffold.dart
+      placeholder_feature_page.dart
 
   features/
+    collections/
+      presentation/
+        collections_page.dart
+    controlled_error/
+      presentation/
+        controlled_error_page.dart
+    creator/
+      presentation/
+        creator_page.dart
     home/
-    collection_creator/
-    collection_library/
-    rarity_creator/
-    card_creator/
-    pack_creator/
-    pack_opening/
-    album/
-    economy/
-    import_export/
+      presentation/
+        home_page.dart
     settings/
+      presentation/
+        settings_page.dart
 
-  domain/
-    entities/
-    repositories/
-    services/
-    value_objects/
+  l10n/
+    app_es.arb
+    generated/
+      app_localizations.dart
+      app_localizations_es.dart
 ```
-
-Cada feature importante podra dividirse en:
 
 ```text
-feature/
-  data/
-  domain/
-  presentation/
+test/
+  app/
+  core/
+    widgets/
+  helpers/
 ```
 
-No se crearan capas vacias. Una feature pequena puede empezar con menos carpetas y crecer cuando tenga reglas o persistencia propias.
+La organización es feature-first en presentación, con `app/` para composición global y `core/` para infraestructura compartida mínima. Las carpetas `data/`, `domain/` y `application/` se crearán solo cuando haya reglas o persistencia reales.
 
-## Responsabilidades por modulo
+## Punto de entrada
 
-- `home`: resumen de sobres, proximas recargas, monedas y accesos recientes.
-- `collection_creator`: flujo de proyecto, autosave y revision antes de finalizar.
-- `collection_library`: listado separado de colecciones instaladas y proyectos.
-- `rarity_creator`: rarezas personalizadas, orden, color, icono, marco, efecto y valor de venta.
-- `card_creator`: seleccion multimedia, plantillas, campos comicos, preview y validaciones.
-- `pack_creator`: tipos de sobre, pools de cartas, reglas de posiciones y probabilidades.
-- `pack_opening`: generacion atomica del resultado, revelado visual y recuperacion tras cierre.
-- `album`: progreso, filtros, cantidades, faltantes, favoritos y detalle.
-- `economy`: duplicados, venta, monedas y aceleracion de temporizadores.
-- `import_export`: `.friendpack`, validacion, checksums, extraccion segura y comparticion.
-- `settings`: preferencias locales, notificaciones, almacenamiento, licencias y privacidad.
+`lib/main.dart` solo:
 
-## Flujo entre capas
+1. Inicializa Flutter con `WidgetsFlutterBinding.ensureInitialized()`.
+2. Crea un `ProviderScope`.
+3. Registra `AppProviderObserver`.
+4. Arranca `GachadexApp`.
 
-1. La presentacion recoge una intencion del usuario.
-2. La presentacion llama a un caso de uso de aplicacion.
-3. El caso de uso valida con entidades y servicios de dominio.
-4. El caso de uso usa repositorios y servicios de infraestructura.
-5. La infraestructura traduce SQLite, archivos, plugins o sistema operativo a modelos propios.
-6. El caso de uso devuelve un resultado o error tipado.
-7. La presentacion traduce el resultado a estado visual y texto en espanol.
+No hay variables globales mutables ni inicializaciones ficticias de base de datos, archivos o notificaciones.
 
-El flujo de dependencia siempre apunta hacia dentro: presentacion depende de aplicacion; aplicacion depende de dominio y contratos; infraestructura implementa contratos; dominio no depende de Flutter, Drift ni plugins.
+## Riverpod
 
-## Estado e inyeccion
+Riverpod se usa para:
 
-Riverpod se introducira en la fase tecnica, no en esta fase documental. Se usara para exponer casos de uso, repositorios, servicios y estados asincronos. Los providers no deben convertirse en estado global mutable; cada dependencia tendra ciclo de vida claro y sera reemplazable en pruebas.
+- Gestionar `ThemeMode` durante la sesión mediante `themeControllerProvider`.
+- Exponer `appRouterProvider` como dependencia reemplazable en tests.
+- Observar creación, actualización y errores de providers con `AppProviderObserver`.
 
-## Navegacion
+El observer solo registra en debug, no registra valores de providers, rutas de archivos, contenido multimedia, secretos ni datos personales. Todo logging pasa por `AppLogger`.
 
-GoRouter se introducira en la fase tecnica. La navegacion inicial sera declarativa, con rutas para inicio, biblioteca, creador, detalle de coleccion, apertura, album, importacion/exportacion y ajustes. No habra rutas de autenticacion porque el producto no tiene cuentas.
+La preferencia de tema no se persiste todavía. Se documenta explícitamente como pendiente hasta que exista infraestructura local.
 
-## Almacenamiento local
+## Navegación
 
-La estrategia prevista es Drift sobre SQLite. La ubicacion estara en el directorio de soporte de la aplicacion obtenido con `path_provider`. SQLite guardara tablas relacionales y metadatos; los binarios multimedia viviran en archivos.
+GoRouter define rutas centralizadas en `AppRoutes`:
 
-Estructura objetivo:
+- `/` redirige a `/home`.
+- `/home` muestra Inicio.
+- `/collections` muestra Colecciones.
+- `/create` muestra Crear.
+- `/settings` muestra Ajustes.
+- `/controlled-error` muestra una pantalla de error controlado.
 
-```text
-app_support/
-  database/
-    app.sqlite
+La navegación principal usa `StatefulShellRoute.indexedStack` con cuatro ramas y `NavigationBar` de Material 3. El shell común vive en `AppScaffold` y conserva el estado de las ramas al cambiar de pestaña cuando GoRouter puede hacerlo.
 
-  projects/
-    {projectId}/
-      images/
-      videos/
-      thumbnails/
-      packs/
+Las rutas desconocidas usan `errorBuilder` y muestran `AppErrorView` con un mensaje seguro, sin detalles técnicos.
 
-  installed/
-    {collectionId}/
-      collection/
-      cards/
-        images/
-        videos/
-        thumbnails/
-      packs/
+## Tema visual
 
-  exports/
-  temp/
-```
+`AppTheme` configura Material 3 con tema claro y oscuro, color scheme propio basado en verde teal y acentos coral/ámbar apagado. Se tematizan:
 
-Las rutas persistidas seran relativas al contenedor de proyecto o coleccion instalada. No se persistiran rutas absolutas.
+- `AppBar`.
+- `NavigationBar`.
+- `Card`.
+- `FilledButton`.
+- `OutlinedButton`.
+- `InputDecoration`.
+- `Dialog`.
+- `SnackBar`.
+- `BottomSheet`.
+- `Divider`.
 
-## Proyectos editables y colecciones instaladas
+La identidad visual evita amarillo/azul como copia directa de Pokémon, pokéballs, tipografías Pokémon, marcos de TCG y recursos de otras marcas.
 
-Un proyecto de coleccion es mutable y se guarda con autosave. Puede cambiar datos generales, rarezas, cartas, sobres, economia y recursos multimedia.
+## Internacionalización
 
-Al finalizar:
+La app usa el flujo oficial de Flutter:
 
-1. Se valida el proyecto completo.
-2. Se crea una definicion jugable inmutable con `collectionId` y `contentVersion`.
-3. Se instala una copia jugable local para el creador.
-4. Se entregan tres sobres iniciales del sobre principal.
-5. Se habilita la exportacion.
+- `flutter_localizations`.
+- `intl` compatible con el pin del SDK.
+- `flutter gen-l10n`.
+- `lib/l10n/app_es.arb`.
+- Código generado versionado en `lib/l10n/generated/`.
 
-Una coleccion instalada nunca se edita directamente en la primera version. Futuras actualizaciones usaran el mismo `collectionId` y un `contentVersion` superior.
-
-## Definicion de contenido y progreso
-
-Definicion de contenido:
-
-- Colecciones y versiones.
-- Rarezas.
-- Cartas.
-- Campos comicos.
-- Activos multimedia.
-- Tipos de sobre.
-- Pools de cartas.
-- Reglas de posiciones.
-- Probabilidades por rareza.
-- Plantillas y efectos seleccionados.
-
-Progreso del jugador:
-
-- Colecciones instaladas.
-- Cartas obtenidas y cantidades.
-- Favoritos.
-- Inventario de sobres.
-- Temporizadores.
-- Historial de aperturas.
-- Movimientos de monedas.
-
-La apertura de sobres actualiza progreso en una transaccion antes de iniciar animaciones. Si la app se cierra durante el revelado, el resultado ya esta guardado y puede recuperarse.
-
-## Fotografias, videos y miniaturas
-
-La seleccion y procesamiento multimedia se aislaran detras de una interfaz `MediaProcessor`.
-
-Fotografias:
-
-- Copia a temporal.
-- Correccion de orientacion.
-- Recorte a la proporcion de plantilla.
-- Redimensionado.
-- Conversion a WebP.
-- Miniatura WebP.
-- Persistencia en carpeta del proyecto o coleccion instalada.
-
-Videos:
-
-- Seleccion desde galeria.
-- Lectura de duracion y dimensiones.
-- Rechazo o recorte si supera 15 segundos.
-- Normalizacion a MP4 H.264.
-- Audio AAC si existe pista de audio.
-- Resolucion maxima inicial 1280 x 720.
-- Extraccion del primer fotograma como miniatura.
-- Conservacion del sonido durante compresion.
-
-La UI usara miniaturas en listados. Los reproductores de video se inicializaran solo para la carta visible o abierta y se liberaran al salir.
-
-## Importacion y exportacion
-
-El formato `.friendpack` sera un contenedor comprimido con:
-
-```text
-manifest.json
-collection.json
-rarities.json
-cards.json
-pack_types.json
-pack_rules.json
-assets/
-checksums.json
-```
-
-Exportacion:
-
-- Se crea un archivo temporal.
-- Se escriben JSON y activos por streaming.
-- Se calcula SHA-256 por archivo.
-- Se cierra el contenedor.
-- Se verifica.
-- Se comparte mediante UI nativa.
-
-Importacion:
-
-- Se copia el archivo a temporal.
-- Se lee y valida `manifest.json`.
-- Se comprueba version, UUID y duplicados.
-- Se muestra previsualizacion.
-- Se extrae de forma segura sin permitir rutas fuera del destino.
-- Se validan JSON, relaciones, extensiones, tamanos y hashes.
-- Se copian activos a almacenamiento definitivo.
-- Se insertan datos y tres sobres iniciales en una transaccion.
-- Se limpian temporales.
-
-El progreso de quien exporta no se incluye en `.friendpack`.
-
-## Migraciones
-
-Habra dos niveles de versionado:
-
-- `schemaVersion`: version de la base de datos local Drift.
-- `formatVersion` y `contentVersion`: version del formato exportable y del contenido de una coleccion.
-
-Reglas:
-
-- Toda migracion de base de datos tendra prueba.
-- Las migraciones seran hacia adelante y no dependeran de nombres visibles.
-- Los UUID no se regeneran durante migraciones.
-- Las migraciones de contenido instalado no se implementaran en la primera version, pero el modelo se disena para soportarlas.
-- Cualquier cambio de arquitectura relevante se documentara en `docs/decisions/`.
+`GachadexApp` fija español como idioma inicial con `locale: Locale('es')`, declara `supportedLocales` desde `AppLocalizations` y usa delegates generados. Añadir otro idioma requerirá incorporar otro ARB, por ejemplo `app_en.arb`.
 
 ## Errores
 
-El dominio expondra errores tipados, por ejemplo:
+La base mínima incluye:
 
-- `InsufficientStorage`
-- `InvalidCollectionFile`
-- `UnsupportedFormatVersion`
-- `CollectionAlreadyInstalled`
-- `MissingMediaAsset`
-- `InvalidProbabilityDistribution`
-- `NoEligibleCards`
-- `MediaProcessingFailed`
-- `NotificationPermissionDenied`
-- `DatabaseFailure`
-- `ExportCancelled`
-- `ImportCancelled`
+- `AppException`: errores técnicos capturados con código y mensaje seguro opcional.
+- `AppFailure`: errores presentables.
+- `UnexpectedFailure`, `ValidationFailure`, `NavigationFailure`.
+- `ErrorMapper`: conversión de errores conocidos a mensajes seguros.
 
-La infraestructura convertira excepciones tecnicas a errores de dominio o aplicacion. La presentacion mostrara mensajes comprensibles en espanol y no filtrara stack traces al usuario.
+La UI no muestra stack traces, rutas internas ni detalles técnicos.
 
-## Pruebas
+## Logging
 
-Pruebas unitarias:
+`AppLogger` encapsula `dart:developer` con niveles `debug`, `info`, `warning` y `error`.
 
-- Probabilidades y seleccion por rareza.
-- Reglas de posicion.
-- Duplicados y venta.
-- Coste de aceleracion.
-- Temporizadores.
-- Validaciones de proyectos.
-- Versiones y checksums.
+- En debug registra eventos útiles de desarrollo.
+- En release elimina logs no esenciales.
+- Los stack traces solo se adjuntan en debug.
+- No se registran datos personales, contenido multimedia, archivos completos ni secretos.
 
-Pruebas de aplicacion:
+## Pantallas provisionales
 
-- Finalizacion de coleccion.
-- Apertura atomica.
-- Entrega de tres sobres iniciales.
-- Importacion transaccional.
-- Exportacion por streaming.
-- Recuperacion tras cierre durante apertura.
+- Inicio: mensaje de sobres futuros y botón a error controlado.
+- Colecciones: estado vacío reutilizable.
+- Crear: explicación breve y acción deshabilitada.
+- Ajustes: selector de tema sistema/claro/oscuro e información básica.
+- Error controlado: `AppErrorView` accesible sin cerrar la app.
 
-Pruebas de datos:
+Estas pantallas no crean sobres, colecciones, proyectos, cartas ni datos falsos.
 
-- DAOs y migraciones Drift.
-- Integridad referencial.
-- Cascadas de borrado.
-- Separacion entre contenido y progreso.
+## Accesibilidad y responsive básico
 
-Pruebas de infraestructura:
+- `NavigationBar` mantiene etiquetas visibles.
+- Acciones importantes tienen texto y tooltip cuando aporta valor.
+- Los estados comunes usan textos centrados, ancho máximo y `Semantics` cuando corresponde.
+- El contenido usa scroll y evita alturas fijas que corten texto escalado.
+- Los tests cubren navegación con labels y una pasada con escala de texto elevada en viewport móvil.
 
-- Servicios de archivos con rutas relativas.
-- Extraccion segura contra path traversal.
-- Procesamiento multimedia mediante fakes y fixtures.
-- Notificaciones con adaptadores mockeables.
+## Límites de la fase
 
-Pruebas de presentacion:
+Queda fuera de esta Fase 1:
 
-- Widgets de formularios.
-- Estados de error, carga y vacio.
-- Accesibilidad basica.
-- Reduccion de animaciones.
-
-Comandos obligatorios al cerrar cada fase:
-
-```text
-dart format .
-flutter analyze
-flutter test
-```
-
-Cuando la fase toque Android, tambien se verificara compilacion Android. iOS requerira Mac con Xcode.
+- Persistencia local, Drift, SQLite, migraciones y repositorios.
+- UUID e identificadores de producto.
+- Modelos de colecciones, cartas, rarezas, sobres o economía.
+- Selección, procesamiento o reproducción multimedia.
+- Importación/exportación `.friendpack`.
+- Temporizadores, monedas y notificaciones.
+- Cambios nativos innecesarios en Android/iOS.
