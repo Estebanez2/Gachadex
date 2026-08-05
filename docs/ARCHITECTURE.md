@@ -2,200 +2,147 @@
 
 Fecha: 2026-08-05
 
-Este documento describe el estado técnico tras la Fase 1: fundación Flutter ejecutable. La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`; esta fase no implementa todavía colecciones, cartas, sobres, probabilidades, temporizadores, monedas, multimedia, base de datos, importación ni exportación.
+Este documento describe el estado tecnico tras la Fase 2: modelo de dominio y
+persistencia local. La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`.
 
 ## Principios
 
-- La aplicación funciona localmente y sin conexión.
+- La aplicacion funciona localmente y sin conexion.
 - No hay cuentas, servidor, Firebase, Supabase ni servicios equivalentes.
-- No se usan nombres, logotipos, marcos, recursos ni patrones visuales oficiales de Pokémon.
-- Los textos visibles se preparan para internacionalización y arrancan en español.
-- No se crean modelos de producto ni datos falsos que parezcan persistentes.
-- No se añaden capas vacías, repositorios falsos ni casos de uso sin lógica.
+- La definicion de contenido y el progreso del jugador estan separados.
+- Los identificadores de dominio son UUID permanentes tipados.
+- Las fechas de dominio se validan como UTC.
+- SQLite guarda metadatos y rutas relativas, nunca binarios multimedia.
+- La presentacion no importa clases generadas por Drift.
+- Las pantallas de Fase 1 no crean datos reales ni muestran funciones incompletas.
 
-## Estructura creada
+## Capas
 
 ```text
 lib/
-  main.dart
-
-  app/
-    app.dart
-    localization/
-      app_localizations.dart
-    observers/
-      app_provider_observer.dart
-    router/
-      app_router.dart
-      app_routes.dart
-    theme/
-      app_theme.dart
-      app_theme_mode.dart
-      theme_controller.dart
-
+  app/                       Composicion Flutter, router, tema, l10n.
   core/
-    constants/
-      app_constants.dart
-    errors/
-      app_exception.dart
-      app_failure.dart
-      error_mapper.dart
-    logging/
-      app_logger.dart
-    widgets/
-      app_empty_view.dart
-      app_error_view.dart
-      app_loading_view.dart
-      app_scaffold.dart
-      placeholder_feature_page.dart
-
+    database/                Drift, conexion, migraciones, providers.
+    domain/                  Enums y validaciones compartidas.
+    errors/                  Fallos seguros para capas superiores.
+    identifiers/             UUID tipados y generador inyectable.
+    time/                    Clock de produccion y FakeClock.
+    value_objects/           Rutas multimedia relativas.
   features/
-    collections/
-      presentation/
-        collections_page.dart
-    controlled_error/
-      presentation/
-        controlled_error_page.dart
-    creator/
-      presentation/
-        creator_page.dart
-    home/
-      presentation/
-        home_page.dart
-    settings/
-      presentation/
-        settings_page.dart
-
-  l10n/
-    app_es.arb
-    generated/
-      app_localizations.dart
-      app_localizations_es.dart
+    collection_creator/      Proyecto editable y versiones de contenido.
+    collections/             Colecciones instaladas.
+    rarities/                Rarezas.
+    cards/                   Cartas, campos y activos multimedia.
+    packs/                   Sobres, pools, reglas y aperturas.
+    album/                   Cartas obtenidas y progreso.
+    economy/                 Historial de monedas.
 ```
 
-```text
-test/
-  app/
-  core/
-    widgets/
-  helpers/
-```
+Cada feature con logica real separa `domain/` y `data/`. Los repositorios de
+dominio exponen entidades limpias; las implementaciones Drift viven en `data/`.
 
-La organización es feature-first en presentación, con `app/` para composición global y `core/` para infraestructura compartida mínima. Las carpetas `data/`, `domain/` y `application/` se crearán solo cuando haya reglas o persistencia reales.
+## Persistencia
 
-## Punto de entrada
+`AppDatabase` esta en `lib/core/database/app_database.dart` y usa Drift sobre
+SQLite. La conexion de produccion se abre con `drift_flutter` en almacenamiento
+privado de la aplicacion mediante `getApplicationSupportDirectory()`; el archivo
+real es `gachadex.sqlite`.
 
-`lib/main.dart` solo:
+La base se expone con `appDatabaseProvider`. Riverpod crea una unica instancia
+por `ProviderScope` y la cierra con `ref.onDispose`.
 
-1. Inicializa Flutter con `WidgetsFlutterBinding.ensureInitialized()`.
-2. Crea un `ProviderScope`.
-3. Registra `AppProviderObserver`.
-4. Arranca `GachadexApp`.
+## Migraciones
 
-No hay variables globales mutables ni inicializaciones ficticias de base de datos, archivos o notificaciones.
+`currentDatabaseSchemaVersion` vive en
+`lib/core/database/migrations/schema_versions.dart` y actualmente vale `1`.
 
-## Riverpod
+`createMigrationStrategy`:
 
-Riverpod se usa para:
+- Crea todas las tablas en una instalacion nueva.
+- Activa `PRAGMA foreign_keys = ON` en cada apertura.
+- Registra apertura y migraciones con `AppLogger`.
+- Rechaza upgrades no implementados con un mensaje seguro hasta que exista v2.
 
-- Gestionar `ThemeMode` durante la sesión mediante `themeControllerProvider`.
-- Exponer `appRouterProvider` como dependencia reemplazable en tests.
-- Observar creación, actualización y errores de providers con `AppProviderObserver`.
+Para anadir v2 se debe subir `currentDatabaseSchemaVersion`, implementar el
+bloque `onUpgrade` para `from == 1`, documentar la decision y cubrir la
+migracion con tests antes de modificar datos de usuario.
 
-El observer solo registra en debug, no registra valores de providers, rutas de archivos, contenido multimedia, secretos ni datos personales. Todo logging pasa por `AppLogger`.
+## Dominio
 
-La preferencia de tema no se persiste todavía. Se documenta explícitamente como pendiente hasta que exista infraestructura local.
+El dominio no importa Drift, SQLite, companions ni filas generadas. Contiene:
 
-## Navegación
+- `CollectionProject` y `ContentVersion` para contenido editable/versionado.
+- `InstalledCollection` para una coleccion instalada.
+- `Rarity`, `Card`, `CardFieldValue` y `MediaAsset`.
+- `PackType`, `PackCardPoolEntry`, `PackSlotRule`,
+  `PackRarityProbability`, `PackInventory`, `PackOpening` y
+  `PackOpeningCard`.
+- `OwnedCard` y `CoinTransaction`.
 
-GoRouter define rutas centralizadas en `AppRoutes`:
+Las reglas numericas, UUID, rutas relativas y fechas UTC se validan al construir
+entidades. Las reglas entre tablas se validan en repositorios cuando SQLite no
+puede expresarlas sin sobreacoplar el esquema.
 
-- `/` redirige a `/home`.
-- `/home` muestra Inicio.
-- `/collections` muestra Colecciones.
-- `/create` muestra Crear.
-- `/settings` muestra Ajustes.
-- `/controlled-error` muestra una pantalla de error controlado.
+## Repositorios
 
-La navegación principal usa `StatefulShellRoute.indexedStack` con cuatro ramas y `NavigationBar` de Material 3. El shell común vive en `AppScaffold` y conserva el estado de las ramas al cambiar de pestaña cuando GoRouter puede hacerlo.
+Interfaces de dominio:
 
-Las rutas desconocidas usan `errorBuilder` y muestran `AppErrorView` con un mensaje seguro, sin detalles técnicos.
+- `CollectionProjectRepository`
+- `ContentVersionRepository`
+- `RarityRepository`
+- `CardRepository`
+- `PackTypeRepository`
+- `InstalledCollectionRepository`
+- `PlayerProgressRepository`
 
-## Tema visual
+Implementaciones Drift:
 
-`AppTheme` configura Material 3 con tema claro y oscuro, color scheme propio basado en verde teal y acentos coral/ámbar apagado. Se tematizan:
+- Crean borrador + version 1 en transaccion.
+- Validan referencias cruzadas de coleccion y version.
+- Evitan borrar rarezas usadas por cartas.
+- Evitan instalar dos veces la misma coleccion/version.
+- Borran progreso local al eliminar una coleccion instalada.
+- No devuelven filas Drift a dominio o presentacion.
 
-- `AppBar`.
-- `NavigationBar`.
-- `Card`.
-- `FilledButton`.
-- `OutlinedButton`.
-- `InputDecoration`.
-- `Dialog`.
-- `SnackBar`.
-- `BottomSheet`.
-- `Divider`.
+## Mappers
 
-La identidad visual evita amarillo/azul como copia directa de Pokémon, pokéballs, tipografías Pokémon, marcos de TCG y recursos de otras marcas.
+Los mappers explicitos viven en `features/*/data/mappers/`. Convierten:
 
-## Internacionalización
+- Fila Drift -> entidad de dominio.
+- Entidad de dominio -> companion Drift.
+- `DateTime` de Drift -> UTC de dominio.
+- IDs tipados -> `String` para SQLite.
 
-La app usa el flujo oficial de Flutter:
+Los enums se guardan como strings estables mediante `TypeConverter`; no se usa
+el indice automatico del enum.
 
-- `flutter_localizations`.
-- `intl` compatible con el pin del SDK.
-- `flutter gen-l10n`.
-- `lib/l10n/app_es.arb`.
-- Código generado versionado en `lib/l10n/generated/`.
+## Eliminacion
 
-`GachadexApp` fija español como idioma inicial con `locale: Locale('es')`, declara `supportedLocales` desde `AppLocalizations` y usa delegates generados. Añadir otro idioma requerirá incorporar otro ARB, por ejemplo `app_en.arb`.
+- Borrar un borrador elimina su proyecto, version editable y activos de esa
+  coleccion cuando no esta instalado.
+- Borrar una coleccion instalada elimina solo progreso local mediante cascadas
+  desde `installed_collections`.
+- El contenido finalizado compartido queda protegido por repositorios y claves
+  foraneas restrictivas.
+- Las cascadas se usan para hijos estrictamente dependientes, como campos de
+  carta, pool de sobre y filas de apertura.
 
-## Errores
+## Tests
 
-La base mínima incluye:
+Las pruebas usan `NativeDatabase.memory()` para bases aisladas. Hay un test
+adicional con archivo temporal que cierra y reabre SQLite para verificar
+persistencia real. La base del dispositivo no se usa en tests.
 
-- `AppException`: errores técnicos capturados con código y mensaje seguro opcional.
-- `AppFailure`: errores presentables.
-- `UnexpectedFailure`, `ValidationFailure`, `NavigationFailure`.
-- `ErrorMapper`: conversión de errores conocidos a mensajes seguros.
+## Limites de la fase
 
-La UI no muestra stack traces, rutas internas ni detalles técnicos.
+Queda fuera de Fase 2:
 
-## Logging
-
-`AppLogger` encapsula `dart:developer` con niveles `debug`, `info`, `warning` y `error`.
-
-- En debug registra eventos útiles de desarrollo.
-- En release elimina logs no esenciales.
-- Los stack traces solo se adjuntan en debug.
-- No se registran datos personales, contenido multimedia, archivos completos ni secretos.
-
-## Pantallas provisionales
-
-- Inicio: mensaje de sobres futuros y botón a error controlado.
-- Colecciones: estado vacío reutilizable.
-- Crear: explicación breve y acción deshabilitada.
-- Ajustes: selector de tema sistema/claro/oscuro e información básica.
-- Error controlado: `AppErrorView` accesible sin cerrar la app.
-
-Estas pantallas no crean sobres, colecciones, proyectos, cartas ni datos falsos.
-
-## Accesibilidad y responsive básico
-
-- `NavigationBar` mantiene etiquetas visibles.
-- Acciones importantes tienen texto y tooltip cuando aporta valor.
-- Los estados comunes usan textos centrados, ancho máximo y `Semantics` cuando corresponde.
-- El contenido usa scroll y evita alturas fijas que corten texto escalado.
-- Los tests cubren navegación con labels y una pasada con escala de texto elevada en viewport móvil.
-
-## Límites de la fase
-
-Queda fuera de esta Fase 1:
-
-- Persistencia local, Drift, SQLite, migraciones y repositorios.
-- UUID e identificadores de producto.
-- Modelos de colecciones, cartas, rarezas, sobres o economía.
-- Selección, procesamiento o reproducción multimedia.
-- Importación/exportación `.friendpack`.
-- Temporizadores, monedas y notificaciones.
-- Cambios nativos innecesarios en Android/iOS.
+- Formularios completos.
+- Selector o procesamiento de fotos/videos.
+- Apertura visual de sobres.
+- Probabilidades ejecutables.
+- Temporizadores reales.
+- Entrega de sobres iniciales.
+- Economia visible.
+- Notificaciones.
+- Importacion/exportacion `.friendpack`.
