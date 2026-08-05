@@ -1,0 +1,6 @@
+[submodule "references/altare-tcg-2023"]
+	path = references/altare-tcg-2023
+	url = https://github.com/Elysium-Delivery-Services/altare-tcg-2023.git
+[submodule "references/react-card-builder"]
+	path = references/react-card-builder
+	url = https://github.com/johnuberbacher/react-card-builder.git
