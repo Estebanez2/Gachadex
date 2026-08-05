@@ -41,10 +41,17 @@ Incluye:
 - Navegacion con GoRouter.
 - Estado e inyeccion con Riverpod.
 - Errores tipados base.
-- UUIDs.
-- Drift/SQLite y repositorios base.
+- Logging seguro de desarrollo.
+- Internacionalizacion inicial en espanol.
+- Selector de tema sistema/claro/oscuro durante la sesion.
 - Pantallas vacias o placeholders minimos.
-- Pruebas de arranque, routing y repositorios de prueba.
+- Pruebas de arranque, navegacion, tema, localizacion, estados comunes y accesibilidad basica.
+
+No incluye:
+
+- Drift, SQLite ni repositorios.
+- UUIDs ni modelos de producto.
+- Multimedia, temporizadores, monedas, notificaciones, importacion o exportacion.
 
 Depende de: fase 0.
 
