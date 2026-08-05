@@ -1,14 +1,21 @@
 # Gachadex
 
-Aplicación Flutter para Android e iOS orientada a crear y jugar colecciones de cartas personalizadas entre grupos de amigos. El producto funcionará localmente y sin conexión: sin cuentas, sin servidor, sin Firebase/Supabase y sin compras con dinero real.
+Aplicacion Flutter para Android e iOS orientada a crear y jugar colecciones de
+cartas personalizadas entre grupos de amigos. El producto funciona localmente y
+sin conexion: sin cuentas, sin servidor, sin Firebase/Supabase y sin compras con
+dinero real.
 
 ## Estado actual
 
-Fase 1: fundación técnica de Flutter.
+Fase 2: modelo de dominio y persistencia local.
 
-Incluye estructura feature-first, Riverpod, GoRouter, navegación inferior, Material 3, tema claro/oscuro/sistema durante la sesión, localización inicial en español, estados comunes, logging de desarrollo, errores controlados y pruebas de arranque/navegación/tema/localización.
+Incluye la base tecnica de Fase 1 mas dominio inicial, UUID tipados, Drift,
+SQLite, esquema version 1, migraciones preparadas, repositorios, DAOs, mappers,
+providers Riverpod y tests de dominio/base/repositorios.
 
-No incluye todavía colecciones reales, cartas, sobres, probabilidades, temporizadores, monedas, multimedia, base de datos, importación ni exportación.
+No incluye todavia formularios completos, selector de fotos/videos, apertura
+visual de sobres, probabilidades ejecutables, temporizadores reales, economia
+visible, notificaciones, importacion ni exportacion.
 
 ## Requisitos
 
@@ -29,7 +36,31 @@ flutter pub get
 flutter gen-l10n
 ```
 
-La configuración está en `l10n.yaml` y el ARB inicial en `lib/l10n/app_es.arb`.
+La configuracion esta en `l10n.yaml` y el ARB inicial en
+`lib/l10n/app_es.arb`.
+
+## Generar codigo Drift
+
+El archivo generado `lib/core/database/app_database.g.dart` se versiona para que
+el proyecto compile tras clonar sin exigir generacion inmediata.
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+Con `build_runner` 2.15.1 puede aparecer un aviso indicando que
+`--delete-conflicting-outputs` fue retirado; el build sigue generando
+correctamente.
+
+Para limpiar la cache de build_runner cuando sea necesario:
+
+```bash
+dart run build_runner clean
+dart run build_runner build
+```
+
+No se versionan `.dart_tool/`, `build/`, bases SQLite locales, journals ni datos
+personales.
 
 ## Ejecutar la app
 
@@ -51,13 +82,7 @@ Selecciona un dispositivo Android concreto:
 flutter run -d <device-id>
 ```
 
-Ejemplo habitual con un emulador:
-
-```bash
-flutter run -d emulator-5554
-```
-
-## Análisis y pruebas
+## Analisis y pruebas
 
 ```bash
 dart format .
@@ -66,20 +91,33 @@ flutter analyze
 flutter test
 ```
 
-Compilación Android debug:
+Compilacion Android debug:
 
 ```bash
 flutter build apk --debug
 ```
 
-## Documentación
+## Base de datos
 
-- [Especificación funcional](docs/PRODUCT_SPEC.md)
+- Esquema: [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)
+- Arquitectura: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- Dependencias: [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md)
+
+La conexion de produccion usa `drift_flutter` y crea `gachadex.sqlite` en el
+directorio privado de soporte de la app. Los tests usan bases en memoria o
+archivos temporales aislados.
+
+## Documentacion
+
+- [Especificacion funcional](docs/PRODUCT_SPEC.md)
 - [Arquitectura](docs/ARCHITECTURE.md)
 - [Roadmap](docs/ROADMAP.md)
-- [Análisis de referencias](docs/REFERENCE_ANALYSIS.md)
+- [Esquema de base de datos](docs/DATABASE_SCHEMA.md)
+- [Analisis de referencias](docs/REFERENCE_ANALYSIS.md)
 - [Dependencias](docs/DEPENDENCIES.md)
 
 ## Aviso de marca
 
-Gachadex no es un producto de Pokémon, no está afiliado a The Pokémon Company, Nintendo, Creatures Inc. ni Game Freak, y no utiliza nombres, logotipos, marcos, imágenes ni recursos oficiales de Pokémon.
+Gachadex no es un producto de Pokemon, no esta afiliado a The Pokemon Company,
+Nintendo, Creatures Inc. ni Game Freak, y no utiliza nombres, logotipos, marcos,
+imagenes ni recursos oficiales de Pokemon.
