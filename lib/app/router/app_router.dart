@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/widgets/app_error_view.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/identifiers/entity_id.dart';
+import '../../features/cards/presentation/pages/card_editor_page.dart';
 import '../../features/collections/presentation/collections_page.dart';
 import '../../features/collection_creator/presentation/pages/collection_draft_editor_page.dart';
 import '../../features/collection_creator/presentation/pages/create_draft_page.dart';
@@ -118,6 +119,44 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
           try {
             return CollectionDraftEditorPage(
               projectId: CollectionProjectId(projectId),
+            );
+          } on FormatException {
+            return _RouteError(description: context.l10n.projectNotFound);
+          }
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '${AppRoutes.createProjectPathPrefix}/:projectId/cards/new',
+        name: AppRoutes.createCardNewName,
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId'];
+          if (projectId == null) {
+            return _RouteError(description: context.l10n.projectNotFound);
+          }
+
+          try {
+            return CardEditorPage(projectId: CollectionProjectId(projectId));
+          } on FormatException {
+            return _RouteError(description: context.l10n.projectNotFound);
+          }
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '${AppRoutes.createProjectPathPrefix}/:projectId/cards/:cardId',
+        name: AppRoutes.createCardEditName,
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId'];
+          final cardId = state.pathParameters['cardId'];
+          if (projectId == null || cardId == null) {
+            return _RouteError(description: context.l10n.projectNotFound);
+          }
+
+          try {
+            return CardEditorPage(
+              projectId: CollectionProjectId(projectId),
+              cardId: CardId(cardId),
             );
           } on FormatException {
             return _RouteError(description: context.l10n.projectNotFound);

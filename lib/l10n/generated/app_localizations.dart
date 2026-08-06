@@ -1029,6 +1029,204 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Pulso'**
   String get rarityEffectPulse;
+
+  /// Accion para crear una carta.
+  ///
+  /// In es, this message translates to:
+  /// **'AÃ±adir carta'**
+  String get addCard;
+
+  /// Accion para editar una carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar carta'**
+  String get editCard;
+
+  /// Accion para eliminar una carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar carta'**
+  String get deleteCard;
+
+  /// Accion para seleccionar fotografia.
+  ///
+  /// In es, this message translates to:
+  /// **'Seleccionar fotografÃ­a'**
+  String get selectPhoto;
+
+  /// Accion para sustituir fotografia.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar fotografÃ­a'**
+  String get changePhoto;
+
+  /// Seccion de fotografia.
+  ///
+  /// In es, this message translates to:
+  /// **'FotografÃ­a'**
+  String get photo;
+
+  /// Estado de procesamiento de imagen.
+  ///
+  /// In es, this message translates to:
+  /// **'Procesando imagen...'**
+  String get processingImage;
+
+  /// Error de fotografia obligatoria.
+  ///
+  /// In es, this message translates to:
+  /// **'La fotografÃ­a es obligatoria'**
+  String get photoRequired;
+
+  /// Seccion de datos principales de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos principales'**
+  String get mainData;
+
+  /// Campo de vida de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Vida'**
+  String get health;
+
+  /// Numero visible de coleccion de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'NÃºmero'**
+  String get collectionNumber;
+
+  /// Campo de rareza de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Rareza'**
+  String get rarity;
+
+  /// Campo de plantilla de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Plantilla'**
+  String get template;
+
+  /// Seccion de apariencia de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Apariencia'**
+  String get appearance;
+
+  /// Seccion de campos comicos de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Campos cÃ³micos'**
+  String get comicFields;
+
+  /// Accion para anadir campo comico.
+  ///
+  /// In es, this message translates to:
+  /// **'AÃ±adir campo'**
+  String get addComicField;
+
+  /// Valor de campo comico.
+  ///
+  /// In es, this message translates to:
+  /// **'Valor'**
+  String get value;
+
+  /// Seccion de previsualizacion de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'PrevisualizaciÃ³n'**
+  String get preview;
+
+  /// Error de nombre obligatorio de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un nombre para la carta'**
+  String get cardNameRequired;
+
+  /// Error de vida invalida.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce una vida entre 1 y 9999'**
+  String get healthInvalid;
+
+  /// Error de numero de carta invalido.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce un nÃºmero positivo'**
+  String get collectionNumberInvalid;
+
+  /// Error de numero de carta duplicado.
+  ///
+  /// In es, this message translates to:
+  /// **'Ese nÃºmero ya estÃ¡ utilizado'**
+  String get collectionNumberUsed;
+
+  /// Error de rareza obligatoria.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige una rareza'**
+  String get rarityRequired;
+
+  /// Error generico de carta invalida.
+  ///
+  /// In es, this message translates to:
+  /// **'Corrige la carta antes de guardarla'**
+  String get cardInvalid;
+
+  /// Confirmacion de carta eliminada.
+  ///
+  /// In es, this message translates to:
+  /// **'Carta eliminada'**
+  String get cardDeleted;
+
+  /// Confirmacion de eliminacion de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Se eliminarÃ¡ esta carta y su fotografÃ­a. Esta acciÃ³n no se puede deshacer.'**
+  String get deleteCardDialogDescription;
+
+  /// Titulo de confirmacion de cambios sin guardar.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambios sin guardar'**
+  String get unsavedChanges;
+
+  /// Accion para descartar cambios.
+  ///
+  /// In es, this message translates to:
+  /// **'Descartar cambios'**
+  String get discardChanges;
+
+  /// Pregunta de confirmacion de cambios sin guardar.
+  ///
+  /// In es, this message translates to:
+  /// **'Hay cambios sin guardar. Â¿Quieres descartarlos?'**
+  String get discardChangesQuestion;
+
+  /// Titulo de estado vacio de cartas.
+  ///
+  /// In es, this message translates to:
+  /// **'TodavÃ­a no hay cartas'**
+  String get noCardsTitle;
+
+  /// Descripcion de estado vacio de cartas.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea la primera carta de esta colecciÃ³n.'**
+  String get noCardsDescription;
+
+  /// Requisito de completitud de cartas.
+  ///
+  /// In es, this message translates to:
+  /// **'Debe existir al menos una carta'**
+  String get atLeastOneCard;
+
+  /// Accion para volver al borrador abierto.
+  ///
+  /// In es, this message translates to:
+  /// **'Volver al borrador'**
+  String get backToDraft;
 }
 
 class _AppLocalizationsDelegate

@@ -17,6 +17,16 @@ abstract final class AppRoutes {
     return '$createProjectPathPrefix/$projectId';
   }
 
+  static const createCardNewName = 'create-card-new';
+  static String createCardNewPath(String projectId) {
+    return '${createProjectPath(projectId)}/cards/new';
+  }
+
+  static const createCardEditName = 'create-card-edit';
+  static String createCardEditPath(String projectId, String cardId) {
+    return '${createProjectPath(projectId)}/cards/$cardId';
+  }
+
   static const settingsName = 'settings';
   static const settingsPath = '/settings';
 

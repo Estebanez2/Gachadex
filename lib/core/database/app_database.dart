@@ -241,7 +241,7 @@ class Cards extends Table {
 
   @override
   List<String> get customConstraints => [
-    'CHECK (collection_number >= 0)',
+    'CHECK (collection_number > 0)',
     'CHECK (health BETWEEN 1 AND 9999)',
     'CHECK (sort_index >= 0)',
   ];
@@ -268,9 +268,11 @@ class CardFieldValues extends Table {
   @override
   List<String> get customConstraints => [
     'CHECK (display_order >= 0)',
-    "CHECK (field_type_id IN ('attackName', 'attackDescription', "
-        "'favoriteSnack', 'catchphrase', 'insideJoke', 'weakness', "
-        "'resistance', 'specialSkill'))",
+    "CHECK (field_type_id IN ('nickname', 'special_ability', 'attack', "
+        "'weakness', 'famous_quote', 'danger_level', "
+        "'embarrassment_level', 'intelligence', 'luck', 'resistance', "
+        "'charisma', 'punctuality', 'secret_power', 'favorite_object', "
+        "'legendary_moment', 'team', 'location', 'custom_description'))",
   ];
 }
 

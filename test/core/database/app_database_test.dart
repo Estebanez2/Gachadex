@@ -51,7 +51,7 @@ void main() {
           'coin_transactions',
         ]),
       );
-      expect(database.schemaVersion, 2);
+      expect(database.schemaVersion, 3);
 
       final foreignKeys = await database
           .customSelect('PRAGMA foreign_keys')

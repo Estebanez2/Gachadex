@@ -1,1 +1,1 @@
-const int currentDatabaseSchemaVersion = 2;
+const int currentDatabaseSchemaVersion = 3;

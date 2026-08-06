@@ -8,10 +8,13 @@ import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/app_failure.dart';
+import '../../../../core/files/stored_media_image.dart';
 import '../../../../core/identifiers/entity_id.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../cards/application/card_providers.dart';
+import '../../../cards/domain/repositories/card_repository.dart';
 import '../../../rarities/application/rarity_use_case_providers.dart';
 import '../../../rarities/application/rarity_use_cases.dart';
 import '../../../rarities/domain/catalogs/rarity_visual_catalog.dart';
@@ -25,7 +28,7 @@ import '../controllers/collection_draft_controller.dart';
 import '../widgets/draft_cover_preview.dart';
 import '../widgets/visual_option_labels.dart';
 
-enum _EditorSection { information, rarities }
+enum _EditorSection { information, rarities, cards }
 
 class CollectionDraftEditorPage extends ConsumerStatefulWidget {
   const CollectionDraftEditorPage({super.key, required this.projectId});
@@ -177,7 +180,10 @@ class _EditorBody extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: AppConstants.spacingMd),
-                _CompletionPanel(state: state),
+                _CompletionPanel(
+                  state: state,
+                  onSectionChanged: onSectionChanged,
+                ),
                 const SizedBox(height: AppConstants.spacingMd),
                 SegmentedButton<_EditorSection>(
                   segments: [
@@ -190,6 +196,11 @@ class _EditorBody extends ConsumerWidget {
                       value: _EditorSection.rarities,
                       icon: const Icon(Icons.auto_awesome_outlined),
                       label: Text(l10n.rarities),
+                    ),
+                    ButtonSegment(
+                      value: _EditorSection.cards,
+                      icon: const Icon(Icons.style_outlined),
+                      label: Text(l10n.cards),
                     ),
                   ],
                   selected: {section},
@@ -207,6 +218,10 @@ class _EditorBody extends ConsumerWidget {
                     ),
                     _EditorSection.rarities => _RaritiesSection(
                       key: const ValueKey('rarities'),
+                      state: state,
+                    ),
+                    _EditorSection.cards => _CardsSection(
+                      key: const ValueKey('cards'),
                       state: state,
                     ),
                   },
@@ -254,9 +269,10 @@ class _SaveStatusChip extends ConsumerWidget {
 }
 
 class _CompletionPanel extends StatelessWidget {
-  const _CompletionPanel({required this.state});
+  const _CompletionPanel({required this.state, required this.onSectionChanged});
 
   final CollectionDraftEditorState state;
+  final ValueChanged<_EditorSection> onSectionChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -271,15 +287,22 @@ class _CompletionPanel extends StatelessWidget {
               title: l10n.information,
               status: state.completeness.info,
               missingText: l10n.collectionNeedsName,
+              onTap: () => onSectionChanged(_EditorSection.information),
             ),
             const Divider(),
             _CompletionRow(
               title: l10n.rarities,
               status: state.completeness.rarities,
               missingText: l10n.atLeastOneRarity,
+              onTap: () => onSectionChanged(_EditorSection.rarities),
             ),
             const Divider(),
-            _FutureRow(title: l10n.cards),
+            _CompletionRow(
+              title: l10n.cards,
+              status: state.completeness.cards,
+              missingText: l10n.atLeastOneCard,
+              onTap: () => onSectionChanged(_EditorSection.cards),
+            ),
             const Divider(),
             _FutureRow(title: l10n.packs),
             const Divider(),
@@ -296,11 +319,13 @@ class _CompletionRow extends StatelessWidget {
     required this.title,
     required this.status,
     required this.missingText,
+    required this.onTap,
   });
 
   final String title;
   final DraftSectionCompletion status;
   final String missingText;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -315,6 +340,7 @@ class _CompletionRow extends StatelessWidget {
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
+      onTap: onTap,
       leading: Icon(
         complete ? Icons.check_circle_outline : Icons.radio_button_unchecked,
       ),
@@ -674,6 +700,198 @@ class _RaritiesSection extends ConsumerWidget {
   }
 }
 
+class _CardsSection extends ConsumerWidget {
+  const _CardsSection({super.key, required this.state});
+
+  final CollectionDraftEditorState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final contentVersionId = state.project.currentContentVersionId;
+    if (contentVersionId == null) {
+      return AppErrorView(
+        title: l10n.screenErrorTitle,
+        description: l10n.projectNotFound,
+      );
+    }
+
+    final cardsAsync = ref.watch(
+      imageCardsProvider((
+        collectionId: state.project.collectionId,
+        contentVersionId: contentVersionId,
+      )),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${l10n.cards} (${state.cardCount})',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              ),
+            ),
+            FilledButton.icon(
+              onPressed: () => context.go(
+                AppRoutes.createCardNewPath(state.project.id.value),
+              ),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.addCard),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppConstants.spacingMd),
+        cardsAsync.when(
+          loading: () => const AppLoadingView(),
+          error: (error, stackTrace) => AppErrorView(
+            title: l10n.screenErrorTitle,
+            description: l10n.saveError,
+          ),
+          data: (cards) {
+            if (cards.isEmpty) {
+              return AppEmptyView(
+                icon: Icons.style_outlined,
+                title: l10n.noCardsTitle,
+                description: l10n.noCardsDescription,
+                action: FilledButton.icon(
+                  onPressed: () => context.go(
+                    AppRoutes.createCardNewPath(state.project.id.value),
+                  ),
+                  icon: const Icon(Icons.add),
+                  label: Text(l10n.addCard),
+                ),
+              );
+            }
+
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: cards.length,
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 220,
+                childAspectRatio: 0.66,
+                mainAxisSpacing: AppConstants.spacingMd,
+                crossAxisSpacing: AppConstants.spacingMd,
+              ),
+              itemBuilder: (context, index) {
+                return _CardGridItem(
+                  details: cards[index],
+                  rarityName: _rarityName(cards[index]),
+                  onEdit: () => context.go(
+                    AppRoutes.createCardEditPath(
+                      state.project.id.value,
+                      cards[index].card.id.value,
+                    ),
+                  ),
+                  onDelete: () =>
+                      _confirmDeleteCard(context, ref, state, cards[index]),
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  String _rarityName(ImageCardDetails details) {
+    for (final rarity in state.rarities) {
+      if (rarity.id == details.card.rarityId) {
+        return rarity.name;
+      }
+    }
+    return '';
+  }
+}
+
+class _CardGridItem extends StatelessWidget {
+  const _CardGridItem({
+    required this.details,
+    required this.rarityName,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final ImageCardDetails details;
+  final String rarityName;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final thumbnail = details.thumbnailAsset ?? details.mediaAsset;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onEdit,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: StoredMediaImage(path: thumbnail.relativePath)),
+            Padding(
+              padding: const EdgeInsets.all(AppConstants.spacingSm),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          details.card.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      PopupMenuButton<_CardMenuAction>(
+                        tooltip: l10n.cards,
+                        onSelected: (action) {
+                          switch (action) {
+                            case _CardMenuAction.edit:
+                              onEdit();
+                            case _CardMenuAction.delete:
+                              onDelete();
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: _CardMenuAction.edit,
+                            child: Text(l10n.editCard),
+                          ),
+                          PopupMenuItem(
+                            value: _CardMenuAction.delete,
+                            child: Text(l10n.deleteCard),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Text(
+                    '#${details.card.collectionNumber} - $rarityName',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _CardMenuAction { edit, delete }
+
 class _RarityListItem extends StatelessWidget {
   const _RarityListItem({
     super.key,
@@ -855,6 +1073,54 @@ Future<void> _confirmDeleteRarity(
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.rarityInUse)));
+    }
+  } on Object {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.saveError)));
+    }
+  }
+}
+
+Future<void> _confirmDeleteCard(
+  BuildContext context,
+  WidgetRef ref,
+  CollectionDraftEditorState state,
+  ImageCardDetails details,
+) async {
+  final l10n = context.l10n;
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.deleteCard),
+      content: Text(l10n.deleteCardDialogDescription),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).pop(true),
+          icon: const Icon(Icons.delete_outline),
+          label: Text(l10n.delete),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed != true) {
+    return;
+  }
+
+  try {
+    await ref
+        .read(deleteImageCardProvider)
+        .call(projectId: state.project.id, cardId: details.card.id);
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.cardDeleted)));
     }
   } on Object {
     if (context.mounted) {

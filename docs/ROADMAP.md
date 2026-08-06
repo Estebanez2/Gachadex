@@ -1,6 +1,6 @@
 # Roadmap
 
-Fecha: 2026-08-05
+Fecha: 2026-08-06
 
 Este roadmap ordena el trabajo practico. La fase 0 documental queda separada de
 la implementacion tecnica.
@@ -86,7 +86,32 @@ No incluye:
 
 Depende de: fase 2.
 
-## Fase 4 - Coleccion jugable local
+## Fase 4 - Cartas con fotografias
+
+Estado: implementada en la rama `phase/04-image-cards`.
+
+Incluye:
+
+- Seccion Cartas dentro del editor de borrador.
+- Creacion, edicion y eliminacion de cartas con fotografia.
+- Selector de galeria, recorte nativo, WebP principal y miniatura WebP.
+- Rutas relativas en SQLite y archivos en almacenamiento privado.
+- Plantillas propias sencillas, marco, colores y previsualizacion.
+- Campos comicos del catalogo fijo.
+- Coordinacion archivo/base en casos de uso y limpieza en flujos normales.
+- Migracion de esquema v3 para el catalogo de campos de carta.
+- Tests de validacion, repositorio, archivos y persistencia con base temporal.
+
+No incluye:
+
+- Videos.
+- Sobres, pools, probabilidades ni apertura.
+- Album jugable, temporizadores, monedas, notificaciones, importacion ni
+  exportacion.
+
+Depende de: fase 3.
+
+## Fase 5 - Coleccion jugable local
 
 Objetivo: finalizar una coleccion y abrir sobres en el mismo dispositivo.
 
@@ -94,9 +119,9 @@ Incluye snapshot inmutable, coleccion instalada, separacion contenido/progreso,
 tres sobres iniciales, temporizadores locales, generador de sobres, apertura
 atomica antes de animar, album, duplicados y apertura visual basica.
 
-Depende de: fase 3.
+Depende de: fase 4.
 
-## Fase 5 - Videos
+## Fase 6 - Videos
 
 Objetivo: soportar cartas con video de forma completa.
 
@@ -104,9 +129,9 @@ Incluye seleccion de videos, lectura de duracion y dimensiones, recorte temporal
 normalizacion MP4 H.264/AAC, conservacion de sonido, primer fotograma,
 miniaturas y reproduccion controlada.
 
-Depende de: fase 4.
+Depende de: fase 5.
 
-## Fase 6 - Exportacion e importacion
+## Fase 7 - Exportacion e importacion
 
 Objetivo: compartir colecciones sin servidor.
 
@@ -114,27 +139,27 @@ Incluye formato `.friendpack`, manifest, JSON de contenido, activos,
 checksums SHA-256, exportacion por streaming, comparticion nativa, importacion
 segura, validacion, duplicados e importacion atomica.
 
-Depende de: fases 4 y 5.
+Depende de: fases 5 y 6.
 
-## Fase 7 - Economia
+## Fase 8 - Economia
 
 Objetivo: cerrar el ciclo de duplicados.
 
 Incluye venta parcial, valores por rareza, monedas por coleccion, historial,
 aceleracion de temporizadores y validaciones de saldo.
 
-Depende de: fase 4.
+Depende de: fase 5.
 
-## Fase 8 - Notificaciones locales
+## Fase 9 - Notificaciones locales
 
 Objetivo: avisar de sobres disponibles sin servidor.
 
 Incluye permisos, programacion/cancelacion/reprogramacion local, apertura desde
 notificacion y recuperacion tras reinicio cuando la plataforma lo permita.
 
-Depende de: fase 4 y de la estrategia de temporizadores.
+Depende de: fase 5 y de la estrategia de temporizadores.
 
-## Fase 9 - Diseno y animaciones
+## Fase 10 - Diseno y animaciones
 
 Objetivo: elevar la experiencia visual con identidad propia.
 
@@ -142,9 +167,9 @@ Incluye disenos de sobres, animacion de apertura, giro/revelado, efectos propios
 por rareza, sonido, vibracion, transiciones, indicadores y modo reducir
 animaciones. No debe copiar Pokemon TCG ni efectos de Altare de forma literal.
 
-Depende de: fases 4, 5 y 8.
+Depende de: fases 5, 6 y 9.
 
-## Fase 10 - Estabilizacion y lanzamiento
+## Fase 11 - Estabilizacion y lanzamiento
 
 Objetivo: preparar una primera version distribuible.
 
@@ -152,7 +177,7 @@ Incluye suite amplia, optimizacion, almacenamiento, accesibilidad, recuperacion
 de errores, privacidad, identidad final, tutorial inicial, compilaciones
 Android y preparacion iOS en Mac con Xcode.
 
-Depende de: fases 1 a 9.
+Depende de: fases 1 a 10.
 
 ## Regla de avance
 

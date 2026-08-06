@@ -3,24 +3,44 @@ final class CardFieldType {
 
   final String id;
 
-  static const attackName = CardFieldType._('attackName');
-  static const attackDescription = CardFieldType._('attackDescription');
-  static const favoriteSnack = CardFieldType._('favoriteSnack');
-  static const catchphrase = CardFieldType._('catchphrase');
-  static const insideJoke = CardFieldType._('insideJoke');
+  static const nickname = CardFieldType._('nickname');
+  static const specialAbility = CardFieldType._('special_ability');
+  static const attack = CardFieldType._('attack');
   static const weakness = CardFieldType._('weakness');
+  static const famousQuote = CardFieldType._('famous_quote');
+  static const dangerLevel = CardFieldType._('danger_level');
+  static const embarrassmentLevel = CardFieldType._('embarrassment_level');
+  static const intelligence = CardFieldType._('intelligence');
+  static const luck = CardFieldType._('luck');
   static const resistance = CardFieldType._('resistance');
-  static const specialSkill = CardFieldType._('specialSkill');
+  static const charisma = CardFieldType._('charisma');
+  static const punctuality = CardFieldType._('punctuality');
+  static const secretPower = CardFieldType._('secret_power');
+  static const favoriteObject = CardFieldType._('favorite_object');
+  static const legendaryMoment = CardFieldType._('legendary_moment');
+  static const team = CardFieldType._('team');
+  static const location = CardFieldType._('location');
+  static const customDescription = CardFieldType._('custom_description');
 
   static const List<CardFieldType> values = [
-    attackName,
-    attackDescription,
-    favoriteSnack,
-    catchphrase,
-    insideJoke,
+    nickname,
+    specialAbility,
+    attack,
     weakness,
+    famousQuote,
+    dangerLevel,
+    embarrassmentLevel,
+    intelligence,
+    luck,
     resistance,
-    specialSkill,
+    charisma,
+    punctuality,
+    secretPower,
+    favoriteObject,
+    legendaryMoment,
+    team,
+    location,
+    customDescription,
   ];
 
   static CardFieldType parse(String id) {

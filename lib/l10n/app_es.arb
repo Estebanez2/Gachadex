@@ -641,5 +641,137 @@
   "rarityEffectPulse": "Pulso",
   "@rarityEffectPulse": {
     "description": "Efecto de rareza."
+  },
+  "addCard": "AÃ±adir carta",
+  "@addCard": {
+    "description": "Accion para crear una carta."
+  },
+  "editCard": "Editar carta",
+  "@editCard": {
+    "description": "Accion para editar una carta."
+  },
+  "deleteCard": "Eliminar carta",
+  "@deleteCard": {
+    "description": "Accion para eliminar una carta."
+  },
+  "selectPhoto": "Seleccionar fotografÃ­a",
+  "@selectPhoto": {
+    "description": "Accion para seleccionar fotografia."
+  },
+  "changePhoto": "Cambiar fotografÃ­a",
+  "@changePhoto": {
+    "description": "Accion para sustituir fotografia."
+  },
+  "photo": "FotografÃ­a",
+  "@photo": {
+    "description": "Seccion de fotografia."
+  },
+  "processingImage": "Procesando imagen...",
+  "@processingImage": {
+    "description": "Estado de procesamiento de imagen."
+  },
+  "photoRequired": "La fotografÃ­a es obligatoria",
+  "@photoRequired": {
+    "description": "Error de fotografia obligatoria."
+  },
+  "mainData": "Datos principales",
+  "@mainData": {
+    "description": "Seccion de datos principales de carta."
+  },
+  "health": "Vida",
+  "@health": {
+    "description": "Campo de vida de carta."
+  },
+  "collectionNumber": "NÃºmero",
+  "@collectionNumber": {
+    "description": "Numero visible de coleccion de carta."
+  },
+  "rarity": "Rareza",
+  "@rarity": {
+    "description": "Campo de rareza de carta."
+  },
+  "template": "Plantilla",
+  "@template": {
+    "description": "Campo de plantilla de carta."
+  },
+  "appearance": "Apariencia",
+  "@appearance": {
+    "description": "Seccion de apariencia de carta."
+  },
+  "comicFields": "Campos cÃ³micos",
+  "@comicFields": {
+    "description": "Seccion de campos comicos de carta."
+  },
+  "addComicField": "AÃ±adir campo",
+  "@addComicField": {
+    "description": "Accion para anadir campo comico."
+  },
+  "value": "Valor",
+  "@value": {
+    "description": "Valor de campo comico."
+  },
+  "preview": "PrevisualizaciÃ³n",
+  "@preview": {
+    "description": "Seccion de previsualizacion de carta."
+  },
+  "cardNameRequired": "Escribe un nombre para la carta",
+  "@cardNameRequired": {
+    "description": "Error de nombre obligatorio de carta."
+  },
+  "healthInvalid": "Introduce una vida entre 1 y 9999",
+  "@healthInvalid": {
+    "description": "Error de vida invalida."
+  },
+  "collectionNumberInvalid": "Introduce un nÃºmero positivo",
+  "@collectionNumberInvalid": {
+    "description": "Error de numero de carta invalido."
+  },
+  "collectionNumberUsed": "Ese nÃºmero ya estÃ¡ utilizado",
+  "@collectionNumberUsed": {
+    "description": "Error de numero de carta duplicado."
+  },
+  "rarityRequired": "Elige una rareza",
+  "@rarityRequired": {
+    "description": "Error de rareza obligatoria."
+  },
+  "cardInvalid": "Corrige la carta antes de guardarla",
+  "@cardInvalid": {
+    "description": "Error generico de carta invalida."
+  },
+  "cardDeleted": "Carta eliminada",
+  "@cardDeleted": {
+    "description": "Confirmacion de carta eliminada."
+  },
+  "deleteCardDialogDescription": "Se eliminarÃ¡ esta carta y su fotografÃ­a. Esta acciÃ³n no se puede deshacer.",
+  "@deleteCardDialogDescription": {
+    "description": "Confirmacion de eliminacion de carta."
+  },
+  "unsavedChanges": "Cambios sin guardar",
+  "@unsavedChanges": {
+    "description": "Titulo de confirmacion de cambios sin guardar."
+  },
+  "discardChanges": "Descartar cambios",
+  "@discardChanges": {
+    "description": "Accion para descartar cambios."
+  },
+  "discardChangesQuestion": "Hay cambios sin guardar. Â¿Quieres descartarlos?",
+  "@discardChangesQuestion": {
+    "description": "Pregunta de confirmacion de cambios sin guardar."
+  },
+  "noCardsTitle": "TodavÃ­a no hay cartas",
+  "@noCardsTitle": {
+    "description": "Titulo de estado vacio de cartas."
+  },
+  "noCardsDescription": "Crea la primera carta de esta colecciÃ³n.",
+  "@noCardsDescription": {
+    "description": "Descripcion de estado vacio de cartas."
+  },
+  "atLeastOneCard": "Debe existir al menos una carta",
+  "@atLeastOneCard": {
+    "description": "Requisito de completitud de cartas."
+  },
+  "backToDraft": "Volver al borrador",
+  "@backToDraft": {
+    "description": "Accion para volver al borrador abierto."
   }
 }

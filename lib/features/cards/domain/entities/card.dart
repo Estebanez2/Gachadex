@@ -21,7 +21,7 @@ final class Card {
     required String? description,
     required int sortIndex,
     required DateTime createdAtUtc,
-  }) : collectionNumber = DomainValidation.requireNonNegative(
+  }) : collectionNumber = DomainValidation.requirePositive(
          collectionNumber,
          'collectionNumber',
        ),
