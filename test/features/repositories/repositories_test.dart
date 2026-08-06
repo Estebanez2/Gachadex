@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gachadex/core/database/app_database.dart';
@@ -11,6 +13,8 @@ import 'package:gachadex/features/album/data/repositories/drift_player_progress_
 import 'package:gachadex/features/cards/data/repositories/drift_card_repository.dart';
 import 'package:gachadex/features/cards/domain/entities/card.dart' as domain;
 import 'package:gachadex/features/collection_creator/data/repositories/drift_collection_project_repository.dart';
+import 'package:gachadex/features/collection_creator/domain/catalogs/draft_cover_catalog.dart';
+import 'package:gachadex/features/collection_creator/domain/value_objects/draft_cover_style.dart';
 import 'package:gachadex/features/collections/data/repositories/drift_installed_collection_repository.dart';
 import 'package:gachadex/features/collections/domain/entities/installed_collection.dart';
 import 'package:gachadex/features/packs/data/repositories/drift_pack_type_repository.dart';
@@ -18,6 +22,7 @@ import 'package:gachadex/features/packs/domain/entities/pack_card_pool_entry.dar
 import 'package:gachadex/features/packs/domain/entities/pack_rarity_probability.dart';
 import 'package:gachadex/features/packs/domain/entities/pack_slot_rule.dart';
 import 'package:gachadex/features/rarities/data/repositories/drift_rarity_repository.dart';
+import 'package:gachadex/features/rarities/domain/catalogs/rarity_visual_catalog.dart';
 import 'package:gachadex/features/rarities/domain/entities/rarity.dart';
 
 import '../../helpers/database_seed.dart';
@@ -72,6 +77,41 @@ void main() {
         hasLength(1),
       );
     });
+
+    test(
+      'creates unnamed drafts and updates provisional cover style',
+      () async {
+        final repository = repositoryWith([
+          testUuid(40),
+          testUuid(41),
+          testUuid(42),
+        ]);
+        final watched = repository.watchById(CollectionProjectId(testUuid(42)));
+
+        final created = await repository.createDraft();
+        final emitted = await watched.firstWhere((project) => project != null);
+        final style = DraftCoverStyle(
+          backgroundColorId: 'cover_rose',
+          accentColorId: DraftCoverCatalog.defaultAccentColorId,
+          iconId: 'cover_icon_group',
+          patternId: 'cover_pattern_dots',
+        );
+
+        clock.advance(const Duration(minutes: 2));
+        final updated = await repository.updateDraftCover(
+          id: created.project.id,
+          draftCoverStyle: style,
+        );
+
+        expect(created.project.name, isEmpty);
+        expect(emitted?.id, created.project.id);
+        expect(updated.draftCoverStyle, style);
+        expect(
+          updated.updatedAtUtc,
+          testNowUtc().add(const Duration(minutes: 2)),
+        );
+      },
+    );
 
     test('retrieves, watches, updates and finalizes drafts', () async {
       final repository = repositoryWith([
@@ -209,6 +249,54 @@ void main() {
 
         await rarityRepository.delete(secondRarity.id);
         expect(await database.select(database.rarities).get(), hasLength(1));
+      },
+    );
+
+    test(
+      'counts rarities and detects duplicate names after normalization',
+      () async {
+        final definition = await seedDefinition(database, seed: 10);
+        final collectionId = CollectionId(definition.collectionId);
+        final contentVersionId = ContentVersionId(definition.contentVersionId);
+        final secondRarity = Rarity(
+          id: RarityId(testUuid(1001)),
+          collectionId: collectionId,
+          contentVersionId: contentVersionId,
+          name: 'Legendaria',
+          orderIndex: 1,
+          colorValue: RarityVisualCatalog.defaultColorValue,
+          iconId: RarityVisualCatalog.defaultIconId,
+          frameId: RarityVisualCatalog.defaultFrameId,
+          effectId: RarityVisualCatalog.defaultEffectId,
+          sellValue: 100,
+          isEnabled: true,
+        );
+
+        await rarityRepository.insert(secondRarity);
+
+        expect(
+          await rarityRepository.countByCollectionVersion(
+            collectionId: collectionId,
+            contentVersionId: contentVersionId,
+          ),
+          2,
+        );
+        expect(
+          await rarityRepository.existsWithNormalizedName(
+            collectionId: collectionId,
+            contentVersionId: contentVersionId,
+            normalizedName: ' legendaria ',
+          ),
+          isTrue,
+        );
+        await expectLater(
+          rarityRepository.reorder(
+            collectionId: collectionId,
+            contentVersionId: contentVersionId,
+            orderedIds: [secondRarity.id],
+          ),
+          throwsA(isA<InvalidEntityFailure>()),
+        );
       },
     );
 
@@ -384,6 +472,154 @@ void main() {
       },
     );
   });
+
+  test(
+    'persists collection draft and rarity order after reopening file database',
+    () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'gachadex_phase3_repo_',
+      );
+      final file = File(
+        '${tempDir.path}${Platform.pathSeparator}phase3.sqlite',
+      );
+      final coverStyle = DraftCoverStyle(
+        backgroundColorId: 'cover_sky',
+        accentColorId: 'cover_gold',
+        iconId: 'cover_icon_trophy',
+        patternId: 'cover_pattern_split',
+      );
+
+      try {
+        final firstDatabase = createFileDatabase(file);
+        final firstClock = FakeClock(testNowUtc());
+        final projectRepository = DriftCollectionProjectRepository(
+          database: firstDatabase,
+          clock: firstClock,
+          uuidGenerator: FixedUuidGenerator([
+            testUuid(7001),
+            testUuid(7002),
+            testUuid(7003),
+          ]),
+        );
+        final cardRepository = DriftCardRepository(database: firstDatabase);
+        final rarityRepository = DriftRarityRepository(
+          database: firstDatabase,
+          cardRepository: cardRepository,
+        );
+
+        final created = await projectRepository.createDraft();
+        firstClock.advance(const Duration(minutes: 1));
+        await projectRepository.updateBasicInformation(
+          id: created.project.id,
+          name: 'Viaje',
+          author: 'Grupo',
+          description: 'Tres dias memorables',
+        );
+        firstClock.advance(const Duration(minutes: 1));
+        await projectRepository.updateDraftCover(
+          id: created.project.id,
+          draftCoverStyle: coverStyle,
+        );
+        final rarities = [
+          Rarity(
+            id: RarityId(testUuid(7101)),
+            collectionId: created.project.collectionId,
+            contentVersionId: created.contentVersion.id,
+            name: 'Normal',
+            orderIndex: 0,
+            colorValue: RarityVisualCatalog.defaultColorValue,
+            iconId: RarityVisualCatalog.defaultIconId,
+            frameId: RarityVisualCatalog.defaultFrameId,
+            effectId: RarityVisualCatalog.defaultEffectId,
+            sellValue: 1,
+            isEnabled: true,
+          ),
+          Rarity(
+            id: RarityId(testUuid(7102)),
+            collectionId: created.project.collectionId,
+            contentVersionId: created.contentVersion.id,
+            name: 'Rara',
+            orderIndex: 1,
+            colorValue: 0xFF2F6FA8,
+            iconId: 'rarity_icon_diamond',
+            frameId: 'rarity_frame_double',
+            effectId: 'rarity_effect_spark',
+            sellValue: 20,
+            isEnabled: true,
+          ),
+          Rarity(
+            id: RarityId(testUuid(7103)),
+            collectionId: created.project.collectionId,
+            contentVersionId: created.contentVersion.id,
+            name: 'Legendaria',
+            orderIndex: 2,
+            colorValue: 0xFFE2B844,
+            iconId: 'rarity_icon_crown',
+            frameId: 'rarity_frame_neon',
+            effectId: 'rarity_effect_holo',
+            sellValue: 100,
+            isEnabled: true,
+          ),
+        ];
+        for (final rarity in rarities) {
+          await rarityRepository.insert(rarity);
+        }
+        await rarityRepository.reorder(
+          collectionId: created.project.collectionId,
+          contentVersionId: created.contentVersion.id,
+          orderedIds: [rarities[0].id, rarities[2].id, rarities[1].id],
+        );
+        await firstDatabase.close();
+
+        final secondDatabase = createFileDatabase(file);
+        try {
+          final reopenedProjectRepository = DriftCollectionProjectRepository(
+            database: secondDatabase,
+            clock: FakeClock(testNowUtc(10)),
+            uuidGenerator: FixedUuidGenerator(const []),
+          );
+          final reopenedRarityRepository = DriftRarityRepository(
+            database: secondDatabase,
+            cardRepository: DriftCardRepository(database: secondDatabase),
+          );
+          final project = await reopenedProjectRepository.getById(
+            created.project.id,
+          );
+          final reopenedRarities = await reopenedRarityRepository
+              .watchByCollectionVersion(
+                collectionId: created.project.collectionId,
+                contentVersionId: created.contentVersion.id,
+              )
+              .first;
+
+          expect(project.name, 'Viaje');
+          expect(project.author, 'Grupo');
+          expect(project.description, 'Tres dias memorables');
+          expect(project.draftCoverStyle, coverStyle);
+          expect(
+            project.updatedAtUtc,
+            testNowUtc().add(const Duration(minutes: 2)),
+          );
+          expect(reopenedRarities.map((rarity) => rarity.name), [
+            'Normal',
+            'Legendaria',
+            'Rara',
+          ]);
+          expect(reopenedRarities.map((rarity) => rarity.orderIndex), [
+            0,
+            1,
+            2,
+          ]);
+        } finally {
+          await secondDatabase.close();
+        }
+      } finally {
+        if (tempDir.existsSync()) {
+          tempDir.deleteSync(recursive: true);
+        }
+      }
+    },
+  );
 }
 
 Future<void> _insertMedia(

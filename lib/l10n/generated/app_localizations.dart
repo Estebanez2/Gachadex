@@ -255,6 +255,780 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Crear colección'**
   String get createDisabledAction;
+
+  /// Resumen de la biblioteca de borradores.
+  ///
+  /// In es, this message translates to:
+  /// **'Prepara colecciones locales y retoma cualquier borrador sin perder cambios.'**
+  String get collectionDraftsDescription;
+
+  /// Accion para crear un borrador.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva colección'**
+  String get newCollection;
+
+  /// Titulo de creacion de borrador.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear colección'**
+  String get createCollection;
+
+  /// Nombre seguro mostrado cuando el borrador no tiene nombre.
+  ///
+  /// In es, this message translates to:
+  /// **'Colección sin nombre'**
+  String get unnamedCollection;
+
+  /// Indicador de estado draft.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrador'**
+  String get draft;
+
+  /// Seccion de informacion general.
+  ///
+  /// In es, this message translates to:
+  /// **'Información'**
+  String get information;
+
+  /// Seccion de rarezas.
+  ///
+  /// In es, this message translates to:
+  /// **'Rarezas'**
+  String get rarities;
+
+  /// Seccion futura de cartas.
+  ///
+  /// In es, this message translates to:
+  /// **'Cartas'**
+  String get cards;
+
+  /// Seccion futura de sobres.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobres'**
+  String get packs;
+
+  /// Seccion futura de revision.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisión'**
+  String get review;
+
+  /// Etiqueta generica para nombre.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get name;
+
+  /// Campo de nombre de coleccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre de colección'**
+  String get collectionName;
+
+  /// Campo de autor.
+  ///
+  /// In es, this message translates to:
+  /// **'Autor'**
+  String get author;
+
+  /// Campo de descripcion.
+  ///
+  /// In es, this message translates to:
+  /// **'Descripción'**
+  String get description;
+
+  /// Seccion de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Portada'**
+  String get cover;
+
+  /// Estado de guardado pendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambios pendientes'**
+  String get savePending;
+
+  /// Estado de guardado en progreso.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardando...'**
+  String get saving;
+
+  /// Estado de guardado correcto.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardado'**
+  String get saved;
+
+  /// Estado de error al guardar.
+  ///
+  /// In es, this message translates to:
+  /// **'No se han podido guardar los cambios'**
+  String get saveError;
+
+  /// Estado de error por validacion local.
+  ///
+  /// In es, this message translates to:
+  /// **'Corrige los campos para guardar'**
+  String get fixFieldsToSave;
+
+  /// Accion para crear rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir rareza'**
+  String get addRarity;
+
+  /// Accion para editar rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar rareza'**
+  String get editRarity;
+
+  /// Accion para eliminar rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar rareza'**
+  String get deleteRarity;
+
+  /// Campo de valor de venta por rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Valor de venta'**
+  String get sellValue;
+
+  /// Etiqueta de selector de color.
+  ///
+  /// In es, this message translates to:
+  /// **'Color'**
+  String get color;
+
+  /// Etiqueta de color principal.
+  ///
+  /// In es, this message translates to:
+  /// **'Color principal'**
+  String get primaryColor;
+
+  /// Etiqueta de color secundario.
+  ///
+  /// In es, this message translates to:
+  /// **'Color secundario'**
+  String get accentColor;
+
+  /// Etiqueta de selector de icono.
+  ///
+  /// In es, this message translates to:
+  /// **'Icono'**
+  String get icon;
+
+  /// Etiqueta de selector de marco.
+  ///
+  /// In es, this message translates to:
+  /// **'Marco'**
+  String get frame;
+
+  /// Etiqueta de selector de efecto.
+  ///
+  /// In es, this message translates to:
+  /// **'Efecto'**
+  String get effect;
+
+  /// Etiqueta de estilo de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Estilo'**
+  String get style;
+
+  /// Etiqueta de orden.
+  ///
+  /// In es, this message translates to:
+  /// **'Orden'**
+  String get order;
+
+  /// Accion accesible para subir una rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir'**
+  String get moveUp;
+
+  /// Accion accesible para bajar una rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Bajar'**
+  String get moveDown;
+
+  /// Accion para cancelar.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get cancel;
+
+  /// Accion para guardar.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar'**
+  String get save;
+
+  /// Accion para eliminar.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get delete;
+
+  /// Accion para eliminar borrador.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar borrador'**
+  String get deleteDraft;
+
+  /// Titulo del estado vacio de borradores.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no has creado ninguna colección'**
+  String get emptyDraftsTitle;
+
+  /// Descripcion del estado vacio de borradores.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea un borrador para empezar a preparar tus cartas y rarezas.'**
+  String get emptyDraftsDescription;
+
+  /// Accion para abrir un borrador.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get continueEditing;
+
+  /// Numero de rarezas de un borrador.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{Sin rarezas} =1{1 rareza} other{{count} rarezas}}'**
+  String rarityCount(int count);
+
+  /// Fecha de ultima modificacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Última edición: {date}'**
+  String lastUpdated(String date);
+
+  /// Estado general incompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrador incompleto'**
+  String get incompleteDraft;
+
+  /// Estado completo dentro de la fase actual.
+  ///
+  /// In es, this message translates to:
+  /// **'Completo para esta fase'**
+  String get completeForThisPhase;
+
+  /// Estado no iniciado.
+  ///
+  /// In es, this message translates to:
+  /// **'No iniciado'**
+  String get notStarted;
+
+  /// Estado incompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Incompleto'**
+  String get incomplete;
+
+  /// Estado con errores.
+  ///
+  /// In es, this message translates to:
+  /// **'Con errores'**
+  String get withErrors;
+
+  /// Estado pendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendiente'**
+  String get pending;
+
+  /// Requisito de completitud de nombre.
+  ///
+  /// In es, this message translates to:
+  /// **'La colección necesita un nombre'**
+  String get collectionNeedsName;
+
+  /// Requisito de completitud de rarezas.
+  ///
+  /// In es, this message translates to:
+  /// **'Debe existir al menos una rareza'**
+  String get atLeastOneRarity;
+
+  /// Etiqueta de funciones futuras.
+  ///
+  /// In es, this message translates to:
+  /// **'Disponible más adelante'**
+  String get availableLater;
+
+  /// Error de borrador no encontrado.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha encontrado este borrador.'**
+  String get projectNotFound;
+
+  /// Accion para volver a biblioteca de borradores.
+  ///
+  /// In es, this message translates to:
+  /// **'Volver a borradores'**
+  String get backToDrafts;
+
+  /// Titulo de confirmacion de borrador.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar borrador'**
+  String get deleteDraftDialogTitle;
+
+  /// Descripcion de confirmacion de borrador.
+  ///
+  /// In es, this message translates to:
+  /// **'Se eliminará este borrador y toda su configuración local. Esta acción no se puede deshacer.'**
+  String get deleteDraftDialogDescription;
+
+  /// Confirmacion de borrador eliminado.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrador eliminado'**
+  String get draftDeleted;
+
+  /// Titulo de confirmacion de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar rareza'**
+  String get deleteRarityDialogTitle;
+
+  /// Descripcion de confirmacion de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'No podrás recuperar esta rareza después de eliminarla.'**
+  String get deleteRarityDialogDescription;
+
+  /// Error al eliminar rareza usada.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes eliminar esta rareza porque está asignada a una o más cartas.'**
+  String get rarityInUse;
+
+  /// Confirmacion de rareza eliminada.
+  ///
+  /// In es, this message translates to:
+  /// **'Rareza eliminada'**
+  String get rarityDeleted;
+
+  /// Confirmacion de rareza guardada.
+  ///
+  /// In es, this message translates to:
+  /// **'Rareza guardada'**
+  String get raritySaved;
+
+  /// Titulo de estado vacio de rarezas.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay rarezas'**
+  String get noRaritiesTitle;
+
+  /// Descripcion de estado vacio de rarezas.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade al menos una rareza para completar esta parte del borrador.'**
+  String get noRaritiesDescription;
+
+  /// Error de longitud de campo.
+  ///
+  /// In es, this message translates to:
+  /// **'Has superado el máximo permitido'**
+  String get fieldTooLong;
+
+  /// Error de nombre obligatorio de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un nombre para la rareza'**
+  String get rarityNameRequired;
+
+  /// Error de nombre duplicado de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya existe una rareza con ese nombre'**
+  String get duplicateRarityName;
+
+  /// Error de valor de venta invalido.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce un valor entre 0 y 999999'**
+  String get sellValueInvalid;
+
+  /// Error de opcion visual invalida.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige una opción del catálogo'**
+  String get invalidVisualOption;
+
+  /// Contador de caracteres.
+  ///
+  /// In es, this message translates to:
+  /// **'{count}/{max}'**
+  String charactersCounter(int count, int max);
+
+  /// Estado activo de una rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa'**
+  String get enabled;
+
+  /// Estado desactivado de una rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Desactivada'**
+  String get disabled;
+
+  /// Color de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Verde agua'**
+  String get coverColorTeal;
+
+  /// Color de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Coral'**
+  String get coverColorCoral;
+
+  /// Color de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Dorado'**
+  String get coverColorGold;
+
+  /// Color de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Lila'**
+  String get coverColorLilac;
+
+  /// Color de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Azul cielo'**
+  String get coverColorSky;
+
+  /// Color de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Menta'**
+  String get coverColorMint;
+
+  /// Color de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Rosa'**
+  String get coverColorRose;
+
+  /// Color de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Grafito'**
+  String get coverColorGraphite;
+
+  /// Icono de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Destello'**
+  String get coverIconSpark;
+
+  /// Icono de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Cartas'**
+  String get coverIconCards;
+
+  /// Icono de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Risa'**
+  String get coverIconLaugh;
+
+  /// Icono de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Cámara'**
+  String get coverIconCamera;
+
+  /// Icono de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Grupo'**
+  String get coverIconGroup;
+
+  /// Icono de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Trofeo'**
+  String get coverIconTrophy;
+
+  /// Patron de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Liso'**
+  String get coverPatternSolid;
+
+  /// Patron de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Diagonal'**
+  String get coverPatternDiagonal;
+
+  /// Patron de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Puntos'**
+  String get coverPatternDots;
+
+  /// Patron de portada.
+  ///
+  /// In es, this message translates to:
+  /// **'Bicolor'**
+  String get coverPatternSplit;
+
+  /// Color de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Gris'**
+  String get rarityColorGray;
+
+  /// Color de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Verde'**
+  String get rarityColorGreen;
+
+  /// Color de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Azul'**
+  String get rarityColorBlue;
+
+  /// Color de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Morado'**
+  String get rarityColorPurple;
+
+  /// Color de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Rojo'**
+  String get rarityColorRed;
+
+  /// Color de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Naranja'**
+  String get rarityColorOrange;
+
+  /// Color de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Rosa'**
+  String get rarityColorPink;
+
+  /// Color de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Dorado'**
+  String get rarityColorGold;
+
+  /// Color de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Turquesa'**
+  String get rarityColorTurquoise;
+
+  /// Color de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Grafito'**
+  String get rarityColorGraphite;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Estrella'**
+  String get rarityIconStar;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Corona'**
+  String get rarityIconCrown;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Diamante'**
+  String get rarityIconDiamond;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuego'**
+  String get rarityIconFire;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Rayo'**
+  String get rarityIconBolt;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Cohete'**
+  String get rarityIconRocket;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Gafas'**
+  String get rarityIconGlasses;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Trofeo'**
+  String get rarityIconTrophy;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Fantasma'**
+  String get rarityIconGhost;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Huella'**
+  String get rarityIconFootprint;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Sonrisa'**
+  String get rarityIconSmile;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Explosión'**
+  String get rarityIconBurst;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Corazón'**
+  String get rarityIconHeart;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Luna'**
+  String get rarityIconMoon;
+
+  /// Icono de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Sol'**
+  String get rarityIconSun;
+
+  /// Marco de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Simple'**
+  String get rarityFrameSimple;
+
+  /// Marco de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Redondeado'**
+  String get rarityFrameRounded;
+
+  /// Marco de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Doble línea'**
+  String get rarityFrameDouble;
+
+  /// Marco de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Metálico'**
+  String get rarityFrameMetallic;
+
+  /// Marco de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Neón'**
+  String get rarityFrameNeon;
+
+  /// Marco de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómico'**
+  String get rarityFrameComic;
+
+  /// Marco de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegante'**
+  String get rarityFrameElegant;
+
+  /// Marco de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Pixelado'**
+  String get rarityFramePixel;
+
+  /// Efecto de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Ninguno'**
+  String get rarityEffectNone;
+
+  /// Efecto de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Brillo suave'**
+  String get rarityEffectSoftGlow;
+
+  /// Efecto de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Destello'**
+  String get rarityEffectSpark;
+
+  /// Efecto de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Gradiente'**
+  String get rarityEffectGradient;
+
+  /// Efecto de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Holográfico simulado'**
+  String get rarityEffectHolo;
+
+  /// Efecto de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulso'**
+  String get rarityEffectPulse;
 }
 
 class _AppLocalizationsDelegate

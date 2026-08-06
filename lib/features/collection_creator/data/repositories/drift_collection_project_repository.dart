@@ -10,6 +10,7 @@ import '../../../../core/time/clock.dart';
 import '../../domain/entities/collection_project.dart';
 import '../../domain/entities/content_version.dart';
 import '../../domain/repositories/collection_project_repository.dart';
+import '../../domain/value_objects/draft_cover_style.dart';
 import '../mappers/collection_project_mapper.dart';
 import '../mappers/content_version_mapper.dart';
 
@@ -27,9 +28,10 @@ final class DriftCollectionProjectRepository
 
   @override
   Future<CreatedCollectionDraft> createDraft({
-    required String name,
+    String name = '',
     String? author,
     String? description,
+    DraftCoverStyle? draftCoverStyle,
   }) async {
     final now = clock.nowUtc();
     final contentVersion = ContentVersion(
@@ -48,6 +50,7 @@ final class DriftCollectionProjectRepository
       author: author,
       description: description,
       coverAssetId: null,
+      draftCoverStyle: draftCoverStyle ?? DraftCoverStyle.defaultStyle(),
       status: CollectionProjectStatus.draft,
       createdAtUtc: now,
       updatedAtUtc: now,
@@ -86,6 +89,13 @@ final class DriftCollectionProjectRepository
   }
 
   @override
+  Stream<CollectionProject?> watchById(CollectionProjectId id) {
+    return database.collectionProjectsDao
+        .watchById(id.value)
+        .map((row) => row?.toDomain());
+  }
+
+  @override
   Stream<List<CollectionProject>> watchAllDrafts() {
     return database.collectionProjectsDao.watchDrafts().map(
       (rows) => rows.map((row) => row.toDomain()).toList(growable: false),
@@ -113,6 +123,7 @@ final class DriftCollectionProjectRepository
       author: author,
       description: description,
       coverAssetId: project.coverAssetId,
+      draftCoverStyle: project.draftCoverStyle,
       status: project.status,
       createdAtUtc: project.createdAtUtc,
       updatedAtUtc: clock.nowUtc(),
@@ -122,6 +133,59 @@ final class DriftCollectionProjectRepository
       startingPackCount: project.startingPackCount,
     );
 
+    final replaced = await database.collectionProjectsDao.replaceProject(
+      updated.toCompanion(),
+    );
+    if (!replaced) {
+      throw const EntityNotFoundFailure('No se encontro el proyecto.');
+    }
+
+    return updated;
+  }
+
+  @override
+  Future<CollectionProject> updateDraftCover({
+    required CollectionProjectId id,
+    required DraftCoverStyle draftCoverStyle,
+  }) async {
+    final project = await getById(id);
+    if (!project.isDraft) {
+      throw const InvalidEntityFailure(
+        'No se puede editar un proyecto finalizado.',
+      );
+    }
+
+    final updated = CollectionProject(
+      id: project.id,
+      collectionId: project.collectionId,
+      name: project.name,
+      author: project.author,
+      description: project.description,
+      coverAssetId: project.coverAssetId,
+      draftCoverStyle: draftCoverStyle,
+      status: project.status,
+      createdAtUtc: project.createdAtUtc,
+      updatedAtUtc: clock.nowUtc(),
+      currentContentVersion: project.currentContentVersion,
+      currentContentVersionId: project.currentContentVersionId,
+      mainPackTypeId: project.mainPackTypeId,
+      startingPackCount: project.startingPackCount,
+    );
+
+    final replaced = await database.collectionProjectsDao.replaceProject(
+      updated.toCompanion(),
+    );
+    if (!replaced) {
+      throw const EntityNotFoundFailure('No se encontro el proyecto.');
+    }
+
+    return updated;
+  }
+
+  @override
+  Future<CollectionProject> touchUpdatedAt(CollectionProjectId id) async {
+    final project = await getById(id);
+    final updated = project.copyWith(updatedAtUtc: clock.nowUtc());
     final replaced = await database.collectionProjectsDao.replaceProject(
       updated.toCompanion(),
     );
@@ -154,6 +218,7 @@ final class DriftCollectionProjectRepository
       author: project.author,
       description: project.description,
       coverAssetId: project.coverAssetId,
+      draftCoverStyle: project.draftCoverStyle,
       status: CollectionProjectStatus.finalized,
       createdAtUtc: project.createdAtUtc,
       updatedAtUtc: now,

@@ -2,8 +2,8 @@
 
 Fecha: 2026-08-05
 
-Este documento registra las dependencias directas del proyecto tras la Fase 2:
-modelo de dominio y persistencia local.
+Este documento registra las dependencias directas del proyecto tras la Fase 3.
+La Fase 3 no anadio dependencias nuevas respecto a la Fase 2.
 
 ## Dependencias directas actuales
 
@@ -33,7 +33,7 @@ modelo de dominio y persistencia local.
 - `sqlite3_flutter_libs` 0.6.0+eol llega como transitiva de `drift_flutter`;
   no se anadio directa porque Drift actual la resuelve.
 - `sqlcipher_flutter_libs` 0.7.0+eol llega transitoriamente por el arbol de
-  SQLite; Gachadex no cifra la base en Fase 2.
+  SQLite; Gachadex no cifra la base en la version actual.
 
 Las transitivas estan fijadas en `pubspec.lock`. Pasaran a directas solo si el
 codigo del proyecto las importa explicitamente.

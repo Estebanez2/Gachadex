@@ -13,6 +13,20 @@ abstract interface class RarityRepository {
     required ContentVersionId contentVersionId,
   });
 
+  Future<bool> existsWithNormalizedName({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+    required String normalizedName,
+    RarityId? excludingId,
+  });
+
+  Future<int> countByCollectionVersion({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+  });
+
+  Future<int> countCardsUsingRarity(RarityId rarityId);
+
   Future<void> delete(RarityId id);
 
   Future<List<Rarity>> reorder({

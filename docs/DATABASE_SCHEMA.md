@@ -2,7 +2,7 @@
 
 Fecha: 2026-08-05
 
-Schema version: `1`
+Schema version: `2`
 
 Motor: SQLite mediante Drift.
 
@@ -40,6 +40,17 @@ Restricciones:
 
 - `current_content_version >= 1`.
 - `starting_pack_count >= 0`.
+
+Columnas de Fase 3:
+
+- `draft_cover_color_id`: id estable del color principal de la portada
+  generada.
+- `draft_cover_accent_color_id`: id estable del color secundario.
+- `draft_cover_icon_id`: id estable del icono.
+- `draft_cover_pattern_id`: id estable del patron visual.
+
+Estas columnas no referencian `media_assets`: son una portada provisional
+generada en Flutter y se validan contra `DraftCoverCatalog`.
 
 ### `content_versions`
 
@@ -348,9 +359,24 @@ Ademas de PKs y uniques, existen indices para las consultas previstas:
 - Progreso por `installed_collection_id`.
 - Aperturas por `installed_collection_id`.
 
-## Migracion a version 2
+## Migraciones
 
-Para v2:
+### Version 1 -> 2
+
+Anade a `collection_projects` la configuracion de portada provisional:
+
+- `draft_cover_color_id TEXT NOT NULL DEFAULT 'cover_teal'`
+- `draft_cover_accent_color_id TEXT NOT NULL DEFAULT 'cover_gold'`
+- `draft_cover_icon_id TEXT NOT NULL DEFAULT 'cover_icon_spark'`
+- `draft_cover_pattern_id TEXT NOT NULL DEFAULT 'cover_pattern_solid'`
+
+Los valores por defecto coinciden con `DraftCoverStyle.defaultStyle()` para que
+los borradores existentes puedan abrirse sin crear activos multimedia ni rutas
+ficticias.
+
+### Proximas versiones
+
+Para una nueva version:
 
 1. Subir `currentDatabaseSchemaVersion`.
 2. Anadir ramas explicitas en `createMigrationStrategy`.

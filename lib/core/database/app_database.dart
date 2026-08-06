@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../database/converters/domain_enum_converters.dart';
 import '../domain/domain_enums.dart';
 import '../logging/app_logger.dart';
+import '../../features/collection_creator/domain/catalogs/draft_cover_catalog.dart';
 import 'database_connection.dart';
 import 'migrations/migration_strategy.dart';
 import 'migrations/schema_versions.dart';
@@ -24,6 +25,16 @@ class CollectionProjects extends Table {
   TextColumn get coverAssetId => text()
       .references(MediaAssets, #id, onDelete: KeyAction.setNull)
       .nullable()();
+  TextColumn get draftCoverColorId => text().withDefault(
+    const Constant(DraftCoverCatalog.defaultBackgroundColorId),
+  )();
+  TextColumn get draftCoverAccentColorId => text().withDefault(
+    const Constant(DraftCoverCatalog.defaultAccentColorId),
+  )();
+  TextColumn get draftCoverIconId =>
+      text().withDefault(const Constant(DraftCoverCatalog.defaultIconId))();
+  TextColumn get draftCoverPatternId =>
+      text().withDefault(const Constant(DraftCoverCatalog.defaultPatternId))();
   TextColumn get status =>
       text().map(const CollectionProjectStatusConverter())();
   DateTimeColumn get createdAtUtc => dateTime()();
@@ -591,9 +602,15 @@ class CollectionProjectsDao extends DatabaseAccessor<AppDatabase>
       ..where(
         (table) => table.status.equalsValue(CollectionProjectStatus.draft),
       )
-      ..orderBy([(table) => OrderingTerm.asc(table.createdAtUtc)]);
+      ..orderBy([(table) => OrderingTerm.desc(table.updatedAtUtc)]);
 
     return query.watch();
+  }
+
+  Stream<CollectionProjectRow?> watchById(String id) {
+    return (select(
+      collectionProjects,
+    )..where((table) => table.id.equals(id))).watchSingleOrNull();
   }
 
   Future<bool> replaceProject(CollectionProjectsCompanion project) async {

@@ -1,0 +1,1225 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/localization/app_localizations.dart';
+import '../../../../app/router/app_routes.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/errors/app_failure.dart';
+import '../../../../core/identifiers/entity_id.dart';
+import '../../../../core/widgets/app_empty_view.dart';
+import '../../../../core/widgets/app_error_view.dart';
+import '../../../../core/widgets/app_loading_view.dart';
+import '../../../rarities/application/rarity_use_case_providers.dart';
+import '../../../rarities/application/rarity_use_cases.dart';
+import '../../../rarities/domain/catalogs/rarity_visual_catalog.dart';
+import '../../../rarities/domain/entities/rarity.dart';
+import '../../../rarities/domain/validation/rarity_validation.dart';
+import '../../../rarities/presentation/widgets/rarity_preview.dart';
+import '../../application/collection_draft_use_case_providers.dart';
+import '../../domain/catalogs/draft_cover_catalog.dart';
+import '../../domain/validation/collection_draft_validation.dart';
+import '../controllers/collection_draft_controller.dart';
+import '../widgets/draft_cover_preview.dart';
+import '../widgets/visual_option_labels.dart';
+
+enum _EditorSection { information, rarities }
+
+class CollectionDraftEditorPage extends ConsumerStatefulWidget {
+  const CollectionDraftEditorPage({super.key, required this.projectId});
+
+  final CollectionProjectId projectId;
+
+  @override
+  ConsumerState<CollectionDraftEditorPage> createState() =>
+      _CollectionDraftEditorPageState();
+}
+
+class _CollectionDraftEditorPageState
+    extends ConsumerState<CollectionDraftEditorPage>
+    with WidgetsBindingObserver {
+  _EditorSection _section = _EditorSection.information;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      unawaited(
+        ref
+            .read(collectionDraftControllerProvider(widget.projectId).notifier)
+            .flushPendingSave(),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final asyncState = ref.watch(
+      collectionDraftControllerProvider(widget.projectId),
+    );
+    final draft = asyncState.asData?.value;
+    final title = draft == null || draft.name.trim().isEmpty
+        ? l10n.unnamedCollection
+        : draft.name.trim();
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          await _leave();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            tooltip: l10n.backToDrafts,
+            onPressed: _leave,
+            icon: const Icon(Icons.arrow_back),
+          ),
+          title: Text(title),
+          actions: [
+            if (draft != null)
+              IconButton(
+                tooltip: l10n.deleteDraft,
+                onPressed: () => _confirmDeleteDraft(context, ref, draft),
+                icon: const Icon(Icons.delete_outline),
+              ),
+          ],
+        ),
+        body: SafeArea(
+          child: draft == null
+              ? asyncState.when(
+                  loading: () => const AppLoadingView(),
+                  error: (error, stackTrace) => AppErrorView(
+                    title: l10n.screenErrorTitle,
+                    description: error is EntityNotFoundFailure
+                        ? l10n.projectNotFound
+                        : l10n.saveError,
+                    onRetry: () => context.go(AppRoutes.createPath),
+                    retryLabel: l10n.backToDrafts,
+                  ),
+                  data: (state) => _EditorBody(
+                    state: state,
+                    section: _section,
+                    onSectionChanged: (section) {
+                      setState(() => _section = section);
+                    },
+                  ),
+                )
+              : _EditorBody(
+                  state: draft,
+                  section: _section,
+                  onSectionChanged: (section) {
+                    setState(() => _section = section);
+                  },
+                ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _leave() async {
+    await ref
+        .read(collectionDraftControllerProvider(widget.projectId).notifier)
+        .flushPendingSave();
+    if (mounted) {
+      context.go(AppRoutes.createPath);
+    }
+  }
+}
+
+class _EditorBody extends ConsumerWidget {
+  const _EditorBody({
+    required this.state,
+    required this.section,
+    required this.onSectionChanged,
+  });
+
+  final CollectionDraftEditorState state;
+  final _EditorSection section;
+  final ValueChanged<_EditorSection> onSectionChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+
+    return ListView(
+      padding: AppConstants.pagePadding,
+      children: [
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: AppConstants.spacingSm,
+                  runSpacing: AppConstants.spacingSm,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Chip(label: Text(l10n.draft)),
+                    _SaveStatusChip(state: state),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacingMd),
+                _CompletionPanel(state: state),
+                const SizedBox(height: AppConstants.spacingMd),
+                SegmentedButton<_EditorSection>(
+                  segments: [
+                    ButtonSegment(
+                      value: _EditorSection.information,
+                      icon: const Icon(Icons.info_outline),
+                      label: Text(l10n.information),
+                    ),
+                    ButtonSegment(
+                      value: _EditorSection.rarities,
+                      icon: const Icon(Icons.auto_awesome_outlined),
+                      label: Text(l10n.rarities),
+                    ),
+                  ],
+                  selected: {section},
+                  onSelectionChanged: (selection) {
+                    onSectionChanged(selection.single);
+                  },
+                ),
+                const SizedBox(height: AppConstants.spacingMd),
+                AnimatedSwitcher(
+                  duration: AppConstants.shortAnimationDuration,
+                  child: switch (section) {
+                    _EditorSection.information => _InformationSection(
+                      key: const ValueKey('information'),
+                      state: state,
+                    ),
+                    _EditorSection.rarities => _RaritiesSection(
+                      key: const ValueKey('rarities'),
+                      state: state,
+                    ),
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SaveStatusChip extends ConsumerWidget {
+  const _SaveStatusChip({required this.state});
+
+  final CollectionDraftEditorState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final (icon, label) = switch (state.saveStatus) {
+      DraftSaveStatus.pending => (Icons.pending_outlined, l10n.savePending),
+      DraftSaveStatus.saving => (Icons.sync_outlined, l10n.saving),
+      DraftSaveStatus.error => (
+        Icons.error_outline,
+        state.infoErrors.canSave ? l10n.saveError : l10n.fixFieldsToSave,
+      ),
+      DraftSaveStatus.saved => (Icons.check_circle_outline, l10n.saved),
+    };
+
+    return InputChip(
+      avatar: Icon(icon, size: 18),
+      label: Text(label),
+      onPressed:
+          state.saveStatus == DraftSaveStatus.error && state.infoErrors.canSave
+          ? () => ref
+                .read(
+                  collectionDraftControllerProvider(state.project.id).notifier,
+                )
+                .retrySave()
+          : null,
+    );
+  }
+}
+
+class _CompletionPanel extends StatelessWidget {
+  const _CompletionPanel({required this.state});
+
+  final CollectionDraftEditorState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.spacingMd),
+        child: Column(
+          children: [
+            _CompletionRow(
+              title: l10n.information,
+              status: state.completeness.info,
+              missingText: l10n.collectionNeedsName,
+            ),
+            const Divider(),
+            _CompletionRow(
+              title: l10n.rarities,
+              status: state.completeness.rarities,
+              missingText: l10n.atLeastOneRarity,
+            ),
+            const Divider(),
+            _FutureRow(title: l10n.cards),
+            const Divider(),
+            _FutureRow(title: l10n.packs),
+            const Divider(),
+            _FutureRow(title: l10n.review),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CompletionRow extends StatelessWidget {
+  const _CompletionRow({
+    required this.title,
+    required this.status,
+    required this.missingText,
+  });
+
+  final String title;
+  final DraftSectionCompletion status;
+  final String missingText;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final complete = status == DraftSectionCompletion.completeForThisPhase;
+    final label = switch (status) {
+      DraftSectionCompletion.notStarted => l10n.notStarted,
+      DraftSectionCompletion.incomplete => l10n.incomplete,
+      DraftSectionCompletion.completeForThisPhase => l10n.completeForThisPhase,
+      DraftSectionCompletion.withErrors => l10n.withErrors,
+    };
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        complete ? Icons.check_circle_outline : Icons.radio_button_unchecked,
+      ),
+      title: Text(title),
+      subtitle: complete ? null : Text(missingText),
+      trailing: Text(label),
+    );
+  }
+}
+
+class _FutureRow extends StatelessWidget {
+  const _FutureRow({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return ListTile(
+      enabled: false,
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.lock_outline),
+      title: Text(title),
+      trailing: Text(l10n.availableLater),
+    );
+  }
+}
+
+class _InformationSection extends ConsumerWidget {
+  const _InformationSection({super.key, required this.state});
+
+  final CollectionDraftEditorState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final controller = ref.read(
+      collectionDraftControllerProvider(state.project.id).notifier,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DraftCoverPreview(
+          style: state.draftCoverStyle,
+          collectionName: state.name,
+        ),
+        const SizedBox(height: AppConstants.spacingMd),
+        TextFormField(
+          key: ValueKey('draft-name-${state.project.id.value}'),
+          initialValue: state.name,
+          maxLength: CollectionDraftValidation.maxNameLength,
+          decoration: InputDecoration(
+            labelText: l10n.collectionName,
+            errorText: state.infoErrors.nameTooLong ? l10n.fieldTooLong : null,
+          ),
+          buildCounter: _buildCounter,
+          textInputAction: TextInputAction.next,
+          onChanged: controller.editName,
+        ),
+        const SizedBox(height: AppConstants.spacingMd),
+        TextFormField(
+          key: ValueKey('draft-author-${state.project.id.value}'),
+          initialValue: state.author,
+          maxLength: CollectionDraftValidation.maxAuthorLength,
+          decoration: InputDecoration(
+            labelText: l10n.author,
+            errorText: state.infoErrors.authorTooLong
+                ? l10n.fieldTooLong
+                : null,
+          ),
+          buildCounter: _buildCounter,
+          textInputAction: TextInputAction.next,
+          onChanged: controller.editAuthor,
+        ),
+        const SizedBox(height: AppConstants.spacingMd),
+        TextFormField(
+          key: ValueKey('draft-description-${state.project.id.value}'),
+          initialValue: state.description,
+          maxLength: CollectionDraftValidation.maxDescriptionLength,
+          minLines: 3,
+          maxLines: 7,
+          decoration: InputDecoration(
+            labelText: l10n.description,
+            errorText: state.infoErrors.descriptionTooLong
+                ? l10n.fieldTooLong
+                : null,
+          ),
+          buildCounter: _buildCounter,
+          onChanged: controller.editDescription,
+        ),
+        const SizedBox(height: AppConstants.spacingLg),
+        _CoverStyleSection(state: state),
+      ],
+    );
+  }
+
+  Widget? _buildCounter(
+    BuildContext context, {
+    required int currentLength,
+    required bool isFocused,
+    required int? maxLength,
+  }) {
+    final max = maxLength;
+    if (max == null) {
+      return null;
+    }
+
+    return Text(context.l10n.charactersCounter(currentLength, max));
+  }
+}
+
+class _CoverStyleSection extends ConsumerWidget {
+  const _CoverStyleSection({required this.state});
+
+  final CollectionDraftEditorState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final controller = ref.read(
+      collectionDraftControllerProvider(state.project.id).notifier,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.cover,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: AppConstants.spacingMd),
+        _OptionTitle(label: l10n.primaryColor),
+        Wrap(
+          spacing: AppConstants.spacingSm,
+          runSpacing: AppConstants.spacingSm,
+          children: [
+            for (final option in DraftCoverCatalog.colors)
+              ChoiceChip(
+                avatar: CircleAvatar(backgroundColor: Color(option.colorValue)),
+                label: Text(coverColorLabel(l10n, option.id)),
+                selected: state.draftCoverStyle.backgroundColorId == option.id,
+                onSelected: (_) {
+                  controller.editCover(
+                    state.draftCoverStyle.copyWith(
+                      backgroundColorId: option.id,
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
+        const SizedBox(height: AppConstants.spacingMd),
+        _OptionTitle(label: l10n.accentColor),
+        Wrap(
+          spacing: AppConstants.spacingSm,
+          runSpacing: AppConstants.spacingSm,
+          children: [
+            for (final option in DraftCoverCatalog.colors)
+              ChoiceChip(
+                avatar: CircleAvatar(backgroundColor: Color(option.colorValue)),
+                label: Text(coverColorLabel(l10n, option.id)),
+                selected: state.draftCoverStyle.accentColorId == option.id,
+                onSelected: (_) {
+                  controller.editCover(
+                    state.draftCoverStyle.copyWith(accentColorId: option.id),
+                  );
+                },
+              ),
+          ],
+        ),
+        const SizedBox(height: AppConstants.spacingMd),
+        _OptionTitle(label: l10n.icon),
+        Wrap(
+          spacing: AppConstants.spacingSm,
+          runSpacing: AppConstants.spacingSm,
+          children: [
+            for (final option in DraftCoverCatalog.icons)
+              ChoiceChip(
+                avatar: Icon(coverIconForId(option.id), size: 18),
+                label: Text(coverIconLabel(l10n, option.id)),
+                selected: state.draftCoverStyle.iconId == option.id,
+                onSelected: (_) {
+                  controller.editCover(
+                    state.draftCoverStyle.copyWith(iconId: option.id),
+                  );
+                },
+              ),
+          ],
+        ),
+        const SizedBox(height: AppConstants.spacingMd),
+        _OptionTitle(label: l10n.style),
+        Wrap(
+          spacing: AppConstants.spacingSm,
+          runSpacing: AppConstants.spacingSm,
+          children: [
+            for (final option in DraftCoverCatalog.patterns)
+              ChoiceChip(
+                label: Text(coverPatternLabel(l10n, option.id)),
+                selected: state.draftCoverStyle.patternId == option.id,
+                onSelected: (_) {
+                  controller.editCover(
+                    state.draftCoverStyle.copyWith(patternId: option.id),
+                  );
+                },
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _RaritiesSection extends ConsumerWidget {
+  const _RaritiesSection({super.key, required this.state});
+
+  final CollectionDraftEditorState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final contentVersionId = state.project.currentContentVersionId;
+    if (contentVersionId == null) {
+      return AppErrorView(
+        title: l10n.screenErrorTitle,
+        description: l10n.projectNotFound,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.rarities,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              ),
+            ),
+            Tooltip(
+              message: l10n.addRarity,
+              child: FilledButton.icon(
+                onPressed: () => _showRarityForm(context, ref, state),
+                icon: const Icon(Icons.add),
+                label: Text(l10n.addRarity),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppConstants.spacingMd),
+        if (state.rarities.isEmpty)
+          AppEmptyView(
+            icon: Icons.auto_awesome_outlined,
+            title: l10n.noRaritiesTitle,
+            description: l10n.noRaritiesDescription,
+            action: FilledButton.icon(
+              onPressed: () => _showRarityForm(context, ref, state),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.addRarity),
+            ),
+          )
+        else
+          ReorderableListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            buildDefaultDragHandles: false,
+            itemCount: state.rarities.length,
+            onReorderItem: (oldIndex, newIndex) {
+              _reorder(context, ref, state, oldIndex, newIndex);
+            },
+            itemBuilder: (context, index) {
+              final rarity = state.rarities[index];
+              return _RarityListItem(
+                key: ValueKey(rarity.id.value),
+                rarity: rarity,
+                index: index,
+                isFirst: index == 0,
+                isLast: index == state.rarities.length - 1,
+                onEdit: () => _showRarityForm(context, ref, state, rarity),
+                onDelete: () =>
+                    _confirmDeleteRarity(context, ref, state, rarity),
+                onMoveUp: () => _move(context, ref, state, index, -1),
+                onMoveDown: () => _move(context, ref, state, index, 1),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  Future<void> _move(
+    BuildContext context,
+    WidgetRef ref,
+    CollectionDraftEditorState state,
+    int index,
+    int direction,
+  ) async {
+    final target = index + direction;
+    if (target < 0 || target >= state.rarities.length) {
+      return;
+    }
+
+    final items = state.rarities.toList();
+    final item = items.removeAt(index);
+    items.insert(target, item);
+    await _persistOrder(context, ref, state, items);
+  }
+
+  Future<void> _reorder(
+    BuildContext context,
+    WidgetRef ref,
+    CollectionDraftEditorState state,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    final items = state.rarities.toList();
+    final item = items.removeAt(oldIndex);
+    items.insert(newIndex, item);
+    await _persistOrder(context, ref, state, items);
+  }
+
+  Future<void> _persistOrder(
+    BuildContext context,
+    WidgetRef ref,
+    CollectionDraftEditorState state,
+    List<Rarity> ordered,
+  ) async {
+    final contentVersionId = state.project.currentContentVersionId;
+    if (contentVersionId == null) {
+      return;
+    }
+
+    try {
+      await ref
+          .read(reorderRaritiesProvider)
+          .call(
+            projectId: state.project.id,
+            collectionId: state.project.collectionId,
+            contentVersionId: contentVersionId,
+            orderedIds: ordered
+                .map((rarity) => rarity.id)
+                .toList(growable: false),
+          );
+    } on Object {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.saveError)));
+      }
+    }
+  }
+}
+
+class _RarityListItem extends StatelessWidget {
+  const _RarityListItem({
+    super.key,
+    required this.rarity,
+    required this.index,
+    required this.isFirst,
+    required this.isLast,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onMoveUp,
+    required this.onMoveDown,
+  });
+
+  final Rarity rarity;
+  final int index;
+  final bool isFirst;
+  final bool isLast;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final VoidCallback onMoveUp;
+  final VoidCallback onMoveDown;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingMd),
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.spacingSm),
+        child: Column(
+          children: [
+            RarityPreview(rarity: rarity, compact: true),
+            const SizedBox(height: AppConstants.spacingSm),
+            Row(
+              children: [
+                ReorderableDragStartListener(
+                  index: index,
+                  child: Tooltip(
+                    message: l10n.order,
+                    child: const IconButton(
+                      onPressed: null,
+                      icon: Icon(Icons.drag_handle),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: l10n.moveUp,
+                  onPressed: isFirst ? null : onMoveUp,
+                  icon: const Icon(Icons.keyboard_arrow_up),
+                ),
+                IconButton(
+                  tooltip: l10n.moveDown,
+                  onPressed: isLast ? null : onMoveDown,
+                  icon: const Icon(Icons.keyboard_arrow_down),
+                ),
+                const Spacer(),
+                IconButton(
+                  tooltip: l10n.editRarity,
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit_outlined),
+                ),
+                IconButton(
+                  tooltip: l10n.deleteRarity,
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OptionTitle extends StatelessWidget {
+  const _OptionTitle({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppConstants.spacingSm),
+      child: Text(
+        label,
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+      ),
+    );
+  }
+}
+
+Future<void> _confirmDeleteDraft(
+  BuildContext context,
+  WidgetRef ref,
+  CollectionDraftEditorState state,
+) async {
+  final l10n = context.l10n;
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.deleteDraftDialogTitle),
+      content: Text(l10n.deleteDraftDialogDescription),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).pop(true),
+          icon: const Icon(Icons.delete_outline),
+          label: Text(l10n.delete),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed != true) {
+    return;
+  }
+
+  await ref
+      .read(collectionDraftControllerProvider(state.project.id).notifier)
+      .flushPendingSave();
+  await ref.read(deleteCollectionDraftProvider).call(state.project.id);
+
+  if (context.mounted) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.draftDeleted)));
+    context.go(AppRoutes.createPath);
+  }
+}
+
+Future<void> _confirmDeleteRarity(
+  BuildContext context,
+  WidgetRef ref,
+  CollectionDraftEditorState state,
+  Rarity rarity,
+) async {
+  final l10n = context.l10n;
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.deleteRarityDialogTitle),
+      content: Text('${rarity.name}\n\n${l10n.deleteRarityDialogDescription}'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).pop(true),
+          icon: const Icon(Icons.delete_outline),
+          label: Text(l10n.delete),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed != true) {
+    return;
+  }
+
+  try {
+    await ref
+        .read(deleteRarityProvider)
+        .call(projectId: state.project.id, rarityId: rarity.id);
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.rarityDeleted)));
+    }
+  } on ReferentialIntegrityFailure {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.rarityInUse)));
+    }
+  } on Object {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.saveError)));
+    }
+  }
+}
+
+Future<void> _showRarityForm(
+  BuildContext context,
+  WidgetRef ref,
+  CollectionDraftEditorState state, [
+  Rarity? rarity,
+]) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => _RarityFormSheet(state: state, rarity: rarity),
+  );
+}
+
+class _RarityFormSheet extends ConsumerStatefulWidget {
+  const _RarityFormSheet({required this.state, this.rarity});
+
+  final CollectionDraftEditorState state;
+  final Rarity? rarity;
+
+  @override
+  ConsumerState<_RarityFormSheet> createState() => _RarityFormSheetState();
+}
+
+class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _sellValueController;
+  late int _colorValue;
+  late String _iconId;
+  late String _frameId;
+  late String _effectId;
+  late bool _isEnabled;
+  bool _submitted = false;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final input = widget.rarity == null
+        ? RarityInput.defaults()
+        : RarityInput(
+            name: widget.rarity!.name,
+            colorValue: widget.rarity!.colorValue,
+            iconId: widget.rarity!.iconId,
+            frameId: widget.rarity!.frameId,
+            effectId:
+                widget.rarity!.effectId ?? RarityVisualCatalog.defaultEffectId,
+            sellValue: widget.rarity!.sellValue,
+            isEnabled: widget.rarity!.isEnabled,
+          );
+    _nameController = TextEditingController(text: input.name);
+    _sellValueController = TextEditingController(
+      text: input.sellValue.toString(),
+    );
+    _colorValue = input.colorValue;
+    _iconId = input.iconId;
+    _frameId = input.frameId;
+    _effectId = input.effectId;
+    _isEnabled = input.isEnabled;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _sellValueController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final bottom = MediaQuery.viewInsetsOf(context).bottom;
+    final sellValue = int.tryParse(_sellValueController.text.trim());
+    final input = RarityInput(
+      name: _nameController.text,
+      colorValue: _colorValue,
+      iconId: _iconId,
+      frameId: _frameId,
+      effectId: _effectId,
+      sellValue: sellValue ?? -1,
+      isEnabled: _isEnabled,
+    );
+    final duplicate = _hasDuplicateName(input.name);
+    final validation = RarityValidation.validate(
+      name: input.name,
+      isDuplicateName: duplicate,
+      colorValue: input.colorValue,
+      iconId: input.iconId,
+      frameId: input.frameId,
+      effectId: input.effectId,
+      sellValue: input.sellValue,
+    );
+    final showErrors = _submitted;
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottom),
+        child: SingleChildScrollView(
+          padding: AppConstants.pagePadding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.rarity == null ? l10n.addRarity : l10n.editRarity,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: AppConstants.spacingMd),
+              RarityPreview(rarity: _previewRarity(l10n, input), compact: true),
+              const SizedBox(height: AppConstants.spacingMd),
+              TextFormField(
+                controller: _nameController,
+                maxLength: RarityVisualCatalog.maxNameLength,
+                decoration: InputDecoration(
+                  labelText: l10n.name,
+                  errorText: showErrors
+                      ? _rarityNameError(l10n, validation)
+                      : null,
+                ),
+                buildCounter: _buildCounter,
+                textInputAction: TextInputAction.next,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: AppConstants.spacingMd),
+              TextFormField(
+                controller: _sellValueController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: l10n.sellValue,
+                  errorText:
+                      showErrors &&
+                          (validation.issues.contains(
+                                RarityValidationIssue.negativeSellValue,
+                              ) ||
+                              validation.issues.contains(
+                                RarityValidationIssue.sellValueTooHigh,
+                              ))
+                      ? l10n.sellValueInvalid
+                      : null,
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(_isEnabled ? l10n.enabled : l10n.disabled),
+                value: _isEnabled,
+                onChanged: (value) => setState(() => _isEnabled = value),
+              ),
+              _OptionTitle(label: l10n.color),
+              Wrap(
+                spacing: AppConstants.spacingSm,
+                runSpacing: AppConstants.spacingSm,
+                children: [
+                  for (final option in RarityVisualCatalog.colors)
+                    ChoiceChip(
+                      avatar: CircleAvatar(
+                        backgroundColor: Color(option.colorValue),
+                      ),
+                      label: Text(rarityColorLabel(l10n, option.id)),
+                      selected: _colorValue == option.colorValue,
+                      onSelected: (_) {
+                        setState(() => _colorValue = option.colorValue);
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.spacingMd),
+              _OptionTitle(label: l10n.icon),
+              Wrap(
+                spacing: AppConstants.spacingSm,
+                runSpacing: AppConstants.spacingSm,
+                children: [
+                  for (final option in RarityVisualCatalog.icons)
+                    ChoiceChip(
+                      avatar: Icon(rarityIconForId(option.id), size: 18),
+                      label: Text(rarityIconLabel(l10n, option.id)),
+                      selected: _iconId == option.id,
+                      onSelected: (_) => setState(() => _iconId = option.id),
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.spacingMd),
+              _OptionTitle(label: l10n.frame),
+              Wrap(
+                spacing: AppConstants.spacingSm,
+                runSpacing: AppConstants.spacingSm,
+                children: [
+                  for (final option in RarityVisualCatalog.frames)
+                    ChoiceChip(
+                      label: Text(rarityFrameLabel(l10n, option.id)),
+                      selected: _frameId == option.id,
+                      onSelected: (_) => setState(() => _frameId = option.id),
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.spacingMd),
+              _OptionTitle(label: l10n.effect),
+              Wrap(
+                spacing: AppConstants.spacingSm,
+                runSpacing: AppConstants.spacingSm,
+                children: [
+                  for (final option in RarityVisualCatalog.effects)
+                    ChoiceChip(
+                      label: Text(rarityEffectLabel(l10n, option.id)),
+                      selected: _effectId == option.id,
+                      onSelected: (_) => setState(() => _effectId = option.id),
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.spacingLg),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: _saving
+                        ? null
+                        : () => Navigator.of(context).pop(),
+                    child: Text(l10n.cancel),
+                  ),
+                  const SizedBox(width: AppConstants.spacingSm),
+                  FilledButton.icon(
+                    onPressed: _saving ? null : () => _save(input, validation),
+                    icon: _saving
+                        ? const SizedBox.square(
+                            dimension: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.save_outlined),
+                    label: Text(l10n.save),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget? _buildCounter(
+    BuildContext context, {
+    required int currentLength,
+    required bool isFocused,
+    required int? maxLength,
+  }) {
+    final max = maxLength;
+    if (max == null) {
+      return null;
+    }
+
+    return Text(context.l10n.charactersCounter(currentLength, max));
+  }
+
+  String? _rarityNameError(
+    AppLocalizations l10n,
+    RarityValidationResult validation,
+  ) {
+    if (validation.issues.contains(RarityValidationIssue.emptyName)) {
+      return l10n.rarityNameRequired;
+    }
+    if (validation.issues.contains(RarityValidationIssue.nameTooLong)) {
+      return l10n.fieldTooLong;
+    }
+    if (validation.issues.contains(RarityValidationIssue.duplicateName)) {
+      return l10n.duplicateRarityName;
+    }
+
+    return null;
+  }
+
+  bool _hasDuplicateName(String name) {
+    final normalized = RarityValidation.normalizedName(name);
+    return widget.state.rarities.any((rarity) {
+      if (widget.rarity != null && rarity.id == widget.rarity!.id) {
+        return false;
+      }
+
+      return RarityValidation.normalizedName(rarity.name) == normalized;
+    });
+  }
+
+  Rarity _previewRarity(AppLocalizations l10n, RarityInput input) {
+    final name = input.name.trim().isEmpty ? l10n.name : input.name;
+    final sellValue = input.sellValue < 0 ? 0 : input.sellValue;
+    final contentVersionId = widget.state.project.currentContentVersionId;
+
+    return Rarity(
+      id: widget.rarity?.id ?? RarityId('00000000-0000-4000-8000-000000000001'),
+      collectionId: widget.state.project.collectionId,
+      contentVersionId:
+          contentVersionId ??
+          ContentVersionId('00000000-0000-4000-8000-000000000002'),
+      name: name,
+      orderIndex: widget.rarity?.orderIndex ?? widget.state.rarities.length,
+      colorValue: input.colorValue,
+      iconId: input.iconId,
+      frameId: input.frameId,
+      effectId: input.effectId,
+      sellValue: sellValue,
+      isEnabled: input.isEnabled,
+    );
+  }
+
+  Future<void> _save(
+    RarityInput input,
+    RarityValidationResult validation,
+  ) async {
+    setState(() => _submitted = true);
+    if (!validation.canSave) {
+      return;
+    }
+
+    final contentVersionId = widget.state.project.currentContentVersionId;
+    if (contentVersionId == null) {
+      return;
+    }
+
+    setState(() => _saving = true);
+    try {
+      if (widget.rarity == null) {
+        await ref
+            .read(createRarityProvider)
+            .call(
+              projectId: widget.state.project.id,
+              collectionId: widget.state.project.collectionId,
+              contentVersionId: contentVersionId,
+              input: input,
+            );
+      } else {
+        await ref
+            .read(updateRarityProvider)
+            .call(
+              projectId: widget.state.project.id,
+              rarityId: widget.rarity!.id,
+              input: input,
+            );
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.raritySaved)));
+        Navigator.of(context).pop();
+      }
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.saveError)));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _saving = false);
+      }
+    }
+  }
+}

@@ -37,17 +37,26 @@ void main() {
 
     await pumpGachadexApp(tester);
 
-    await tester.tap(navigationLabel('Colecciones'));
-    await tester.pumpAndSettle();
-    await tester.tap(navigationLabel('Crear'));
-    await tester.pumpAndSettle();
-    await tester.tap(navigationLabel('Ajustes'));
-    await tester.pumpAndSettle();
+    try {
+      await tester.tap(navigationLabel('Colecciones'));
+      await _pumpNavigation(tester);
+      await tester.tap(navigationLabel('Crear'));
+      await _pumpNavigation(tester);
+      await tester.tap(navigationLabel('Ajustes'));
+      await _pumpNavigation(tester);
 
-    expect(tester.takeException(), isNull);
+      expect(tester.takeException(), isNull);
+    } finally {
+      await disposeGachadexApp(tester);
+    }
   });
 }
 
 String _semanticsLabel(WidgetTester tester, String label) {
   return tester.getSemantics(navigationLabel(label)).getSemanticsData().label;
+}
+
+Future<void> _pumpNavigation(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 350));
 }

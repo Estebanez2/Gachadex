@@ -107,5 +107,539 @@
   "createDisabledAction": "Crear colección",
   "@createDisabledAction": {
     "description": "Boton deshabilitado de creacion futura."
+  },
+  "collectionDraftsDescription": "Prepara colecciones locales y retoma cualquier borrador sin perder cambios.",
+  "@collectionDraftsDescription": {
+    "description": "Resumen de la biblioteca de borradores."
+  },
+  "newCollection": "Nueva colección",
+  "@newCollection": {
+    "description": "Accion para crear un borrador."
+  },
+  "createCollection": "Crear colección",
+  "@createCollection": {
+    "description": "Titulo de creacion de borrador."
+  },
+  "unnamedCollection": "Colección sin nombre",
+  "@unnamedCollection": {
+    "description": "Nombre seguro mostrado cuando el borrador no tiene nombre."
+  },
+  "draft": "Borrador",
+  "@draft": {
+    "description": "Indicador de estado draft."
+  },
+  "information": "Información",
+  "@information": {
+    "description": "Seccion de informacion general."
+  },
+  "rarities": "Rarezas",
+  "@rarities": {
+    "description": "Seccion de rarezas."
+  },
+  "cards": "Cartas",
+  "@cards": {
+    "description": "Seccion futura de cartas."
+  },
+  "packs": "Sobres",
+  "@packs": {
+    "description": "Seccion futura de sobres."
+  },
+  "review": "Revisión",
+  "@review": {
+    "description": "Seccion futura de revision."
+  },
+  "name": "Nombre",
+  "@name": {
+    "description": "Etiqueta generica para nombre."
+  },
+  "collectionName": "Nombre de colección",
+  "@collectionName": {
+    "description": "Campo de nombre de coleccion."
+  },
+  "author": "Autor",
+  "@author": {
+    "description": "Campo de autor."
+  },
+  "description": "Descripción",
+  "@description": {
+    "description": "Campo de descripcion."
+  },
+  "cover": "Portada",
+  "@cover": {
+    "description": "Seccion de portada."
+  },
+  "savePending": "Cambios pendientes",
+  "@savePending": {
+    "description": "Estado de guardado pendiente."
+  },
+  "saving": "Guardando...",
+  "@saving": {
+    "description": "Estado de guardado en progreso."
+  },
+  "saved": "Guardado",
+  "@saved": {
+    "description": "Estado de guardado correcto."
+  },
+  "saveError": "No se han podido guardar los cambios",
+  "@saveError": {
+    "description": "Estado de error al guardar."
+  },
+  "fixFieldsToSave": "Corrige los campos para guardar",
+  "@fixFieldsToSave": {
+    "description": "Estado de error por validacion local."
+  },
+  "addRarity": "Añadir rareza",
+  "@addRarity": {
+    "description": "Accion para crear rareza."
+  },
+  "editRarity": "Editar rareza",
+  "@editRarity": {
+    "description": "Accion para editar rareza."
+  },
+  "deleteRarity": "Eliminar rareza",
+  "@deleteRarity": {
+    "description": "Accion para eliminar rareza."
+  },
+  "sellValue": "Valor de venta",
+  "@sellValue": {
+    "description": "Campo de valor de venta por rareza."
+  },
+  "color": "Color",
+  "@color": {
+    "description": "Etiqueta de selector de color."
+  },
+  "primaryColor": "Color principal",
+  "@primaryColor": {
+    "description": "Etiqueta de color principal."
+  },
+  "accentColor": "Color secundario",
+  "@accentColor": {
+    "description": "Etiqueta de color secundario."
+  },
+  "icon": "Icono",
+  "@icon": {
+    "description": "Etiqueta de selector de icono."
+  },
+  "frame": "Marco",
+  "@frame": {
+    "description": "Etiqueta de selector de marco."
+  },
+  "effect": "Efecto",
+  "@effect": {
+    "description": "Etiqueta de selector de efecto."
+  },
+  "style": "Estilo",
+  "@style": {
+    "description": "Etiqueta de estilo de portada."
+  },
+  "order": "Orden",
+  "@order": {
+    "description": "Etiqueta de orden."
+  },
+  "moveUp": "Subir",
+  "@moveUp": {
+    "description": "Accion accesible para subir una rareza."
+  },
+  "moveDown": "Bajar",
+  "@moveDown": {
+    "description": "Accion accesible para bajar una rareza."
+  },
+  "cancel": "Cancelar",
+  "@cancel": {
+    "description": "Accion para cancelar."
+  },
+  "save": "Guardar",
+  "@save": {
+    "description": "Accion para guardar."
+  },
+  "delete": "Eliminar",
+  "@delete": {
+    "description": "Accion para eliminar."
+  },
+  "deleteDraft": "Eliminar borrador",
+  "@deleteDraft": {
+    "description": "Accion para eliminar borrador."
+  },
+  "emptyDraftsTitle": "Todavía no has creado ninguna colección",
+  "@emptyDraftsTitle": {
+    "description": "Titulo del estado vacio de borradores."
+  },
+  "emptyDraftsDescription": "Crea un borrador para empezar a preparar tus cartas y rarezas.",
+  "@emptyDraftsDescription": {
+    "description": "Descripcion del estado vacio de borradores."
+  },
+  "continueEditing": "Continuar",
+  "@continueEditing": {
+    "description": "Accion para abrir un borrador."
+  },
+  "rarityCount": "{count, plural, =0{Sin rarezas} =1{1 rareza} other{{count} rarezas}}",
+  "@rarityCount": {
+    "description": "Numero de rarezas de un borrador.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lastUpdated": "Última edición: {date}",
+  "@lastUpdated": {
+    "description": "Fecha de ultima modificacion.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "incompleteDraft": "Borrador incompleto",
+  "@incompleteDraft": {
+    "description": "Estado general incompleto."
+  },
+  "completeForThisPhase": "Completo para esta fase",
+  "@completeForThisPhase": {
+    "description": "Estado completo dentro de la fase actual."
+  },
+  "notStarted": "No iniciado",
+  "@notStarted": {
+    "description": "Estado no iniciado."
+  },
+  "incomplete": "Incompleto",
+  "@incomplete": {
+    "description": "Estado incompleto."
+  },
+  "withErrors": "Con errores",
+  "@withErrors": {
+    "description": "Estado con errores."
+  },
+  "pending": "Pendiente",
+  "@pending": {
+    "description": "Estado pendiente."
+  },
+  "collectionNeedsName": "La colección necesita un nombre",
+  "@collectionNeedsName": {
+    "description": "Requisito de completitud de nombre."
+  },
+  "atLeastOneRarity": "Debe existir al menos una rareza",
+  "@atLeastOneRarity": {
+    "description": "Requisito de completitud de rarezas."
+  },
+  "availableLater": "Disponible más adelante",
+  "@availableLater": {
+    "description": "Etiqueta de funciones futuras."
+  },
+  "projectNotFound": "No se ha encontrado este borrador.",
+  "@projectNotFound": {
+    "description": "Error de borrador no encontrado."
+  },
+  "backToDrafts": "Volver a borradores",
+  "@backToDrafts": {
+    "description": "Accion para volver a biblioteca de borradores."
+  },
+  "deleteDraftDialogTitle": "Eliminar borrador",
+  "@deleteDraftDialogTitle": {
+    "description": "Titulo de confirmacion de borrador."
+  },
+  "deleteDraftDialogDescription": "Se eliminará este borrador y toda su configuración local. Esta acción no se puede deshacer.",
+  "@deleteDraftDialogDescription": {
+    "description": "Descripcion de confirmacion de borrador."
+  },
+  "draftDeleted": "Borrador eliminado",
+  "@draftDeleted": {
+    "description": "Confirmacion de borrador eliminado."
+  },
+  "deleteRarityDialogTitle": "Eliminar rareza",
+  "@deleteRarityDialogTitle": {
+    "description": "Titulo de confirmacion de rareza."
+  },
+  "deleteRarityDialogDescription": "No podrás recuperar esta rareza después de eliminarla.",
+  "@deleteRarityDialogDescription": {
+    "description": "Descripcion de confirmacion de rareza."
+  },
+  "rarityInUse": "No puedes eliminar esta rareza porque está asignada a una o más cartas.",
+  "@rarityInUse": {
+    "description": "Error al eliminar rareza usada."
+  },
+  "rarityDeleted": "Rareza eliminada",
+  "@rarityDeleted": {
+    "description": "Confirmacion de rareza eliminada."
+  },
+  "raritySaved": "Rareza guardada",
+  "@raritySaved": {
+    "description": "Confirmacion de rareza guardada."
+  },
+  "noRaritiesTitle": "Todavía no hay rarezas",
+  "@noRaritiesTitle": {
+    "description": "Titulo de estado vacio de rarezas."
+  },
+  "noRaritiesDescription": "Añade al menos una rareza para completar esta parte del borrador.",
+  "@noRaritiesDescription": {
+    "description": "Descripcion de estado vacio de rarezas."
+  },
+  "fieldTooLong": "Has superado el máximo permitido",
+  "@fieldTooLong": {
+    "description": "Error de longitud de campo."
+  },
+  "rarityNameRequired": "Escribe un nombre para la rareza",
+  "@rarityNameRequired": {
+    "description": "Error de nombre obligatorio de rareza."
+  },
+  "duplicateRarityName": "Ya existe una rareza con ese nombre",
+  "@duplicateRarityName": {
+    "description": "Error de nombre duplicado de rareza."
+  },
+  "sellValueInvalid": "Introduce un valor entre 0 y 999999",
+  "@sellValueInvalid": {
+    "description": "Error de valor de venta invalido."
+  },
+  "invalidVisualOption": "Elige una opción del catálogo",
+  "@invalidVisualOption": {
+    "description": "Error de opcion visual invalida."
+  },
+  "charactersCounter": "{count}/{max}",
+  "@charactersCounter": {
+    "description": "Contador de caracteres.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "enabled": "Activa",
+  "@enabled": {
+    "description": "Estado activo de una rareza."
+  },
+  "disabled": "Desactivada",
+  "@disabled": {
+    "description": "Estado desactivado de una rareza."
+  },
+  "coverColorTeal": "Verde agua",
+  "@coverColorTeal": {
+    "description": "Color de portada."
+  },
+  "coverColorCoral": "Coral",
+  "@coverColorCoral": {
+    "description": "Color de portada."
+  },
+  "coverColorGold": "Dorado",
+  "@coverColorGold": {
+    "description": "Color de portada."
+  },
+  "coverColorLilac": "Lila",
+  "@coverColorLilac": {
+    "description": "Color de portada."
+  },
+  "coverColorSky": "Azul cielo",
+  "@coverColorSky": {
+    "description": "Color de portada."
+  },
+  "coverColorMint": "Menta",
+  "@coverColorMint": {
+    "description": "Color de portada."
+  },
+  "coverColorRose": "Rosa",
+  "@coverColorRose": {
+    "description": "Color de portada."
+  },
+  "coverColorGraphite": "Grafito",
+  "@coverColorGraphite": {
+    "description": "Color de portada."
+  },
+  "coverIconSpark": "Destello",
+  "@coverIconSpark": {
+    "description": "Icono de portada."
+  },
+  "coverIconCards": "Cartas",
+  "@coverIconCards": {
+    "description": "Icono de portada."
+  },
+  "coverIconLaugh": "Risa",
+  "@coverIconLaugh": {
+    "description": "Icono de portada."
+  },
+  "coverIconCamera": "Cámara",
+  "@coverIconCamera": {
+    "description": "Icono de portada."
+  },
+  "coverIconGroup": "Grupo",
+  "@coverIconGroup": {
+    "description": "Icono de portada."
+  },
+  "coverIconTrophy": "Trofeo",
+  "@coverIconTrophy": {
+    "description": "Icono de portada."
+  },
+  "coverPatternSolid": "Liso",
+  "@coverPatternSolid": {
+    "description": "Patron de portada."
+  },
+  "coverPatternDiagonal": "Diagonal",
+  "@coverPatternDiagonal": {
+    "description": "Patron de portada."
+  },
+  "coverPatternDots": "Puntos",
+  "@coverPatternDots": {
+    "description": "Patron de portada."
+  },
+  "coverPatternSplit": "Bicolor",
+  "@coverPatternSplit": {
+    "description": "Patron de portada."
+  },
+  "rarityColorGray": "Gris",
+  "@rarityColorGray": {
+    "description": "Color de rareza."
+  },
+  "rarityColorGreen": "Verde",
+  "@rarityColorGreen": {
+    "description": "Color de rareza."
+  },
+  "rarityColorBlue": "Azul",
+  "@rarityColorBlue": {
+    "description": "Color de rareza."
+  },
+  "rarityColorPurple": "Morado",
+  "@rarityColorPurple": {
+    "description": "Color de rareza."
+  },
+  "rarityColorRed": "Rojo",
+  "@rarityColorRed": {
+    "description": "Color de rareza."
+  },
+  "rarityColorOrange": "Naranja",
+  "@rarityColorOrange": {
+    "description": "Color de rareza."
+  },
+  "rarityColorPink": "Rosa",
+  "@rarityColorPink": {
+    "description": "Color de rareza."
+  },
+  "rarityColorGold": "Dorado",
+  "@rarityColorGold": {
+    "description": "Color de rareza."
+  },
+  "rarityColorTurquoise": "Turquesa",
+  "@rarityColorTurquoise": {
+    "description": "Color de rareza."
+  },
+  "rarityColorGraphite": "Grafito",
+  "@rarityColorGraphite": {
+    "description": "Color de rareza."
+  },
+  "rarityIconStar": "Estrella",
+  "@rarityIconStar": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconCrown": "Corona",
+  "@rarityIconCrown": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconDiamond": "Diamante",
+  "@rarityIconDiamond": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconFire": "Fuego",
+  "@rarityIconFire": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconBolt": "Rayo",
+  "@rarityIconBolt": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconRocket": "Cohete",
+  "@rarityIconRocket": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconGlasses": "Gafas",
+  "@rarityIconGlasses": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconTrophy": "Trofeo",
+  "@rarityIconTrophy": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconGhost": "Fantasma",
+  "@rarityIconGhost": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconFootprint": "Huella",
+  "@rarityIconFootprint": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconSmile": "Sonrisa",
+  "@rarityIconSmile": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconBurst": "Explosión",
+  "@rarityIconBurst": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconHeart": "Corazón",
+  "@rarityIconHeart": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconMoon": "Luna",
+  "@rarityIconMoon": {
+    "description": "Icono de rareza."
+  },
+  "rarityIconSun": "Sol",
+  "@rarityIconSun": {
+    "description": "Icono de rareza."
+  },
+  "rarityFrameSimple": "Simple",
+  "@rarityFrameSimple": {
+    "description": "Marco de rareza."
+  },
+  "rarityFrameRounded": "Redondeado",
+  "@rarityFrameRounded": {
+    "description": "Marco de rareza."
+  },
+  "rarityFrameDouble": "Doble línea",
+  "@rarityFrameDouble": {
+    "description": "Marco de rareza."
+  },
+  "rarityFrameMetallic": "Metálico",
+  "@rarityFrameMetallic": {
+    "description": "Marco de rareza."
+  },
+  "rarityFrameNeon": "Neón",
+  "@rarityFrameNeon": {
+    "description": "Marco de rareza."
+  },
+  "rarityFrameComic": "Cómico",
+  "@rarityFrameComic": {
+    "description": "Marco de rareza."
+  },
+  "rarityFrameElegant": "Elegante",
+  "@rarityFrameElegant": {
+    "description": "Marco de rareza."
+  },
+  "rarityFramePixel": "Pixelado",
+  "@rarityFramePixel": {
+    "description": "Marco de rareza."
+  },
+  "rarityEffectNone": "Ninguno",
+  "@rarityEffectNone": {
+    "description": "Efecto de rareza."
+  },
+  "rarityEffectSoftGlow": "Brillo suave",
+  "@rarityEffectSoftGlow": {
+    "description": "Efecto de rareza."
+  },
+  "rarityEffectSpark": "Destello",
+  "@rarityEffectSpark": {
+    "description": "Efecto de rareza."
+  },
+  "rarityEffectGradient": "Gradiente",
+  "@rarityEffectGradient": {
+    "description": "Efecto de rareza."
+  },
+  "rarityEffectHolo": "Holográfico simulado",
+  "@rarityEffectHolo": {
+    "description": "Efecto de rareza."
+  },
+  "rarityEffectPulse": "Pulso",
+  "@rarityEffectPulse": {
+    "description": "Efecto de rareza."
   }
 }

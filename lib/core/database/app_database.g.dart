@@ -2217,6 +2217,57 @@ class $CollectionProjectsTable extends CollectionProjects
       'REFERENCES media_assets (id) ON DELETE SET NULL',
     ),
   );
+  static const VerificationMeta _draftCoverColorIdMeta = const VerificationMeta(
+    'draftCoverColorId',
+  );
+  @override
+  late final GeneratedColumn<String> draftCoverColorId =
+      GeneratedColumn<String>(
+        'draft_cover_color_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(
+          DraftCoverCatalog.defaultBackgroundColorId,
+        ),
+      );
+  static const VerificationMeta _draftCoverAccentColorIdMeta =
+      const VerificationMeta('draftCoverAccentColorId');
+  @override
+  late final GeneratedColumn<String> draftCoverAccentColorId =
+      GeneratedColumn<String>(
+        'draft_cover_accent_color_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(DraftCoverCatalog.defaultAccentColorId),
+      );
+  static const VerificationMeta _draftCoverIconIdMeta = const VerificationMeta(
+    'draftCoverIconId',
+  );
+  @override
+  late final GeneratedColumn<String> draftCoverIconId = GeneratedColumn<String>(
+    'draft_cover_icon_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(DraftCoverCatalog.defaultIconId),
+  );
+  static const VerificationMeta _draftCoverPatternIdMeta =
+      const VerificationMeta('draftCoverPatternId');
+  @override
+  late final GeneratedColumn<String> draftCoverPatternId =
+      GeneratedColumn<String>(
+        'draft_cover_pattern_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(DraftCoverCatalog.defaultPatternId),
+      );
   @override
   late final GeneratedColumnWithTypeConverter<CollectionProjectStatus, String>
   status =
@@ -2308,6 +2359,10 @@ class $CollectionProjectsTable extends CollectionProjects
     author,
     description,
     coverAssetId,
+    draftCoverColorId,
+    draftCoverAccentColorId,
+    draftCoverIconId,
+    draftCoverPatternId,
     status,
     createdAtUtc,
     updatedAtUtc,
@@ -2373,6 +2428,42 @@ class $CollectionProjectsTable extends CollectionProjects
         coverAssetId.isAcceptableOrUnknown(
           data['cover_asset_id']!,
           _coverAssetIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('draft_cover_color_id')) {
+      context.handle(
+        _draftCoverColorIdMeta,
+        draftCoverColorId.isAcceptableOrUnknown(
+          data['draft_cover_color_id']!,
+          _draftCoverColorIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('draft_cover_accent_color_id')) {
+      context.handle(
+        _draftCoverAccentColorIdMeta,
+        draftCoverAccentColorId.isAcceptableOrUnknown(
+          data['draft_cover_accent_color_id']!,
+          _draftCoverAccentColorIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('draft_cover_icon_id')) {
+      context.handle(
+        _draftCoverIconIdMeta,
+        draftCoverIconId.isAcceptableOrUnknown(
+          data['draft_cover_icon_id']!,
+          _draftCoverIconIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('draft_cover_pattern_id')) {
+      context.handle(
+        _draftCoverPatternIdMeta,
+        draftCoverPatternId.isAcceptableOrUnknown(
+          data['draft_cover_pattern_id']!,
+          _draftCoverPatternIdMeta,
         ),
       );
     }
@@ -2471,6 +2562,22 @@ class $CollectionProjectsTable extends CollectionProjects
         DriftSqlType.string,
         data['${effectivePrefix}cover_asset_id'],
       ),
+      draftCoverColorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}draft_cover_color_id'],
+      )!,
+      draftCoverAccentColorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}draft_cover_accent_color_id'],
+      )!,
+      draftCoverIconId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}draft_cover_icon_id'],
+      )!,
+      draftCoverPatternId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}draft_cover_pattern_id'],
+      )!,
       status: $CollectionProjectsTable.$converterstatus.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -2521,6 +2628,10 @@ class CollectionProjectRow extends DataClass
   final String? author;
   final String? description;
   final String? coverAssetId;
+  final String draftCoverColorId;
+  final String draftCoverAccentColorId;
+  final String draftCoverIconId;
+  final String draftCoverPatternId;
   final CollectionProjectStatus status;
   final DateTime createdAtUtc;
   final DateTime updatedAtUtc;
@@ -2535,6 +2646,10 @@ class CollectionProjectRow extends DataClass
     this.author,
     this.description,
     this.coverAssetId,
+    required this.draftCoverColorId,
+    required this.draftCoverAccentColorId,
+    required this.draftCoverIconId,
+    required this.draftCoverPatternId,
     required this.status,
     required this.createdAtUtc,
     required this.updatedAtUtc,
@@ -2558,6 +2673,12 @@ class CollectionProjectRow extends DataClass
     if (!nullToAbsent || coverAssetId != null) {
       map['cover_asset_id'] = Variable<String>(coverAssetId);
     }
+    map['draft_cover_color_id'] = Variable<String>(draftCoverColorId);
+    map['draft_cover_accent_color_id'] = Variable<String>(
+      draftCoverAccentColorId,
+    );
+    map['draft_cover_icon_id'] = Variable<String>(draftCoverIconId);
+    map['draft_cover_pattern_id'] = Variable<String>(draftCoverPatternId);
     {
       map['status'] = Variable<String>(
         $CollectionProjectsTable.$converterstatus.toSql(status),
@@ -2592,6 +2713,10 @@ class CollectionProjectRow extends DataClass
       coverAssetId: coverAssetId == null && nullToAbsent
           ? const Value.absent()
           : Value(coverAssetId),
+      draftCoverColorId: Value(draftCoverColorId),
+      draftCoverAccentColorId: Value(draftCoverAccentColorId),
+      draftCoverIconId: Value(draftCoverIconId),
+      draftCoverPatternId: Value(draftCoverPatternId),
       status: Value(status),
       createdAtUtc: Value(createdAtUtc),
       updatedAtUtc: Value(updatedAtUtc),
@@ -2618,6 +2743,14 @@ class CollectionProjectRow extends DataClass
       author: serializer.fromJson<String?>(json['author']),
       description: serializer.fromJson<String?>(json['description']),
       coverAssetId: serializer.fromJson<String?>(json['coverAssetId']),
+      draftCoverColorId: serializer.fromJson<String>(json['draftCoverColorId']),
+      draftCoverAccentColorId: serializer.fromJson<String>(
+        json['draftCoverAccentColorId'],
+      ),
+      draftCoverIconId: serializer.fromJson<String>(json['draftCoverIconId']),
+      draftCoverPatternId: serializer.fromJson<String>(
+        json['draftCoverPatternId'],
+      ),
       status: serializer.fromJson<CollectionProjectStatus>(json['status']),
       createdAtUtc: serializer.fromJson<DateTime>(json['createdAtUtc']),
       updatedAtUtc: serializer.fromJson<DateTime>(json['updatedAtUtc']),
@@ -2641,6 +2774,12 @@ class CollectionProjectRow extends DataClass
       'author': serializer.toJson<String?>(author),
       'description': serializer.toJson<String?>(description),
       'coverAssetId': serializer.toJson<String?>(coverAssetId),
+      'draftCoverColorId': serializer.toJson<String>(draftCoverColorId),
+      'draftCoverAccentColorId': serializer.toJson<String>(
+        draftCoverAccentColorId,
+      ),
+      'draftCoverIconId': serializer.toJson<String>(draftCoverIconId),
+      'draftCoverPatternId': serializer.toJson<String>(draftCoverPatternId),
       'status': serializer.toJson<CollectionProjectStatus>(status),
       'createdAtUtc': serializer.toJson<DateTime>(createdAtUtc),
       'updatedAtUtc': serializer.toJson<DateTime>(updatedAtUtc),
@@ -2660,6 +2799,10 @@ class CollectionProjectRow extends DataClass
     Value<String?> author = const Value.absent(),
     Value<String?> description = const Value.absent(),
     Value<String?> coverAssetId = const Value.absent(),
+    String? draftCoverColorId,
+    String? draftCoverAccentColorId,
+    String? draftCoverIconId,
+    String? draftCoverPatternId,
     CollectionProjectStatus? status,
     DateTime? createdAtUtc,
     DateTime? updatedAtUtc,
@@ -2674,6 +2817,11 @@ class CollectionProjectRow extends DataClass
     author: author.present ? author.value : this.author,
     description: description.present ? description.value : this.description,
     coverAssetId: coverAssetId.present ? coverAssetId.value : this.coverAssetId,
+    draftCoverColorId: draftCoverColorId ?? this.draftCoverColorId,
+    draftCoverAccentColorId:
+        draftCoverAccentColorId ?? this.draftCoverAccentColorId,
+    draftCoverIconId: draftCoverIconId ?? this.draftCoverIconId,
+    draftCoverPatternId: draftCoverPatternId ?? this.draftCoverPatternId,
     status: status ?? this.status,
     createdAtUtc: createdAtUtc ?? this.createdAtUtc,
     updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
@@ -2700,6 +2848,18 @@ class CollectionProjectRow extends DataClass
       coverAssetId: data.coverAssetId.present
           ? data.coverAssetId.value
           : this.coverAssetId,
+      draftCoverColorId: data.draftCoverColorId.present
+          ? data.draftCoverColorId.value
+          : this.draftCoverColorId,
+      draftCoverAccentColorId: data.draftCoverAccentColorId.present
+          ? data.draftCoverAccentColorId.value
+          : this.draftCoverAccentColorId,
+      draftCoverIconId: data.draftCoverIconId.present
+          ? data.draftCoverIconId.value
+          : this.draftCoverIconId,
+      draftCoverPatternId: data.draftCoverPatternId.present
+          ? data.draftCoverPatternId.value
+          : this.draftCoverPatternId,
       status: data.status.present ? data.status.value : this.status,
       createdAtUtc: data.createdAtUtc.present
           ? data.createdAtUtc.value
@@ -2731,6 +2891,10 @@ class CollectionProjectRow extends DataClass
           ..write('author: $author, ')
           ..write('description: $description, ')
           ..write('coverAssetId: $coverAssetId, ')
+          ..write('draftCoverColorId: $draftCoverColorId, ')
+          ..write('draftCoverAccentColorId: $draftCoverAccentColorId, ')
+          ..write('draftCoverIconId: $draftCoverIconId, ')
+          ..write('draftCoverPatternId: $draftCoverPatternId, ')
           ..write('status: $status, ')
           ..write('createdAtUtc: $createdAtUtc, ')
           ..write('updatedAtUtc: $updatedAtUtc, ')
@@ -2750,6 +2914,10 @@ class CollectionProjectRow extends DataClass
     author,
     description,
     coverAssetId,
+    draftCoverColorId,
+    draftCoverAccentColorId,
+    draftCoverIconId,
+    draftCoverPatternId,
     status,
     createdAtUtc,
     updatedAtUtc,
@@ -2768,6 +2936,10 @@ class CollectionProjectRow extends DataClass
           other.author == this.author &&
           other.description == this.description &&
           other.coverAssetId == this.coverAssetId &&
+          other.draftCoverColorId == this.draftCoverColorId &&
+          other.draftCoverAccentColorId == this.draftCoverAccentColorId &&
+          other.draftCoverIconId == this.draftCoverIconId &&
+          other.draftCoverPatternId == this.draftCoverPatternId &&
           other.status == this.status &&
           other.createdAtUtc == this.createdAtUtc &&
           other.updatedAtUtc == this.updatedAtUtc &&
@@ -2785,6 +2957,10 @@ class CollectionProjectsCompanion
   final Value<String?> author;
   final Value<String?> description;
   final Value<String?> coverAssetId;
+  final Value<String> draftCoverColorId;
+  final Value<String> draftCoverAccentColorId;
+  final Value<String> draftCoverIconId;
+  final Value<String> draftCoverPatternId;
   final Value<CollectionProjectStatus> status;
   final Value<DateTime> createdAtUtc;
   final Value<DateTime> updatedAtUtc;
@@ -2800,6 +2976,10 @@ class CollectionProjectsCompanion
     this.author = const Value.absent(),
     this.description = const Value.absent(),
     this.coverAssetId = const Value.absent(),
+    this.draftCoverColorId = const Value.absent(),
+    this.draftCoverAccentColorId = const Value.absent(),
+    this.draftCoverIconId = const Value.absent(),
+    this.draftCoverPatternId = const Value.absent(),
     this.status = const Value.absent(),
     this.createdAtUtc = const Value.absent(),
     this.updatedAtUtc = const Value.absent(),
@@ -2816,6 +2996,10 @@ class CollectionProjectsCompanion
     this.author = const Value.absent(),
     this.description = const Value.absent(),
     this.coverAssetId = const Value.absent(),
+    this.draftCoverColorId = const Value.absent(),
+    this.draftCoverAccentColorId = const Value.absent(),
+    this.draftCoverIconId = const Value.absent(),
+    this.draftCoverPatternId = const Value.absent(),
     required CollectionProjectStatus status,
     required DateTime createdAtUtc,
     required DateTime updatedAtUtc,
@@ -2839,6 +3023,10 @@ class CollectionProjectsCompanion
     Expression<String>? author,
     Expression<String>? description,
     Expression<String>? coverAssetId,
+    Expression<String>? draftCoverColorId,
+    Expression<String>? draftCoverAccentColorId,
+    Expression<String>? draftCoverIconId,
+    Expression<String>? draftCoverPatternId,
     Expression<String>? status,
     Expression<DateTime>? createdAtUtc,
     Expression<DateTime>? updatedAtUtc,
@@ -2855,6 +3043,12 @@ class CollectionProjectsCompanion
       if (author != null) 'author': author,
       if (description != null) 'description': description,
       if (coverAssetId != null) 'cover_asset_id': coverAssetId,
+      if (draftCoverColorId != null) 'draft_cover_color_id': draftCoverColorId,
+      if (draftCoverAccentColorId != null)
+        'draft_cover_accent_color_id': draftCoverAccentColorId,
+      if (draftCoverIconId != null) 'draft_cover_icon_id': draftCoverIconId,
+      if (draftCoverPatternId != null)
+        'draft_cover_pattern_id': draftCoverPatternId,
       if (status != null) 'status': status,
       if (createdAtUtc != null) 'created_at_utc': createdAtUtc,
       if (updatedAtUtc != null) 'updated_at_utc': updatedAtUtc,
@@ -2875,6 +3069,10 @@ class CollectionProjectsCompanion
     Value<String?>? author,
     Value<String?>? description,
     Value<String?>? coverAssetId,
+    Value<String>? draftCoverColorId,
+    Value<String>? draftCoverAccentColorId,
+    Value<String>? draftCoverIconId,
+    Value<String>? draftCoverPatternId,
     Value<CollectionProjectStatus>? status,
     Value<DateTime>? createdAtUtc,
     Value<DateTime>? updatedAtUtc,
@@ -2891,6 +3089,11 @@ class CollectionProjectsCompanion
       author: author ?? this.author,
       description: description ?? this.description,
       coverAssetId: coverAssetId ?? this.coverAssetId,
+      draftCoverColorId: draftCoverColorId ?? this.draftCoverColorId,
+      draftCoverAccentColorId:
+          draftCoverAccentColorId ?? this.draftCoverAccentColorId,
+      draftCoverIconId: draftCoverIconId ?? this.draftCoverIconId,
+      draftCoverPatternId: draftCoverPatternId ?? this.draftCoverPatternId,
       status: status ?? this.status,
       createdAtUtc: createdAtUtc ?? this.createdAtUtc,
       updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
@@ -2924,6 +3127,22 @@ class CollectionProjectsCompanion
     }
     if (coverAssetId.present) {
       map['cover_asset_id'] = Variable<String>(coverAssetId.value);
+    }
+    if (draftCoverColorId.present) {
+      map['draft_cover_color_id'] = Variable<String>(draftCoverColorId.value);
+    }
+    if (draftCoverAccentColorId.present) {
+      map['draft_cover_accent_color_id'] = Variable<String>(
+        draftCoverAccentColorId.value,
+      );
+    }
+    if (draftCoverIconId.present) {
+      map['draft_cover_icon_id'] = Variable<String>(draftCoverIconId.value);
+    }
+    if (draftCoverPatternId.present) {
+      map['draft_cover_pattern_id'] = Variable<String>(
+        draftCoverPatternId.value,
+      );
     }
     if (status.present) {
       map['status'] = Variable<String>(
@@ -2967,6 +3186,10 @@ class CollectionProjectsCompanion
           ..write('author: $author, ')
           ..write('description: $description, ')
           ..write('coverAssetId: $coverAssetId, ')
+          ..write('draftCoverColorId: $draftCoverColorId, ')
+          ..write('draftCoverAccentColorId: $draftCoverAccentColorId, ')
+          ..write('draftCoverIconId: $draftCoverIconId, ')
+          ..write('draftCoverPatternId: $draftCoverPatternId, ')
           ..write('status: $status, ')
           ..write('createdAtUtc: $createdAtUtc, ')
           ..write('updatedAtUtc: $updatedAtUtc, ')
@@ -12665,6 +12888,10 @@ typedef $$CollectionProjectsTableCreateCompanionBuilder =
       Value<String?> author,
       Value<String?> description,
       Value<String?> coverAssetId,
+      Value<String> draftCoverColorId,
+      Value<String> draftCoverAccentColorId,
+      Value<String> draftCoverIconId,
+      Value<String> draftCoverPatternId,
       required CollectionProjectStatus status,
       required DateTime createdAtUtc,
       required DateTime updatedAtUtc,
@@ -12682,6 +12909,10 @@ typedef $$CollectionProjectsTableUpdateCompanionBuilder =
       Value<String?> author,
       Value<String?> description,
       Value<String?> coverAssetId,
+      Value<String> draftCoverColorId,
+      Value<String> draftCoverAccentColorId,
+      Value<String> draftCoverIconId,
+      Value<String> draftCoverPatternId,
       Value<CollectionProjectStatus> status,
       Value<DateTime> createdAtUtc,
       Value<DateTime> updatedAtUtc,
@@ -12794,6 +13025,26 @@ class $$CollectionProjectsTableFilterComposer
 
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get draftCoverColorId => $composableBuilder(
+    column: $table.draftCoverColorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get draftCoverAccentColorId => $composableBuilder(
+    column: $table.draftCoverAccentColorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get draftCoverIconId => $composableBuilder(
+    column: $table.draftCoverIconId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get draftCoverPatternId => $composableBuilder(
+    column: $table.draftCoverPatternId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12931,6 +13182,26 @@ class $$CollectionProjectsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get draftCoverColorId => $composableBuilder(
+    column: $table.draftCoverColorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get draftCoverAccentColorId => $composableBuilder(
+    column: $table.draftCoverAccentColorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get draftCoverIconId => $composableBuilder(
+    column: $table.draftCoverIconId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get draftCoverPatternId => $composableBuilder(
+    column: $table.draftCoverPatternId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -13051,6 +13322,26 @@ class $$CollectionProjectsTableAnnotationComposer
 
   GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get draftCoverColorId => $composableBuilder(
+    column: $table.draftCoverColorId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get draftCoverAccentColorId => $composableBuilder(
+    column: $table.draftCoverAccentColorId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get draftCoverIconId => $composableBuilder(
+    column: $table.draftCoverIconId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get draftCoverPatternId => $composableBuilder(
+    column: $table.draftCoverPatternId,
     builder: (column) => column,
   );
 
@@ -13191,6 +13482,10 @@ class $$CollectionProjectsTableTableManager
                 Value<String?> author = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<String?> coverAssetId = const Value.absent(),
+                Value<String> draftCoverColorId = const Value.absent(),
+                Value<String> draftCoverAccentColorId = const Value.absent(),
+                Value<String> draftCoverIconId = const Value.absent(),
+                Value<String> draftCoverPatternId = const Value.absent(),
                 Value<CollectionProjectStatus> status = const Value.absent(),
                 Value<DateTime> createdAtUtc = const Value.absent(),
                 Value<DateTime> updatedAtUtc = const Value.absent(),
@@ -13206,6 +13501,10 @@ class $$CollectionProjectsTableTableManager
                 author: author,
                 description: description,
                 coverAssetId: coverAssetId,
+                draftCoverColorId: draftCoverColorId,
+                draftCoverAccentColorId: draftCoverAccentColorId,
+                draftCoverIconId: draftCoverIconId,
+                draftCoverPatternId: draftCoverPatternId,
                 status: status,
                 createdAtUtc: createdAtUtc,
                 updatedAtUtc: updatedAtUtc,
@@ -13223,6 +13522,10 @@ class $$CollectionProjectsTableTableManager
                 Value<String?> author = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<String?> coverAssetId = const Value.absent(),
+                Value<String> draftCoverColorId = const Value.absent(),
+                Value<String> draftCoverAccentColorId = const Value.absent(),
+                Value<String> draftCoverIconId = const Value.absent(),
+                Value<String> draftCoverPatternId = const Value.absent(),
                 required CollectionProjectStatus status,
                 required DateTime createdAtUtc,
                 required DateTime updatedAtUtc,
@@ -13238,6 +13541,10 @@ class $$CollectionProjectsTableTableManager
                 author: author,
                 description: description,
                 coverAssetId: coverAssetId,
+                draftCoverColorId: draftCoverColorId,
+                draftCoverAccentColorId: draftCoverAccentColorId,
+                draftCoverIconId: draftCoverIconId,
+                draftCoverPatternId: draftCoverPatternId,
                 status: status,
                 createdAtUtc: createdAtUtc,
                 updatedAtUtc: updatedAtUtc,
