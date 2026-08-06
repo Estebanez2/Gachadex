@@ -56,13 +56,33 @@ No incluye:
 
 ## Fase 3 - Creador sin multimedia avanzada
 
-Objetivo: definir una coleccion completa con imagenes ya persistidas como rutas,
-sin exportar ni jugar todavia.
+Estado: implementada en la rama `phase/03-collection-drafts`.
 
-Incluye datos generales, rarezas, cartas con imagen normalizada en fases
-posteriores, campos comicos, plantillas propias, tipos de sobre, pools,
-probabilidades, reglas de slots, autosave de borradores y validaciones de
-finalizacion.
+Objetivo de esta entrega: crear y recuperar borradores de coleccion, editar
+informacion general, usar una portada provisional generada en Flutter y gestionar
+rarezas sin multimedia avanzada.
+
+Incluye:
+
+- Biblioteca real de borradores en `/create`.
+- Creacion atomica de borrador y version de contenido.
+- Editor en `/create/project/:projectId`.
+- Nombre, autor y descripcion con validaciones y contadores.
+- Portada provisional por catalogos de color, acento, icono y patron.
+- Autosave con debounce, estados de guardado y recuperacion tras reinicio.
+- Estado incompleto por secciones de esta fase.
+- CRUD de rarezas con catalogos visuales propios y valor de venta.
+- Reordenacion de rarezas y proteccion al borrar si existen cartas asociadas.
+- Borrado de borrador con confirmacion.
+- Tests de validacion, controlador, widgets, repositorios y persistencia en
+  archivo.
+
+No incluye:
+
+- Creacion de cartas.
+- Seleccion, normalizacion o reproduccion de fotos/videos.
+- Tipos de sobre, pools, probabilidades ni reglas de slots.
+- Finalizacion, instalacion o juego de colecciones desde la UI.
 
 Depende de: fase 2.
 

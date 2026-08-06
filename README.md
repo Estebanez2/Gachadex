@@ -7,14 +7,15 @@ dinero real.
 
 ## Estado actual
 
-Fase 2: modelo de dominio y persistencia local.
+Fase 3: borradores de coleccion, informacion general y rarezas.
 
-Incluye la base tecnica de Fase 1 mas dominio inicial, UUID tipados, Drift,
-SQLite, esquema version 1, migraciones preparadas, repositorios, DAOs, mappers,
-providers Riverpod y tests de dominio/base/repositorios.
+Incluye la base tecnica de Fase 1, el dominio y persistencia local de Fase 2,
+schema version 2, biblioteca de borradores, creacion atomica de borradores,
+editor con autosave, portada provisional generada en Flutter y CRUD/reordenacion
+de rarezas.
 
-No incluye todavia formularios completos, selector de fotos/videos, apertura
-visual de sobres, probabilidades ejecutables, temporizadores reales, economia
+No incluye todavia creacion de cartas, selector de fotos/videos, tipos de sobre,
+apertura visual, probabilidades ejecutables, temporizadores reales, economia
 visible, notificaciones, importacion ni exportacion.
 
 ## Requisitos
@@ -82,6 +83,14 @@ Selecciona un dispositivo Android concreto:
 flutter run -d <device-id>
 ```
 
+Flujo manual de Fase 3:
+
+1. Abrir la pestana `Crear`.
+2. Crear una coleccion nueva.
+3. Editar nombre, autor, descripcion y portada provisional.
+4. Entrar en `Rarezas`, anadir varias rarezas y reordenarlas.
+5. Cerrar y volver a abrir la app para comprobar que el borrador persiste.
+
 ## Analisis y pruebas
 
 ```bash
@@ -112,6 +121,7 @@ archivos temporales aislados.
 - [Especificacion funcional](docs/PRODUCT_SPEC.md)
 - [Arquitectura](docs/ARCHITECTURE.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Creador de borradores](docs/DRAFT_CREATOR.md)
 - [Esquema de base de datos](docs/DATABASE_SCHEMA.md)
 - [Analisis de referencias](docs/REFERENCE_ANALYSIS.md)
 - [Dependencias](docs/DEPENDENCIES.md)

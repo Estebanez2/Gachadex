@@ -8,6 +8,10 @@ abstract final class DomainValidation {
     return trimmed;
   }
 
+  static String trimmed(String value) {
+    return value.trim();
+  }
+
   static String? optionalTrimmed(String? value) {
     final trimmed = value?.trim();
     if (trimmed == null || trimmed.isEmpty) {

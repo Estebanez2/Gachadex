@@ -1,6 +1,7 @@
 import '../../../../core/domain/domain_enums.dart';
 import '../../../../core/domain/domain_validation.dart';
 import '../../../../core/identifiers/entity_id.dart';
+import '../value_objects/draft_cover_style.dart';
 
 final class CollectionProject {
   CollectionProject({
@@ -10,6 +11,7 @@ final class CollectionProject {
     required String? author,
     required String? description,
     required this.coverAssetId,
+    DraftCoverStyle? draftCoverStyle,
     required this.status,
     required DateTime createdAtUtc,
     required DateTime updatedAtUtc,
@@ -17,9 +19,10 @@ final class CollectionProject {
     required this.currentContentVersionId,
     required this.mainPackTypeId,
     int startingPackCount = 3,
-  }) : name = DomainValidation.requireTrimmedNotEmpty(name, 'name'),
+  }) : name = DomainValidation.trimmed(name),
        author = DomainValidation.optionalTrimmed(author),
        description = DomainValidation.optionalTrimmed(description),
+       draftCoverStyle = draftCoverStyle ?? DraftCoverStyle.defaultStyle(),
        createdAtUtc = DomainValidation.requireUtc(createdAtUtc, 'createdAtUtc'),
        updatedAtUtc = DomainValidation.requireUtc(updatedAtUtc, 'updatedAtUtc'),
        currentContentVersion = DomainValidation.requirePositive(
@@ -37,6 +40,7 @@ final class CollectionProject {
   final String? author;
   final String? description;
   final MediaAssetId? coverAssetId;
+  final DraftCoverStyle draftCoverStyle;
   final CollectionProjectStatus status;
   final DateTime createdAtUtc;
   final DateTime updatedAtUtc;
@@ -52,6 +56,7 @@ final class CollectionProject {
     String? author,
     String? description,
     MediaAssetId? coverAssetId,
+    DraftCoverStyle? draftCoverStyle,
     CollectionProjectStatus? status,
     DateTime? updatedAtUtc,
     int? currentContentVersion,
@@ -66,6 +71,7 @@ final class CollectionProject {
       author: author ?? this.author,
       description: description ?? this.description,
       coverAssetId: coverAssetId ?? this.coverAssetId,
+      draftCoverStyle: draftCoverStyle ?? this.draftCoverStyle,
       status: status ?? this.status,
       createdAtUtc: createdAtUtc,
       updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,

@@ -21,7 +21,7 @@ void main() {
       await database.close();
     });
 
-    test('creates schema v1 with expected tables and foreign keys', () async {
+    test('creates schema v2 with expected tables and foreign keys', () async {
       final tables = await database
           .customSelect(
             "SELECT name FROM sqlite_master WHERE type = 'table' "
@@ -51,12 +51,24 @@ void main() {
           'coin_transactions',
         ]),
       );
-      expect(database.schemaVersion, 1);
+      expect(database.schemaVersion, 2);
 
       final foreignKeys = await database
           .customSelect('PRAGMA foreign_keys')
           .get();
       expect(foreignKeys.single.read<int>('foreign_keys'), 1);
+    });
+
+    test('creates draft cover columns with safe defaults', () async {
+      final columns = await database
+          .customSelect('PRAGMA table_info(collection_projects)')
+          .map((row) => row.read<String>('name'))
+          .get();
+
+      expect(columns, contains('draft_cover_color_id'));
+      expect(columns, contains('draft_cover_accent_color_id'));
+      expect(columns, contains('draft_cover_icon_id'));
+      expect(columns, contains('draft_cover_pattern_id'));
     });
 
     test('preserves UTC dates through mappers', () async {

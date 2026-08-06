@@ -10,35 +10,37 @@ void main() {
   ) async {
     await pumpGachadexApp(tester);
 
-    expect(_selectedIndex(tester), 0);
+    try {
+      expect(_selectedIndex(tester), 0);
 
-    await tester.tap(navigationLabel('Colecciones'));
-    await tester.pumpAndSettle();
-    expect(find.text('Todavía no hay colecciones.'), findsOneWidget);
-    expect(_selectedIndex(tester), 1);
+      await tester.tap(navigationLabel('Colecciones'));
+      await _pumpUntilText(tester, 'Todavía no hay colecciones.');
+      expect(find.text('Todavía no hay colecciones.'), findsOneWidget);
+      expect(_selectedIndex(tester), 1);
 
-    await tester.tap(navigationLabel('Crear'));
-    await tester.pumpAndSettle();
-    expect(
-      find.text(
-        'Aquí se crearán colecciones cuando la fase de creador esté lista.',
-      ),
-      findsOneWidget,
-    );
-    expect(_selectedIndex(tester), 2);
+      await tester.tap(navigationLabel('Crear'));
+      await _pumpUntilText(tester, 'Todavía no has creado ninguna colección');
+      expect(
+        find.text('Todavía no has creado ninguna colección'),
+        findsOneWidget,
+      );
+      expect(_selectedIndex(tester), 2);
 
-    await tester.tap(navigationLabel('Ajustes'));
-    await tester.pumpAndSettle();
-    expect(find.text('Información de la aplicación'), findsOneWidget);
-    expect(_selectedIndex(tester), 3);
+      await tester.tap(navigationLabel('Ajustes'));
+      await _pumpUntilText(tester, 'Información de la aplicación');
+      expect(find.text('Información de la aplicación'), findsOneWidget);
+      expect(_selectedIndex(tester), 3);
 
-    await tester.tap(navigationLabel('Inicio'));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('Aquí aparecerán los sobres disponibles.'),
-      findsOneWidget,
-    );
-    expect(_selectedIndex(tester), 0);
+      await tester.tap(navigationLabel('Inicio'));
+      await _pumpUntilText(tester, 'Aquí aparecerán los sobres disponibles.');
+      expect(
+        find.text('Aquí aparecerán los sobres disponibles.'),
+        findsOneWidget,
+      );
+      expect(_selectedIndex(tester), 0);
+    } finally {
+      await disposeGachadexApp(tester);
+    }
   });
 
   testWidgets('controlled error route displays AppErrorView safely', (
@@ -47,7 +49,7 @@ void main() {
     await pumpGachadexApp(tester);
 
     await tester.tap(find.text('Ver error controlado'));
-    await tester.pumpAndSettle();
+    await _pumpUntilText(tester, 'No se ha podido mostrar esta pantalla.');
 
     expect(find.byType(AppErrorView), findsOneWidget);
     expect(find.text('No se ha podido mostrar esta pantalla.'), findsOneWidget);
@@ -79,4 +81,14 @@ int _selectedIndex(WidgetTester tester) {
     find.byType(NavigationBar),
   );
   return navigationBar.selectedIndex;
+}
+
+Future<void> _pumpUntilText(WidgetTester tester, String text) async {
+  for (var attempt = 0; attempt < 20; attempt += 1) {
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    if (find.text(text).evaluate().isNotEmpty) {
+      return;
+    }
+  }
 }

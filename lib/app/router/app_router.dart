@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/widgets/app_error_view.dart';
 import '../../core/widgets/app_scaffold.dart';
+import '../../core/identifiers/entity_id.dart';
 import '../../features/collections/presentation/collections_page.dart';
+import '../../features/collection_creator/presentation/pages/collection_draft_editor_page.dart';
+import '../../features/collection_creator/presentation/pages/create_draft_page.dart';
 import '../../features/controlled_error/presentation/controlled_error_page.dart';
 import '../../features/creator/presentation/creator_page.dart';
 import '../../features/home/presentation/home_page.dart';
@@ -98,6 +101,31 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
+        path: AppRoutes.createNewPath,
+        name: AppRoutes.createNewName,
+        builder: (context, state) => const CreateDraftPage(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '${AppRoutes.createProjectPathPrefix}/:projectId',
+        name: AppRoutes.createProjectName,
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId'];
+          if (projectId == null) {
+            return _RouteError(description: context.l10n.projectNotFound);
+          }
+
+          try {
+            return CollectionDraftEditorPage(
+              projectId: CollectionProjectId(projectId),
+            );
+          } on FormatException {
+            return _RouteError(description: context.l10n.projectNotFound);
+          }
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.controlledErrorPath,
         name: AppRoutes.controlledErrorName,
         builder: (context, state) => const ControlledErrorPage(),
@@ -116,4 +144,25 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
       );
     },
   );
+}
+
+class _RouteError extends StatelessWidget {
+  const _RouteError({required this.description});
+
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.screenErrorTitle)),
+      body: SafeArea(
+        child: AppErrorView(
+          title: l10n.screenErrorTitle,
+          description: description,
+        ),
+      ),
+    );
+  }
 }

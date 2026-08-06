@@ -9,6 +9,13 @@ abstract final class AppRoutes {
 
   static const createName = 'create';
   static const createPath = '/create';
+  static const createNewName = 'create-new';
+  static const createNewPath = '/create/new';
+  static const createProjectName = 'create-project';
+  static const createProjectPathPrefix = '/create/project';
+  static String createProjectPath(String projectId) {
+    return '$createProjectPathPrefix/$projectId';
+  }
 
   static const settingsName = 'settings';
   static const settingsPath = '/settings';

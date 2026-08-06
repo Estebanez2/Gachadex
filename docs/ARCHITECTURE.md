@@ -2,8 +2,9 @@
 
 Fecha: 2026-08-05
 
-Este documento describe el estado tecnico tras la Fase 2: modelo de dominio y
-persistencia local. La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`.
+Este documento describe el estado tecnico tras la Fase 3: borradores de
+coleccion, informacion general y rarezas. La fuente funcional sigue siendo
+`docs/PRODUCT_SPEC.md`.
 
 ## Principios
 
@@ -14,7 +15,8 @@ persistencia local. La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`.
 - Las fechas de dominio se validan como UTC.
 - SQLite guarda metadatos y rutas relativas, nunca binarios multimedia.
 - La presentacion no importa clases generadas por Drift.
-- Las pantallas de Fase 1 no crean datos reales ni muestran funciones incompletas.
+- La pantalla Crear manipula borradores reales y conserva el progreso local.
+- La Fase 3 usa portadas generadas en Flutter; no crea activos multimedia.
 
 ## Capas
 
@@ -29,9 +31,9 @@ lib/
     time/                    Clock de produccion y FakeClock.
     value_objects/           Rutas multimedia relativas.
   features/
-    collection_creator/      Proyecto editable y versiones de contenido.
+    collection_creator/      Borradores, portadas generadas y versiones.
     collections/             Colecciones instaladas.
-    rarities/                Rarezas.
+    rarities/                Rarezas y catalogos visuales.
     cards/                   Cartas, campos y activos multimedia.
     packs/                   Sobres, pools, reglas y aperturas.
     album/                   Cartas obtenidas y progreso.
@@ -54,24 +56,27 @@ por `ProviderScope` y la cierra con `ref.onDispose`.
 ## Migraciones
 
 `currentDatabaseSchemaVersion` vive en
-`lib/core/database/migrations/schema_versions.dart` y actualmente vale `1`.
+`lib/core/database/migrations/schema_versions.dart` y actualmente vale `2`.
 
 `createMigrationStrategy`:
 
 - Crea todas las tablas en una instalacion nueva.
 - Activa `PRAGMA foreign_keys = ON` en cada apertura.
 - Registra apertura y migraciones con `AppLogger`.
-- Rechaza upgrades no implementados con un mensaje seguro hasta que exista v2.
+- Migra de v1 a v2 anadiendo la configuracion de portada provisional a
+  `collection_projects`.
+- Rechaza upgrades no implementados con un mensaje seguro.
 
-Para anadir v2 se debe subir `currentDatabaseSchemaVersion`, implementar el
-bloque `onUpgrade` para `from == 1`, documentar la decision y cubrir la
+Para anadir una nueva version se debe subir `currentDatabaseSchemaVersion`,
+implementar una rama explicita en `onUpgrade`, documentar el cambio y cubrir la
 migracion con tests antes de modificar datos de usuario.
 
 ## Dominio
 
 El dominio no importa Drift, SQLite, companions ni filas generadas. Contiene:
 
-- `CollectionProject` y `ContentVersion` para contenido editable/versionado.
+- `CollectionProject`, `ContentVersion` y `DraftCoverStyle` para contenido
+  editable/versionado.
 - `InstalledCollection` para una coleccion instalada.
 - `Rarity`, `Card`, `CardFieldValue` y `MediaAsset`.
 - `PackType`, `PackCardPoolEntry`, `PackSlotRule`,
@@ -79,9 +84,28 @@ El dominio no importa Drift, SQLite, companions ni filas generadas. Contiene:
   `PackOpeningCard`.
 - `OwnedCard` y `CoinTransaction`.
 
-Las reglas numericas, UUID, rutas relativas y fechas UTC se validan al construir
-entidades. Las reglas entre tablas se validan en repositorios cuando SQLite no
-puede expresarlas sin sobreacoplar el esquema.
+Las reglas numericas, UUID, rutas relativas, catalogos visuales y fechas UTC se
+validan al construir entidades o antes de guardar. Las reglas entre tablas se
+validan en repositorios cuando SQLite no puede expresarlas sin sobreacoplar el
+esquema.
+
+## Creador de borradores
+
+La Fase 3 introduce un flujo real bajo `/create`:
+
+- `/create` lista borradores ordenados por `updatedAtUtc` descendente.
+- `/create/new` crea un borrador atomico con version 1 y redirige al editor.
+- `/create/project/:projectId` edita informacion general, portada provisional y
+  rarezas.
+
+La presentacion vive en `features/creator/presentation` y
+`features/collection_creator/presentation`. El estado editable se concentra en
+`CollectionDraftController`, que escucha proyecto y rarezas, calcula el estado
+incompleto de la fase y guarda cambios con debounce. Los casos de uso viven en
+`features/collection_creator/application` y `features/rarities/application`.
+
+La portada provisional no usa `MediaAsset`: guarda ids estables de color,
+acento, icono y patron definidos en `DraftCoverCatalog`.
 
 ## Repositorios
 
@@ -98,8 +122,12 @@ Interfaces de dominio:
 Implementaciones Drift:
 
 - Crean borrador + version 1 en transaccion.
+- Observan, actualizan y borran borradores.
+- Actualizan la portada provisional y refrescan `updatedAtUtc`.
 - Validan referencias cruzadas de coleccion y version.
 - Evitan borrar rarezas usadas por cartas.
+- Detectan nombres duplicados de rarezas normalizados.
+- Reordenan rarezas compactando `orderIndex`.
 - Evitan instalar dos veces la misma coleccion/version.
 - Borran progreso local al eliminar una coleccion instalada.
 - No devuelven filas Drift a dominio o presentacion.
@@ -131,18 +159,24 @@ el indice automatico del enum.
 
 Las pruebas usan `NativeDatabase.memory()` para bases aisladas. Hay un test
 adicional con archivo temporal que cierra y reabre SQLite para verificar
-persistencia real. La base del dispositivo no se usa en tests.
+persistencia real de borradores, portada y orden de rarezas. La base del
+dispositivo no se usa en tests.
+
+Los widgets de Fase 3 se prueban con repositorios en memoria para evitar que los
+streams de Drift dejen temporizadores pendientes dentro de `testWidgets`; la
+persistencia real queda cubierta por tests de repositorio y controlador.
 
 ## Limites de la fase
 
-Queda fuera de Fase 2:
+Queda fuera de Fase 3:
 
-- Formularios completos.
+- Creacion de cartas.
 - Selector o procesamiento de fotos/videos.
 - Apertura visual de sobres.
-- Probabilidades ejecutables.
+- Tipos de sobre, pools y probabilidades.
 - Temporizadores reales.
 - Entrega de sobres iniciales.
 - Economia visible.
 - Notificaciones.
 - Importacion/exportacion `.friendpack`.
+- Finalizacion/instalacion de colecciones desde la UI.
