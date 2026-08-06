@@ -84,7 +84,7 @@ void main() {
         CollectionProjectStatus.draft,
       );
       expect(MediaType.fromStorage('video'), MediaType.video);
-      expect(CardFieldType.parse('attackName'), CardFieldType.attackName);
+      expect(CardFieldType.parse('attack'), CardFieldType.attack);
     });
 
     test('reject unknown values instead of silently converting them', () {
@@ -242,7 +242,7 @@ void main() {
         () => CardFieldValue(
           id: CardFieldValueId(testUuid(6)),
           cardId: CardId(testUuid(1)),
-          fieldType: CardFieldType.catchphrase,
+          fieldType: CardFieldType.famousQuote,
           value: '',
           displayOrder: 0,
         ),

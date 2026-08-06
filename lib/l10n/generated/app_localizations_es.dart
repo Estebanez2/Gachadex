@@ -499,4 +499,105 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rarityEffectPulse => 'Pulso';
+
+  @override
+  String get addCard => 'AÃ±adir carta';
+
+  @override
+  String get editCard => 'Editar carta';
+
+  @override
+  String get deleteCard => 'Eliminar carta';
+
+  @override
+  String get selectPhoto => 'Seleccionar fotografÃ­a';
+
+  @override
+  String get changePhoto => 'Cambiar fotografÃ­a';
+
+  @override
+  String get photo => 'FotografÃ­a';
+
+  @override
+  String get processingImage => 'Procesando imagen...';
+
+  @override
+  String get photoRequired => 'La fotografÃ­a es obligatoria';
+
+  @override
+  String get mainData => 'Datos principales';
+
+  @override
+  String get health => 'Vida';
+
+  @override
+  String get collectionNumber => 'NÃºmero';
+
+  @override
+  String get rarity => 'Rareza';
+
+  @override
+  String get template => 'Plantilla';
+
+  @override
+  String get appearance => 'Apariencia';
+
+  @override
+  String get comicFields => 'Campos cÃ³micos';
+
+  @override
+  String get addComicField => 'AÃ±adir campo';
+
+  @override
+  String get value => 'Valor';
+
+  @override
+  String get preview => 'PrevisualizaciÃ³n';
+
+  @override
+  String get cardNameRequired => 'Escribe un nombre para la carta';
+
+  @override
+  String get healthInvalid => 'Introduce una vida entre 1 y 9999';
+
+  @override
+  String get collectionNumberInvalid => 'Introduce un nÃºmero positivo';
+
+  @override
+  String get collectionNumberUsed => 'Ese nÃºmero ya estÃ¡ utilizado';
+
+  @override
+  String get rarityRequired => 'Elige una rareza';
+
+  @override
+  String get cardInvalid => 'Corrige la carta antes de guardarla';
+
+  @override
+  String get cardDeleted => 'Carta eliminada';
+
+  @override
+  String get deleteCardDialogDescription =>
+      'Se eliminarÃ¡ esta carta y su fotografÃ­a. Esta acciÃ³n no se puede deshacer.';
+
+  @override
+  String get unsavedChanges => 'Cambios sin guardar';
+
+  @override
+  String get discardChanges => 'Descartar cambios';
+
+  @override
+  String get discardChangesQuestion =>
+      'Hay cambios sin guardar. Â¿Quieres descartarlos?';
+
+  @override
+  String get noCardsTitle => 'TodavÃ­a no hay cartas';
+
+  @override
+  String get noCardsDescription => 'Crea la primera carta de esta colecciÃ³n.';
+
+  @override
+  String get atLeastOneCard => 'Debe existir al menos una carta';
+
+  @override
+  String get backToDraft => 'Volver al borrador';
 }

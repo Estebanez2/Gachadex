@@ -12,6 +12,9 @@ import 'package:gachadex/core/identifiers/entity_id.dart';
 import 'package:gachadex/core/identifiers/uuid_generator.dart';
 import 'package:gachadex/core/time/clock.dart';
 import 'package:gachadex/core/time/fake_clock.dart';
+import 'package:gachadex/features/cards/domain/entities/card.dart'
+    as card_domain;
+import 'package:gachadex/features/cards/domain/repositories/card_repository.dart';
 import 'package:gachadex/features/collection_creator/application/collection_draft_use_case_providers.dart';
 import 'package:gachadex/features/collection_creator/domain/entities/collection_project.dart';
 import 'package:gachadex/features/collection_creator/domain/entities/content_version.dart';
@@ -87,7 +90,9 @@ void main() {
       await tester.tap(find.text('Rarezas').last);
       await _pump(tester);
       await _pumpUntilFound(tester, find.text('Añadir rareza'));
-      await tester.tap(find.text('Añadir rareza').first);
+      await tester.ensureVisible(find.text('Añadir rareza').first);
+      await tester.pump();
+      await tester.tap(find.text('Añadir rareza').first, warnIfMissed: false);
       await _pump(tester);
       await _tapSave(tester);
       await _pump(tester);
@@ -107,6 +112,43 @@ void main() {
       await fakes.dispose();
     }
   });
+
+  testWidgets('editor cards section shows the empty state', (tester) async {
+    final fakes = _Phase3Fakes(
+      uuids: [testUuid(20), testUuid(21), testUuid(22)],
+    );
+    final container = ProviderContainer(overrides: [...fakes.overrides]);
+
+    try {
+      final projectId = await container
+          .read(createCollectionDraftProvider)
+          .call();
+
+      await _pumpPhase3Widget(
+        tester,
+        CollectionDraftEditorPage(projectId: projectId),
+        container: container,
+        wrapScaffold: false,
+      );
+
+      await _pumpUntilFound(tester, find.text('Cartas'));
+      await tester.tap(find.widgetWithText(ListTile, 'Cartas'));
+      await _pump(tester);
+
+      expect(find.text('TodavÃ­a no hay cartas'), findsOneWidget);
+      expect(
+        find.text('Crea la primera carta de esta colecciÃ³n.'),
+        findsOneWidget,
+      );
+      final addCardButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'AÃ±adir carta').first,
+      );
+      expect(addCardButton.onPressed, isNotNull);
+    } finally {
+      await _disposePhase3Widget(tester, container);
+      await fakes.dispose();
+    }
+  });
 }
 
 final class _Phase3Fakes {
@@ -118,23 +160,27 @@ final class _Phase3Fakes {
       uuidGenerator: uuidGenerator,
     );
     rarityRepository = _InMemoryRarityRepository();
+    cardRepository = _InMemoryCardRepository();
   }
 
   final FixedUuidGenerator uuidGenerator;
   final FakeClock clock;
   late final _InMemoryCollectionProjectRepository projectRepository;
   late final _InMemoryRarityRepository rarityRepository;
+  late final _InMemoryCardRepository cardRepository;
 
   List<dynamic> get overrides => [
     clockProvider.overrideWithValue(clock),
     uuidGeneratorProvider.overrideWithValue(uuidGenerator),
     collectionProjectRepositoryProvider.overrideWithValue(projectRepository),
     rarityRepositoryProvider.overrideWithValue(rarityRepository),
+    cardRepositoryProvider.overrideWithValue(cardRepository),
   ];
 
   Future<void> dispose() async {
     await projectRepository.close();
     await rarityRepository.close();
+    await cardRepository.close();
   }
 }
 
@@ -413,6 +459,85 @@ final class _InMemoryRarityRepository implements RarityRepository {
             .toList(growable: false)
           ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
     return items;
+  }
+
+  Future<void> close() => _changes.close();
+}
+
+final class _InMemoryCardRepository implements CardRepository {
+  final _changes = StreamController<void>.broadcast();
+
+  @override
+  Future<ImageCardDetails> createCard(ImageCardGraph graph) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> delete(CardId id) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ImageCardDetails> deleteCard(CardId id) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<card_domain.Card> getById(CardId id) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ImageCardDetails> getImageCardById(CardId id) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<card_domain.Card> insert(card_domain.Card card) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<card_domain.Card> update(card_domain.Card card) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ImageCardDetails> updateCard(ImageCardGraph graph) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> collectionNumberExists({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+    required int collectionNumber,
+    CardId? excludingCardId,
+  }) async {
+    return false;
+  }
+
+  @override
+  Future<int> countByRarity(RarityId rarityId) async {
+    return 0;
+  }
+
+  @override
+  Stream<List<card_domain.Card>> watchByCollectionVersion({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+  }) async* {
+    yield const [];
+    yield* _changes.stream.map((_) => const <card_domain.Card>[]);
+  }
+
+  @override
+  Stream<List<ImageCardDetails>> watchImageCardsByCollectionVersion({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+  }) async* {
+    yield const [];
+    yield* _changes.stream.map((_) => const <ImageCardDetails>[]);
   }
 
   Future<void> close() => _changes.close();

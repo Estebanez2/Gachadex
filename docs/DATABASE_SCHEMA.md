@@ -1,8 +1,8 @@
 # Esquema de base de datos
 
-Fecha: 2026-08-05
+Fecha: 2026-08-06
 
-Schema version: `2`
+Schema version: `3`
 
 Motor: SQLite mediante Drift.
 
@@ -143,7 +143,7 @@ Relaciones:
 
 Restricciones:
 
-- `collection_number >= 0`.
+- `collection_number > 0`.
 - `health BETWEEN 1 AND 9999`.
 - `sort_index >= 0`.
 
@@ -165,8 +165,11 @@ Restricciones:
 
 - `display_order >= 0`.
 - `field_type_id` dentro del catalogo fijo:
-  `attackName`, `attackDescription`, `favoriteSnack`, `catchphrase`,
-  `insideJoke`, `weakness`, `resistance`, `specialSkill`.
+  `nickname`, `special_ability`, `attack`, `weakness`, `famous_quote`,
+  `danger_level`, `embarrassment_level`, `intelligence`, `luck`,
+  `resistance`, `charisma`, `punctuality`, `secret_power`,
+  `favorite_object`, `legendary_moment`, `team`, `location`,
+  `custom_description`.
 
 ### `pack_types`
 
@@ -373,6 +376,24 @@ Anade a `collection_projects` la configuracion de portada provisional:
 Los valores por defecto coinciden con `DraftCoverStyle.defaultStyle()` para que
 los borradores existentes puedan abrirse sin crear activos multimedia ni rutas
 ficticias.
+
+### Version 2 -> 3
+
+Recrea `card_field_values` para sustituir el `CHECK` de campos comicos de Fase
+2 por el catalogo fijo de Fase 4.
+
+Durante la copia se preservan datos existentes mapeando IDs antiguos:
+
+- `attackName` -> `attack`
+- `attackDescription` -> `custom_description`
+- `favoriteSnack` -> `favorite_object`
+- `catchphrase` -> `famous_quote`
+- `insideJoke` -> `legendary_moment`
+- `specialSkill` -> `special_ability`
+- `weakness` y `resistance` se mantienen.
+
+La tabla nueva conserva PK, unique `card_id + field_type_id`, indice por
+`card_id` y `ON DELETE CASCADE` hacia `cards`.
 
 ### Proximas versiones
 

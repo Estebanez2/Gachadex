@@ -7,16 +7,18 @@ dinero real.
 
 ## Estado actual
 
-Fase 3: borradores de coleccion, informacion general y rarezas.
+Fase 4: borradores, rarezas y cartas con fotografias.
 
 Incluye la base tecnica de Fase 1, el dominio y persistencia local de Fase 2,
-schema version 2, biblioteca de borradores, creacion atomica de borradores,
+schema version 3, biblioteca de borradores, creacion atomica de borradores,
 editor con autosave, portada provisional generada en Flutter y CRUD/reordenacion
-de rarezas.
+de rarezas. La seccion Cartas permite seleccionar una foto de galeria,
+recortarla, guardarla como WebP privado con miniatura, completar datos, ver
+preview, editar y eliminar.
 
-No incluye todavia creacion de cartas, selector de fotos/videos, tipos de sobre,
-apertura visual, probabilidades ejecutables, temporizadores reales, economia
-visible, notificaciones, importacion ni exportacion.
+No incluye todavia videos, tipos de sobre, apertura visual, probabilidades
+ejecutables, temporizadores reales, economia visible, notificaciones,
+importacion ni exportacion.
 
 ## Requisitos
 
@@ -83,13 +85,19 @@ Selecciona un dispositivo Android concreto:
 flutter run -d <device-id>
 ```
 
-Flujo manual de Fase 3:
+Flujo manual de Fase 4:
 
 1. Abrir la pestana `Crear`.
 2. Crear una coleccion nueva.
 3. Editar nombre, autor, descripcion y portada provisional.
 4. Entrar en `Rarezas`, anadir varias rarezas y reordenarlas.
-5. Cerrar y volver a abrir la app para comprobar que el borrador persiste.
+5. Entrar en `Cartas` y pulsar `Anadir carta`.
+6. Seleccionar una fotografia de galeria, recortarla y completar nombre, vida,
+   numero, rareza, plantilla, marco, colores y campos comicos.
+7. Guardar, cerrar completamente la app y volver a abrirla.
+8. Verificar que la carta y su miniatura siguen en la cuadricula.
+9. Editar la carta, sustituir la foto y guardar.
+10. Eliminar la carta y confirmar que desaparece de la cuadricula.
 
 ## Analisis y pruebas
 

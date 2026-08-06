@@ -1,9 +1,9 @@
 # Arquitectura
 
-Fecha: 2026-08-05
+Fecha: 2026-08-06
 
-Este documento describe el estado tecnico tras la Fase 3: borradores de
-coleccion, informacion general y rarezas. La fuente funcional sigue siendo
+Este documento describe el estado tecnico tras la Fase 4: borradores,
+rarezas y cartas con fotografias. La fuente funcional sigue siendo
 `docs/PRODUCT_SPEC.md`.
 
 ## Principios
@@ -16,7 +16,8 @@ coleccion, informacion general y rarezas. La fuente funcional sigue siendo
 - SQLite guarda metadatos y rutas relativas, nunca binarios multimedia.
 - La presentacion no importa clases generadas por Drift.
 - La pantalla Crear manipula borradores reales y conserva el progreso local.
-- La Fase 3 usa portadas generadas en Flutter; no crea activos multimedia.
+- La Fase 4 guarda fotografias de cartas en archivos privados y registra solo
+  rutas relativas/metadatos en SQLite.
 
 ## Capas
 
@@ -27,6 +28,7 @@ lib/
     database/                Drift, conexion, migraciones, providers.
     domain/                  Enums y validaciones compartidas.
     errors/                  Fallos seguros para capas superiores.
+    files/                   Almacenamiento multimedia privado.
     identifiers/             UUID tipados y generador inyectable.
     time/                    Clock de produccion y FakeClock.
     value_objects/           Rutas multimedia relativas.
@@ -56,7 +58,7 @@ por `ProviderScope` y la cierra con `ref.onDispose`.
 ## Migraciones
 
 `currentDatabaseSchemaVersion` vive en
-`lib/core/database/migrations/schema_versions.dart` y actualmente vale `2`.
+`lib/core/database/migrations/schema_versions.dart` y actualmente vale `3`.
 
 `createMigrationStrategy`:
 
@@ -65,6 +67,8 @@ por `ProviderScope` y la cierra con `ref.onDispose`.
 - Registra apertura y migraciones con `AppLogger`.
 - Migra de v1 a v2 anadiendo la configuracion de portada provisional a
   `collection_projects`.
+- Migra de v2 a v3 recreando `card_field_values` con el catalogo fijo de campos
+  comicos de Fase 4.
 - Rechaza upgrades no implementados con un mensaje seguro.
 
 Para anadir una nueva version se debe subir `currentDatabaseSchemaVersion`,
@@ -95,8 +99,10 @@ La Fase 3 introduce un flujo real bajo `/create`:
 
 - `/create` lista borradores ordenados por `updatedAtUtc` descendente.
 - `/create/new` crea un borrador atomico con version 1 y redirige al editor.
-- `/create/project/:projectId` edita informacion general, portada provisional y
-  rarezas.
+- `/create/project/:projectId` edita informacion general, portada provisional,
+  rarezas y lista de cartas.
+- `/create/project/:projectId/cards/new` crea una carta con fotografia.
+- `/create/project/:projectId/cards/:cardId` edita una carta existente.
 
 La presentacion vive en `features/creator/presentation` y
 `features/collection_creator/presentation`. El estado editable se concentra en
@@ -106,6 +112,29 @@ incompleto de la fase y guarda cambios con debounce. Los casos de uso viven en
 
 La portada provisional no usa `MediaAsset`: guarda ids estables de color,
 acento, icono y patron definidos en `DraftCoverCatalog`.
+
+## Cartas con fotografias
+
+La Fase 4 anade creacion, edicion y borrado de cartas de imagen:
+
+- `ProjectMediaStorage` genera rutas relativas, resuelve archivos privados,
+  copia temporales y borra archivos.
+- `CardPhotoProcessor` usa galeria, recorte nativo y compresion WebP para
+  producir una imagen principal y una miniatura.
+- `CreateImageCard`, `UpdateImageCard` y `DeleteImageCard` coordinan archivos y
+  base de datos. Las filas `MediaAsset`, `Card` y `CardFieldValue` se escriben
+  en transacciones; si falla la base tras copiar archivos se limpian los nuevos.
+- Al sustituir foto, la antigua no se borra hasta que la actualizacion de base
+  termina correctamente.
+- Las cuadriculas usan miniaturas; la preview puede usar la foto pendiente en
+  temporal antes de guardar.
+
+Rutas actuales:
+
+```text
+projects/{projectId}/cards/images/{assetId}.webp
+projects/{projectId}/cards/thumbnails/{assetId}.webp
+```
 
 ## Repositorios
 
@@ -168,10 +197,9 @@ persistencia real queda cubierta por tests de repositorio y controlador.
 
 ## Limites de la fase
 
-Queda fuera de Fase 3:
+Queda fuera de Fase 4:
 
-- Creacion de cartas.
-- Selector o procesamiento de fotos/videos.
+- Videos.
 - Apertura visual de sobres.
 - Tipos de sobre, pools y probabilidades.
 - Temporizadores reales.

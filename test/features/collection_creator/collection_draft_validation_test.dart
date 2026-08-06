@@ -17,6 +17,7 @@ void main() {
         name: '   ',
         coverStyle: DraftCoverStyle.defaultStyle(),
         rarityCount: 0,
+        cardCount: 0,
         infoErrors: errors,
       );
 
@@ -39,7 +40,7 @@ void main() {
       expect(errors.canSave, isFalse);
     });
 
-    test('marks information and rarities complete for this phase', () {
+    test('marks information, rarities and cards complete for this phase', () {
       final errors = CollectionDraftValidation.validateInfo(
         name: 'Viaje',
         author: 'Grupo',
@@ -49,11 +50,13 @@ void main() {
         name: 'Viaje',
         coverStyle: DraftCoverStyle.defaultStyle(),
         rarityCount: 1,
+        cardCount: 1,
         infoErrors: errors,
       );
 
       expect(completeness.infoComplete, isTrue);
       expect(completeness.raritiesComplete, isTrue);
+      expect(completeness.cardsComplete, isTrue);
       expect(completeness.completeForThisPhase, isTrue);
       expect(completeness.hasFuturePendingWork, isTrue);
     });

@@ -32,17 +32,23 @@ final class CollectionDraftCompleteness {
   const CollectionDraftCompleteness({
     required this.info,
     required this.rarities,
+    required this.cards,
   });
 
   final DraftSectionCompletion info;
   final DraftSectionCompletion rarities;
+  final DraftSectionCompletion cards;
 
   bool get infoComplete => info == DraftSectionCompletion.completeForThisPhase;
 
   bool get raritiesComplete =>
       rarities == DraftSectionCompletion.completeForThisPhase;
 
-  bool get completeForThisPhase => infoComplete && raritiesComplete;
+  bool get cardsComplete =>
+      cards == DraftSectionCompletion.completeForThisPhase;
+
+  bool get completeForThisPhase =>
+      infoComplete && raritiesComplete && cardsComplete;
 
   bool get hasFuturePendingWork => true;
 }
@@ -68,6 +74,7 @@ abstract final class CollectionDraftValidation {
     required String name,
     required DraftCoverStyle coverStyle,
     required int rarityCount,
+    required int cardCount,
     required CollectionDraftInfoErrors infoErrors,
   }) {
     return CollectionDraftCompleteness(
@@ -77,6 +84,7 @@ abstract final class CollectionDraftValidation {
         infoErrors: infoErrors,
       ),
       rarities: _rarityCompletion(rarityCount),
+      cards: _cardCompletion(cardCount),
     );
   }
 
@@ -106,6 +114,14 @@ abstract final class CollectionDraftValidation {
 
   static DraftSectionCompletion _rarityCompletion(int rarityCount) {
     if (rarityCount <= 0) {
+      return DraftSectionCompletion.notStarted;
+    }
+
+    return DraftSectionCompletion.completeForThisPhase;
+  }
+
+  static DraftSectionCompletion _cardCompletion(int cardCount) {
+    if (cardCount <= 0) {
       return DraftSectionCompletion.notStarted;
     }
 

@@ -1,9 +1,8 @@
 # Dependencias
 
-Fecha: 2026-08-05
+Fecha: 2026-08-06
 
-Este documento registra las dependencias directas del proyecto tras la Fase 3.
-La Fase 3 no anadio dependencias nuevas respecto a la Fase 2.
+Este documento registra las dependencias directas del proyecto tras la Fase 4.
 
 ## Dependencias directas actuales
 
@@ -16,6 +15,9 @@ La Fase 3 no anadio dependencias nuevas respecto a la Fase 2.
 | `flutter_riverpod` | `^3.4.2`, resuelto 3.4.2 | Produccion | Estado e inyeccion | MIT | Android e iOS | Providers de router, tema, base y repositorios | Fase 1 | Cambios de API mayores en futuras versiones |
 | `go_router` | `^17.4.0`, resuelto 17.4.0 | Produccion | Navegacion declarativa | BSD-3-Clause | Android e iOS | Rutas centralizadas y shell de tabs | Fase 1 | Paquete feature-complete; vigilar cambios de estabilidad |
 | `intl` | `^0.20.2`, resuelto 0.20.2 | Produccion | Soporte de gen-l10n | BSD-3-Clause | Android e iOS | Codigo generado por Flutter importa `intl` | Fase 1 | 0.20.3 existe, pero Flutter 3.44.8 fija 0.20.2 |
+| `image_picker` | `^1.2.3`, resuelto 1.2.3 | Produccion | Selector de imagenes de galeria | Apache-2.0/BSD-3-Clause | Android e iOS | Elegir fotografia para cartas sin permisos amplios de almacenamiento | Fase 4 | En Android/iOS los archivos elegidos son temporales y se copian a almacenamiento privado |
+| `image_cropper` | `^12.2.1`, resuelto 12.2.1 | Produccion | Recorte nativo de fotografias | BSD-3-Clause | Android e iOS | Ajustar la foto a la proporcion fija de las plantillas | Fase 4 | Requiere declarar `UCropActivity` en Android |
+| `flutter_image_compress` | `^2.5.1`, resuelto 2.5.1 | Produccion | Compresion/conversion WebP | MIT | Android e iOS | Crear imagen principal WebP y miniatura WebP | Fase 4 | El soporte WebP depende de implementaciones nativas; mantener pruebas manuales en Android/iOS |
 | `drift` | `^2.34.3`, resuelto 2.34.3 | Produccion | ORM/SQL tipado sobre SQLite | MIT | Android e iOS | Esquema local, DAOs, streams y transacciones | Fase 2 | Requiere codigo generado actualizado |
 | `drift_flutter` | `^0.3.1`, resuelto 0.3.1 | Produccion | Conexion Flutter para Drift | MIT | Android e iOS | Base privada con `path_provider` e isolate de SQLite | Fase 2 | Usa dependencias nativas transitivas de SQLite |
 | `path_provider` | `^2.1.6`, resuelto 2.1.6 | Produccion | Directorios privados de app | BSD-3-Clause | Android e iOS | Ubicar `gachadex.sqlite` sin permisos de almacenamiento publico | Fase 2 | Diferencias de rutas por plataforma |
@@ -34,6 +36,8 @@ La Fase 3 no anadio dependencias nuevas respecto a la Fase 2.
   no se anadio directa porque Drift actual la resuelve.
 - `sqlcipher_flutter_libs` 0.7.0+eol llega transitoriamente por el arbol de
   SQLite; Gachadex no cifra la base en la version actual.
+- `cross_file`, `flutter_plugin_android_lifecycle` y `http` llegan por los
+  plugins de imagen.
 
 Las transitivas estan fijadas en `pubspec.lock`. Pasaran a directas solo si el
 codigo del proyecto las importa explicitamente.
@@ -49,6 +53,14 @@ codigo del proyecto las importa explicitamente.
 - `path` 1.9.1: paquete Dart oficial, licencia BSD-3-Clause, suficiente para
   normalizar rutas POSIX guardadas.
 - `uuid` 4.6.0: paquete mantenido, licencia MIT, genera UUID v4.
+- `image_picker` 1.2.3: plugin publicado por `flutter.dev`, mantenido y
+  compatible con Android/iOS. En Android usa el Photo Picker moderno cuando
+  esta disponible; en iOS requiere `NSPhotoLibraryUsageDescription`.
+- `image_cropper` 12.2.1: plugin mantenido para Android/iOS/Web basado en
+  recorte nativo. En Android se declaro `UCropActivity`; iOS no requiere
+  configuracion adicional propia del plugin.
+- `flutter_image_compress` 2.5.1: plugin mantenido para compresion nativa y
+  salida WebP en Android/iOS. Se usa solo para imagenes, no para video.
 - `build_runner` y `drift_dev`: versiones fijadas por compatibilidad real con
   Flutter 3.44.8, `flutter_test`, `meta` y `analyzer`.
 
@@ -56,8 +68,8 @@ codigo del proyecto las importa explicitamente.
 
 No incorporar todavia:
 
-- `image_picker`, `image_cropper`, `video_player`, plugins de camara, galeria,
-  archivos o video.
+- `video_player`, plugins de camara personalizada, galeria avanzada, archivos
+  generales o video.
 - `flutter_local_notifications`.
 - `share_plus`, `file_selector`, `archive`.
 - Firebase, Supabase o cualquier servicio online.
@@ -67,6 +79,9 @@ No incorporar todavia:
 - https://pub.dev/packages/flutter_riverpod
 - https://pub.dev/packages/go_router
 - https://pub.dev/packages/intl
+- https://pub.dev/packages/image_picker
+- https://pub.dev/packages/image_cropper
+- https://pub.dev/packages/flutter_image_compress
 - https://pub.dev/packages/drift
 - https://pub.dev/packages/drift_flutter
 - https://pub.dev/packages/path_provider
