@@ -1024,5 +1024,164 @@
   "openPackComingSoon": "Abrir sobre proximamente",
   "@openPackComingSoon": {
     "description": "Boton deshabilitado de apertura futura."
+  },
+  "openPack": "Abrir sobre",
+  "@openPack": {
+    "description": "Accion para abrir un sobre."
+  },
+  "pendingOpening": "Apertura pendiente",
+  "@pendingOpening": {
+    "description": "Titulo de apertura pendiente."
+  },
+  "pendingOpeningDescription": "Continua la apertura guardada sin consumir otro sobre.",
+  "@pendingOpeningDescription": {
+    "description": "Descripcion de recuperacion de apertura."
+  },
+  "continueOpening": "Continuar apertura",
+  "@continueOpening": {
+    "description": "Accion para continuar una apertura pendiente."
+  },
+  "album": "Album",
+  "@album": {
+    "description": "Seccion de album."
+  },
+  "all": "Todas",
+  "@all": {
+    "description": "Filtro de todas las cartas."
+  },
+  "owned": "Obtenidas",
+  "@owned": {
+    "description": "Filtro de cartas obtenidas."
+  },
+  "missing": "Faltantes",
+  "@missing": {
+    "description": "Filtro de cartas faltantes."
+  },
+  "favorites": "Favoritas",
+  "@favorites": {
+    "description": "Filtro de cartas favoritas."
+  },
+  "quantity": "Cantidad",
+  "@quantity": {
+    "description": "Orden por cantidad."
+  },
+  "undiscovered": "Sin descubrir",
+  "@undiscovered": {
+    "description": "Carta no obtenida."
+  },
+  "albumProgress": "{owned}/{total} cartas · {percent} %",
+  "@albumProgress": {
+    "description": "Progreso del album.",
+    "placeholders": {
+      "owned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "totalCopies": "Copias totales: {count}",
+  "@totalCopies": {
+    "description": "Total de copias en album.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "favoriteCount": "Favoritas: {count}",
+  "@favoriteCount": {
+    "description": "Total de favoritas.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardDetail": "Detalle de carta",
+  "@cardDetail": {
+    "description": "Titulo de detalle de carta."
+  },
+  "cardStillMissing": "Todavia no has descubierto esta carta.",
+  "@cardStillMissing": {
+    "description": "Descripcion de carta faltante."
+  },
+  "firstObtained": "Primera obtencion: {date}",
+  "@firstObtained": {
+    "description": "Fecha de primera obtencion.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "copies": "Copias",
+  "@copies": {
+    "description": "Etiqueta de copias."
+  },
+  "skip": "Saltar",
+  "@skip": {
+    "description": "Accion para saltar animacion."
+  },
+  "cardPosition": "Carta {index} de {total}",
+  "@cardPosition": {
+    "description": "Posicion de carta en apertura.",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "newCard": "Nueva",
+  "@newCard": {
+    "description": "Indicador de carta nueva."
+  },
+  "repeatedCard": "Repetida · x{quantity}",
+  "@repeatedCard": {
+    "description": "Indicador de carta repetida.",
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "next": "Siguiente",
+  "@next": {
+    "description": "Accion para avanzar."
+  },
+  "revealCard": "Revelar carta",
+  "@revealCard": {
+    "description": "Accion para revelar carta."
+  },
+  "summary": "Resumen",
+  "@summary": {
+    "description": "Titulo del resumen de apertura."
+  },
+  "openingSummaryCounts": "Nuevas: {newCount} · Repetidas: {repeatedCount}",
+  "@openingSummaryCounts": {
+    "description": "Conteos de resumen de apertura.",
+    "placeholders": {
+      "newCount": {
+        "type": "int"
+      },
+      "repeatedCount": {
+        "type": "int"
+      }
+    }
+  },
+  "viewAlbum": "Ver album",
+  "@viewAlbum": {
+    "description": "Accion para ver album."
+  },
+  "backToPacks": "Volver a sobres",
+  "@backToPacks": {
+    "description": "Accion para volver a sobres."
   }
 }

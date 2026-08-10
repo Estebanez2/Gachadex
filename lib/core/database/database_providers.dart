@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/album/data/repositories/drift_album_repository.dart';
+import '../../features/album/domain/repositories/album_repository.dart';
 import '../../features/album/data/repositories/drift_player_progress_repository.dart';
 import '../../features/album/domain/repositories/player_progress_repository.dart';
 import '../../features/cards/data/repositories/drift_card_repository.dart';
@@ -10,9 +12,11 @@ import '../../features/collection_creator/domain/repositories/collection_project
 import '../../features/collection_creator/domain/repositories/content_version_repository.dart';
 import '../../features/collections/data/repositories/drift_installed_collection_repository.dart';
 import '../../features/collections/domain/repositories/installed_collection_repository.dart';
-import '../../features/packs/data/repositories/drift_pack_type_repository.dart';
 import '../../features/packs/data/repositories/drift_pack_inventory_repository.dart';
+import '../../features/packs/data/repositories/drift_pack_opening_repository.dart';
+import '../../features/packs/data/repositories/drift_pack_type_repository.dart';
 import '../../features/packs/domain/repositories/pack_inventory_repository.dart';
+import '../../features/packs/domain/repositories/pack_opening_repository.dart';
 import '../../features/packs/domain/repositories/pack_type_repository.dart';
 import '../../features/rarities/data/repositories/drift_rarity_repository.dart';
 import '../../features/rarities/domain/repositories/rarity_repository.dart';
@@ -76,6 +80,14 @@ final packInventoryRepositoryProvider = Provider<PackInventoryRepository>((
   return DriftPackInventoryRepository(database: ref.watch(appDatabaseProvider));
 });
 
+final packOpeningRepositoryProvider = Provider<PackOpeningRepository>((ref) {
+  return DriftPackOpeningRepository(
+    database: ref.watch(appDatabaseProvider),
+    cardRepository: ref.watch(cardRepositoryProvider),
+    clock: ref.watch(clockProvider),
+  );
+});
+
 final installedCollectionRepositoryProvider =
     Provider<InstalledCollectionRepository>((ref) {
       return DriftInstalledCollectionRepository(
@@ -89,4 +101,8 @@ final playerProgressRepositoryProvider = Provider<PlayerProgressRepository>((
   return DriftPlayerProgressRepository(
     database: ref.watch(appDatabaseProvider),
   );
+});
+
+final albumRepositoryProvider = Provider<AlbumRepository>((ref) {
+  return DriftAlbumRepository(database: ref.watch(appDatabaseProvider));
 });

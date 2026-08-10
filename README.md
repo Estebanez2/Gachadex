@@ -7,8 +7,8 @@ dinero real.
 
 ## Estado actual
 
-Fase 6: borradores, rarezas, cartas con fotografias, configuracion de sobres,
-finalizacion local e inventario con temporizadores.
+Fase 7: borradores, rarezas, cartas con fotografias, configuracion de sobres,
+finalizacion local, temporizadores, apertura de sobres y album.
 
 Incluye la base tecnica de Fase 1, el dominio y persistencia local de Fase 2,
 schema version 4, biblioteca de borradores, creacion atomica de borradores,
@@ -20,10 +20,13 @@ sobre, elegir principal, configurar cartas elegibles, reglas por posicion,
 pesos por rareza y simular aperturas sin modificar progreso. La seccion
 Revision valida la coleccion, la finaliza de forma local, instala la copia
 jugable del creador, entrega tres sobres iniciales del sobre principal y crea
-temporizadores independientes para cada tipo de sobre.
+temporizadores independientes para cada tipo de sobre. Las colecciones
+instaladas permiten abrir sobres disponibles, revelar cartas una a una, saltar
+la apertura, recuperar aperturas pendientes y consultar album con obtenidas,
+faltantes, cantidades, favoritas, filtros y orden.
 
-No incluye todavia videos, apertura real de sobres, album jugable, duplicados
-visibles, economia usable, notificaciones, importacion ni exportacion.
+No incluye todavia videos, venta de duplicados, economia usable, notificaciones,
+importacion ni exportacion.
 
 ## Requisitos
 
@@ -90,7 +93,7 @@ Selecciona un dispositivo Android concreto:
 flutter run -d <device-id>
 ```
 
-Flujo manual de Fase 6:
+Flujo manual de Fase 7:
 
 1. Abrir la pestana `Crear`.
 2. Crear una coleccion nueva.
@@ -124,8 +127,14 @@ Flujo manual de Fase 6:
     inventario siguen ahi.
 22. Esperar o adelantar el reloj del emulador hasta superar una recarga,
     reabrir o volver a primer plano y verificar que el inventario se actualiza.
-23. Comprobar que el boton de apertura aparece deshabilitado como marcador de
-    funcionalidad futura.
+23. Pulsar `Abrir sobre` y comprobar que el inventario baja de 3 a 2.
+24. Revelar cartas una a una y comprobar indicador `Nueva` o `Repetida`.
+25. Usar `Saltar` en otra apertura y comprobar que aparece el resumen.
+26. Entrar en `Album` y verificar obtenidas, faltantes, cantidades y porcentaje.
+27. Abrir una carta obtenida, marcarla como favorita y filtrar `Favoritas`.
+28. Ordenar por `Cantidad`.
+29. Cerrar la app a mitad de una apertura y volver a abrir la coleccion:
+    debe aparecer `Continuar apertura` sin consumir otro sobre.
 
 ## Analisis y pruebas
 

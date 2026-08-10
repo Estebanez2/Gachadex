@@ -783,4 +783,103 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get openPackComingSoon => 'Abrir sobre proximamente';
+
+  @override
+  String get openPack => 'Abrir sobre';
+
+  @override
+  String get pendingOpening => 'Apertura pendiente';
+
+  @override
+  String get pendingOpeningDescription =>
+      'Continua la apertura guardada sin consumir otro sobre.';
+
+  @override
+  String get continueOpening => 'Continuar apertura';
+
+  @override
+  String get album => 'Album';
+
+  @override
+  String get all => 'Todas';
+
+  @override
+  String get owned => 'Obtenidas';
+
+  @override
+  String get missing => 'Faltantes';
+
+  @override
+  String get favorites => 'Favoritas';
+
+  @override
+  String get quantity => 'Cantidad';
+
+  @override
+  String get undiscovered => 'Sin descubrir';
+
+  @override
+  String albumProgress(int owned, int total, String percent) {
+    return '$owned/$total cartas · $percent %';
+  }
+
+  @override
+  String totalCopies(int count) {
+    return 'Copias totales: $count';
+  }
+
+  @override
+  String favoriteCount(int count) {
+    return 'Favoritas: $count';
+  }
+
+  @override
+  String get cardDetail => 'Detalle de carta';
+
+  @override
+  String get cardStillMissing => 'Todavia no has descubierto esta carta.';
+
+  @override
+  String firstObtained(String date) {
+    return 'Primera obtencion: $date';
+  }
+
+  @override
+  String get copies => 'Copias';
+
+  @override
+  String get skip => 'Saltar';
+
+  @override
+  String cardPosition(int index, int total) {
+    return 'Carta $index de $total';
+  }
+
+  @override
+  String get newCard => 'Nueva';
+
+  @override
+  String repeatedCard(int quantity) {
+    return 'Repetida · x$quantity';
+  }
+
+  @override
+  String get next => 'Siguiente';
+
+  @override
+  String get revealCard => 'Revelar carta';
+
+  @override
+  String get summary => 'Resumen';
+
+  @override
+  String openingSummaryCounts(int newCount, int repeatedCount) {
+    return 'Nuevas: $newCount · Repetidas: $repeatedCount';
+  }
+
+  @override
+  String get viewAlbum => 'Ver album';
+
+  @override
+  String get backToPacks => 'Volver a sobres';
 }

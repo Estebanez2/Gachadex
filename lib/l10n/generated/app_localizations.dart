@@ -1557,6 +1557,174 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Abrir sobre proximamente'**
   String get openPackComingSoon;
+
+  /// Accion para abrir un sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir sobre'**
+  String get openPack;
+
+  /// Titulo de apertura pendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Apertura pendiente'**
+  String get pendingOpening;
+
+  /// Descripcion de recuperacion de apertura.
+  ///
+  /// In es, this message translates to:
+  /// **'Continua la apertura guardada sin consumir otro sobre.'**
+  String get pendingOpeningDescription;
+
+  /// Accion para continuar una apertura pendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar apertura'**
+  String get continueOpening;
+
+  /// Seccion de album.
+  ///
+  /// In es, this message translates to:
+  /// **'Album'**
+  String get album;
+
+  /// Filtro de todas las cartas.
+  ///
+  /// In es, this message translates to:
+  /// **'Todas'**
+  String get all;
+
+  /// Filtro de cartas obtenidas.
+  ///
+  /// In es, this message translates to:
+  /// **'Obtenidas'**
+  String get owned;
+
+  /// Filtro de cartas faltantes.
+  ///
+  /// In es, this message translates to:
+  /// **'Faltantes'**
+  String get missing;
+
+  /// Filtro de cartas favoritas.
+  ///
+  /// In es, this message translates to:
+  /// **'Favoritas'**
+  String get favorites;
+
+  /// Orden por cantidad.
+  ///
+  /// In es, this message translates to:
+  /// **'Cantidad'**
+  String get quantity;
+
+  /// Carta no obtenida.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin descubrir'**
+  String get undiscovered;
+
+  /// Progreso del album.
+  ///
+  /// In es, this message translates to:
+  /// **'{owned}/{total} cartas · {percent} %'**
+  String albumProgress(int owned, int total, String percent);
+
+  /// Total de copias en album.
+  ///
+  /// In es, this message translates to:
+  /// **'Copias totales: {count}'**
+  String totalCopies(int count);
+
+  /// Total de favoritas.
+  ///
+  /// In es, this message translates to:
+  /// **'Favoritas: {count}'**
+  String favoriteCount(int count);
+
+  /// Titulo de detalle de carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Detalle de carta'**
+  String get cardDetail;
+
+  /// Descripcion de carta faltante.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavia no has descubierto esta carta.'**
+  String get cardStillMissing;
+
+  /// Fecha de primera obtencion.
+  ///
+  /// In es, this message translates to:
+  /// **'Primera obtencion: {date}'**
+  String firstObtained(String date);
+
+  /// Etiqueta de copias.
+  ///
+  /// In es, this message translates to:
+  /// **'Copias'**
+  String get copies;
+
+  /// Accion para saltar animacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Saltar'**
+  String get skip;
+
+  /// Posicion de carta en apertura.
+  ///
+  /// In es, this message translates to:
+  /// **'Carta {index} de {total}'**
+  String cardPosition(int index, int total);
+
+  /// Indicador de carta nueva.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva'**
+  String get newCard;
+
+  /// Indicador de carta repetida.
+  ///
+  /// In es, this message translates to:
+  /// **'Repetida · x{quantity}'**
+  String repeatedCard(int quantity);
+
+  /// Accion para avanzar.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente'**
+  String get next;
+
+  /// Accion para revelar carta.
+  ///
+  /// In es, this message translates to:
+  /// **'Revelar carta'**
+  String get revealCard;
+
+  /// Titulo del resumen de apertura.
+  ///
+  /// In es, this message translates to:
+  /// **'Resumen'**
+  String get summary;
+
+  /// Conteos de resumen de apertura.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevas: {newCount} · Repetidas: {repeatedCount}'**
+  String openingSummaryCounts(int newCount, int repeatedCount);
+
+  /// Accion para ver album.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver album'**
+  String get viewAlbum;
+
+  /// Accion para volver a sobres.
+  ///
+  /// In es, this message translates to:
+  /// **'Volver a sobres'**
+  String get backToPacks;
 }
 
 class _AppLocalizationsDelegate
