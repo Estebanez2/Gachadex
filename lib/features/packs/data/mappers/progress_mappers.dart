@@ -62,6 +62,21 @@ extension PackOpeningDomainMapper on PackOpening {
   }
 }
 
+extension PackOpeningRowMapper on PackOpeningRow {
+  PackOpening toDomain() {
+    return PackOpening(
+      id: PackOpeningId(id),
+      installedCollectionId: InstalledCollectionId(installedCollectionId),
+      packTypeId: PackTypeId(packTypeId),
+      status: status,
+      generatedAtUtc: fromDatabaseUtc(generatedAtUtc),
+      completedAtUtc: completedAtUtc == null
+          ? null
+          : fromDatabaseUtc(completedAtUtc!),
+    );
+  }
+}
+
 extension PackOpeningCardDomainMapper on PackOpeningCard {
   PackOpeningCardsCompanion toCompanion() {
     return PackOpeningCardsCompanion(
@@ -71,6 +86,19 @@ extension PackOpeningCardDomainMapper on PackOpeningCard {
       wasNew: Value(wasNew),
       quantityAfter: Value(quantityAfter),
       revealed: Value(revealed),
+    );
+  }
+}
+
+extension PackOpeningCardRowMapper on PackOpeningCardRow {
+  PackOpeningCard toDomain() {
+    return PackOpeningCard(
+      openingId: PackOpeningId(openingId),
+      cardId: CardId(cardId),
+      slotIndex: slotIndex,
+      wasNew: wasNew,
+      quantityAfter: quantityAfter,
+      revealed: revealed,
     );
   }
 }

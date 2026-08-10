@@ -2,9 +2,9 @@
 
 Fecha: 2026-08-10
 
-Este documento describe el estado tecnico tras la Fase 6: borradores,
-rarezas, cartas con fotografias, configuracion de sobres, finalizacion local e
-inventario con temporizadores. La fuente funcional sigue siendo
+Este documento describe el estado tecnico tras la Fase 7: borradores,
+rarezas, cartas con fotografias, configuracion de sobres, finalizacion local,
+inventario con temporizadores, apertura de sobres y album. La fuente funcional sigue siendo
 `docs/PRODUCT_SPEC.md`.
 
 ## Principios
@@ -191,8 +191,51 @@ arrancar y al volver a primer plano; el detalle de coleccion tambien refresca su
 inventario al abrirse.
 
 La pantalla `Colecciones` lista colecciones instaladas y el detalle muestra
-sobres disponibles, maximo acumulado, tiempo restante y un boton de apertura
-deshabilitado como marcador de la fase siguiente.
+sobres disponibles, maximo acumulado, tiempo restante y apertura cuando hay
+inventario.
+
+## Apertura de sobres
+
+La Fase 7 implementa `OpenPack` en `features/packs/application/`:
+
+- Refresca el inventario antes de abrir.
+- Rechaza aperturas sin sobres disponibles o con otra apertura activa.
+- Valida la configuracion del sobre y usa `PackGenerator` de Fase 5.
+- Guarda `PackOpening`, `PackOpeningCard`, `OwnedCard`, inventario y contador
+  `distinctOwnedCount` en una unica transaccion.
+- Calcula `wasNew` y `quantityAfter` dentro de la transaccion, incluyendo cartas
+  repetidas dentro del mismo sobre.
+- Si el inventario estaba lleno, inicia el siguiente intervalo con
+  `PackRechargeCalculator.nextAfterConsumed`; si no estaba lleno, conserva el
+  temporizador existente.
+
+La UI de apertura marca la apertura como `revealing`, revela cartas una a una,
+permite `Saltar` y completa la apertura marcando todas las cartas como
+reveladas. La apertura ya existe en SQLite antes de mostrar la primera carta.
+
+## Recuperacion de aperturas
+
+`PackOpeningRepository.getActive` busca aperturas `generated` o `revealing` por
+coleccion instalada. Al entrar al detalle se muestra `Continuar apertura` si hay
+una pendiente. No se vuelve a generar ni se consume otro sobre. Si todas las
+cartas estuvieran reveladas pero la apertura no estuviera completada, el
+repositorio la completa de forma segura.
+
+## Album
+
+`AlbumRepository` consulta el album desde `cards` con `LEFT JOIN` a
+`owned_cards` y joins a rareza/media. La tabla base es siempre `cards`, por lo
+que tambien aparecen faltantes. Las faltantes se entregan al modelo de UI sin
+nombre, rareza visible ni imagen para no revelar contenido.
+
+El album expone:
+
+- Obtenidas / total y porcentaje.
+- Total de copias calculado con las cantidades actuales.
+- Numero de favoritas.
+- Filtros: todas, obtenidas, faltantes y favoritas.
+- Orden: numero, nombre, rareza y cantidad.
+- Detalle de carta obtenida con imagen completa y favorito.
 
 ## Repositorios
 
@@ -204,6 +247,8 @@ Interfaces de dominio:
 - `CardRepository`
 - `PackTypeRepository`
 - `PackInventoryRepository`
+- `PackOpeningRepository`
+- `AlbumRepository`
 - `InstalledCollectionRepository`
 - `PlayerProgressRepository`
 
@@ -220,6 +265,8 @@ Implementaciones Drift:
   transaccion y actualizan `updatedAtUtc` del borrador.
 - Evitan instalar dos veces la misma coleccion/version.
 - Leen y actualizan inventario independiente por tipo de sobre.
+- Abren sobres de forma atomica y conservan historial de aperturas.
+- Consultan album sin SQL desde widgets.
 - Borran progreso local al eliminar una coleccion instalada.
 - No devuelven filas Drift a dominio o presentacion.
 
@@ -259,13 +306,10 @@ persistencia real queda cubierta por tests de repositorio y controlador.
 
 ## Limites de la fase
 
-Queda fuera de Fase 6:
+Queda fuera de Fase 7:
 
 - Videos.
-- Apertura visual de sobres.
-- Apertura real de sobres y escritura de `OwnedCard`.
-- Album jugable.
-- Duplicados visibles y venta.
+- Venta de duplicados.
 - Economia usable.
 - Notificaciones.
 - Importacion/exportacion `.friendpack`.

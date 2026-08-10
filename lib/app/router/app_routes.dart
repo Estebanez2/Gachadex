@@ -12,6 +12,23 @@ abstract final class AppRoutes {
     return '$installedCollectionPathPrefix/$installedCollectionId';
   }
 
+  static String installedCollectionAlbumPath(String installedCollectionId) {
+    return '${installedCollectionPath(installedCollectionId)}?tab=album';
+  }
+
+  static const packOpeningName = 'pack-opening';
+  static String packOpeningPath(
+    String installedCollectionId,
+    String openingId,
+  ) {
+    return '${installedCollectionPath(installedCollectionId)}/openings/$openingId';
+  }
+
+  static const albumCardName = 'album-card';
+  static String albumCardPath(String installedCollectionId, String cardId) {
+    return '${installedCollectionPath(installedCollectionId)}/cards/$cardId';
+  }
+
   static const createName = 'create';
   static const createPath = '/create';
   static const createNewName = 'create-new';

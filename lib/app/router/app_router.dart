@@ -7,6 +7,7 @@ import '../../core/widgets/app_error_view.dart';
 import '../../core/widgets/app_scaffold.dart';
 import '../../core/identifiers/entity_id.dart';
 import '../../features/cards/presentation/pages/card_editor_page.dart';
+import '../../features/album/presentation/pages/album_card_detail_page.dart';
 import '../../features/collections/presentation/collections_page.dart';
 import '../../features/collections/presentation/installed_collection_detail_page.dart';
 import '../../features/collection_creator/presentation/pages/collection_draft_editor_page.dart';
@@ -14,6 +15,7 @@ import '../../features/collection_creator/presentation/pages/create_draft_page.d
 import '../../features/controlled_error/presentation/controlled_error_page.dart';
 import '../../features/creator/presentation/creator_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/packs/presentation/pages/pack_opening_page.dart';
 import '../../features/packs/presentation/pages/pack_editor_page.dart';
 import '../../features/settings/presentation/settings_page.dart';
 import '../localization/app_localizations.dart';
@@ -95,6 +97,10 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
                           installedCollectionId: InstalledCollectionId(
                             installedCollectionId,
                           ),
+                          initialTabIndex:
+                              state.uri.queryParameters['tab'] == 'album'
+                              ? 1
+                              : 0,
                         );
                       } on FormatException {
                         return _RouteError(
@@ -102,6 +108,63 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
                         );
                       }
                     },
+                    routes: [
+                      GoRoute(
+                        path: 'openings/:openingId',
+                        name: AppRoutes.packOpeningName,
+                        builder: (context, state) {
+                          final installedCollectionId =
+                              state.pathParameters['installedCollectionId'];
+                          final openingId = state.pathParameters['openingId'];
+                          if (installedCollectionId == null ||
+                              openingId == null) {
+                            return _RouteError(
+                              description: context.l10n.projectNotFound,
+                            );
+                          }
+
+                          try {
+                            return PackOpeningPage(
+                              installedCollectionId: InstalledCollectionId(
+                                installedCollectionId,
+                              ),
+                              openingId: PackOpeningId(openingId),
+                            );
+                          } on FormatException {
+                            return _RouteError(
+                              description: context.l10n.projectNotFound,
+                            );
+                          }
+                        },
+                      ),
+                      GoRoute(
+                        path: 'cards/:cardId',
+                        name: AppRoutes.albumCardName,
+                        builder: (context, state) {
+                          final installedCollectionId =
+                              state.pathParameters['installedCollectionId'];
+                          final cardId = state.pathParameters['cardId'];
+                          if (installedCollectionId == null || cardId == null) {
+                            return _RouteError(
+                              description: context.l10n.projectNotFound,
+                            );
+                          }
+
+                          try {
+                            return AlbumCardDetailPage(
+                              installedCollectionId: InstalledCollectionId(
+                                installedCollectionId,
+                              ),
+                              cardId: CardId(cardId),
+                            );
+                          } on FormatException {
+                            return _RouteError(
+                              description: context.l10n.projectNotFound,
+                            );
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -879,6 +879,9 @@ class InstalledCollectionsDao extends DatabaseAccessor<AppDatabase>
   tables: [
     PackInventory,
     OwnedCards,
+    Cards,
+    Rarities,
+    MediaAssets,
     CoinTransactions,
     PackOpenings,
     PackOpeningCards,
@@ -911,6 +914,95 @@ class PlayerProgressDao extends DatabaseAccessor<AppDatabase>
           (table) => table.installedCollectionId.equals(installedCollectionId),
         ))
         .watch();
+  }
+
+  Future<PackOpeningRow?> getOpeningById(String openingId) {
+    return (select(
+      packOpenings,
+    )..where((table) => table.id.equals(openingId))).getSingleOrNull();
+  }
+
+  Future<PackOpeningRow?> getActiveOpening(String installedCollectionId) {
+    return (select(packOpenings)
+          ..where(
+            (table) =>
+                table.installedCollectionId.equals(installedCollectionId) &
+                table.status.isInValues([
+                  PackOpeningStatus.generated,
+                  PackOpeningStatus.revealing,
+                ]),
+          )
+          ..orderBy([(table) => OrderingTerm.asc(table.generatedAtUtc)])
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
+  Stream<PackOpeningRow?> watchActiveOpening(String installedCollectionId) {
+    return (select(packOpenings)
+          ..where(
+            (table) =>
+                table.installedCollectionId.equals(installedCollectionId) &
+                table.status.isInValues([
+                  PackOpeningStatus.generated,
+                  PackOpeningStatus.revealing,
+                ]),
+          )
+          ..orderBy([(table) => OrderingTerm.asc(table.generatedAtUtc)])
+          ..limit(1))
+        .watchSingleOrNull();
+  }
+
+  Future<List<PackOpeningCardRow>> getOpeningCards(String openingId) {
+    return (select(packOpeningCards)
+          ..where((table) => table.openingId.equals(openingId))
+          ..orderBy([(table) => OrderingTerm.asc(table.slotIndex)]))
+        .get();
+  }
+
+  Stream<List<PackOpeningCardRow>> watchOpeningCards(String openingId) {
+    return (select(packOpeningCards)
+          ..where((table) => table.openingId.equals(openingId))
+          ..orderBy([(table) => OrderingTerm.asc(table.slotIndex)]))
+        .watch();
+  }
+
+  Future<void> markOpeningRevealing(String openingId) {
+    return (update(
+      packOpenings,
+    )..where((table) => table.id.equals(openingId))).write(
+      const PackOpeningsCompanion(status: Value(PackOpeningStatus.revealing)),
+    );
+  }
+
+  Future<void> revealOpeningCard({
+    required String openingId,
+    required int slotIndex,
+  }) {
+    return (update(packOpeningCards)..where(
+          (table) =>
+              table.openingId.equals(openingId) &
+              table.slotIndex.equals(slotIndex),
+        ))
+        .write(const PackOpeningCardsCompanion(revealed: Value(true)));
+  }
+
+  Future<void> completeOpening({
+    required String openingId,
+    required DateTime completedAtUtc,
+  }) {
+    return transaction(() async {
+      await (update(packOpeningCards)
+            ..where((table) => table.openingId.equals(openingId)))
+          .write(const PackOpeningCardsCompanion(revealed: Value(true)));
+      await (update(
+        packOpenings,
+      )..where((table) => table.id.equals(openingId))).write(
+        PackOpeningsCompanion(
+          status: const Value(PackOpeningStatus.completed),
+          completedAtUtc: Value(completedAtUtc),
+        ),
+      );
+    });
   }
 
   Future<int> getCoinBalance(String installedCollectionId) async {

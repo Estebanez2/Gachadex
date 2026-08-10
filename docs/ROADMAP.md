@@ -158,7 +158,28 @@ importacion ni exportacion.
 
 Depende de: fase 5.
 
-## Fase 7 - Videos
+## Fase 7 - Apertura de sobres y album
+
+Estado: implementada en la rama `phase/07-pack-opening-album`.
+
+Incluye:
+
+- Apertura real de sobres desde colecciones instaladas.
+- Consumo atomico de un sobre disponible.
+- Generacion de cartas con el motor de Fase 5.
+- Escritura previa a UI de `PackOpening` y `PackOpeningCard`.
+- Actualizacion de `OwnedCard`, repetidas, `wasNew` y `quantityAfter`.
+- Recuperacion de apertura pendiente sin consumir otro sobre.
+- Revelado basico carta a carta, salto y resumen.
+- Album con obtenidas, faltantes ocultas, cantidades, favoritas, filtros,
+  orden y estadisticas basicas.
+
+No incluye videos, venta de duplicados, economia usable, aceleracion,
+notificaciones, importacion ni exportacion.
+
+Depende de: fase 6.
+
+## Fase 8 - Videos
 
 Objetivo: soportar cartas con video de forma completa.
 
@@ -166,9 +187,9 @@ Incluye seleccion de videos, lectura de duracion y dimensiones, recorte temporal
 normalizacion MP4 H.264/AAC, conservacion de sonido, primer fotograma,
 miniaturas y reproduccion controlada.
 
-Depende de: fase 6.
+Depende de: fase 7.
 
-## Fase 8 - Exportacion e importacion
+## Fase 9 - Exportacion e importacion
 
 Objetivo: compartir colecciones sin servidor.
 
@@ -176,9 +197,9 @@ Incluye formato `.friendpack`, manifest, JSON de contenido, activos,
 checksums SHA-256, exportacion por streaming, comparticion nativa, importacion
 segura, validacion, duplicados e importacion atomica.
 
-Depende de: fases 6 y 7.
+Depende de: fases 7 y 8.
 
-## Fase 9 - Economia
+## Fase 10 - Economia
 
 Objetivo: cerrar el ciclo de duplicados.
 
@@ -187,7 +208,7 @@ aceleracion de temporizadores y validaciones de saldo.
 
 Depende de: fase 6.
 
-## Fase 10 - Notificaciones locales
+## Fase 11 - Notificaciones locales
 
 Objetivo: avisar de sobres disponibles sin servidor.
 
@@ -196,7 +217,7 @@ notificacion y recuperacion tras reinicio cuando la plataforma lo permita.
 
 Depende de: fase 6 y de la estrategia de temporizadores.
 
-## Fase 11 - Diseno y animaciones
+## Fase 12 - Diseno y animaciones
 
 Objetivo: elevar la experiencia visual con identidad propia.
 
@@ -206,7 +227,7 @@ animaciones. No debe copiar Pokemon TCG ni efectos de Altare de forma literal.
 
 Depende de: fases 6, 7 y 10.
 
-## Fase 12 - Estabilizacion y lanzamiento
+## Fase 13 - Estabilizacion y lanzamiento
 
 Objetivo: preparar una primera version distribuible.
 
