@@ -773,5 +773,171 @@
   "backToDraft": "Volver al borrador",
   "@backToDraft": {
     "description": "Accion para volver al borrador abierto."
+  },
+  "addPack": "AÃ±adir sobre",
+  "@addPack": {
+    "description": "Accion para crear un tipo de sobre."
+  },
+  "editPack": "Editar sobre",
+  "@editPack": {
+    "description": "Accion para editar un tipo de sobre."
+  },
+  "deletePack": "Eliminar sobre",
+  "@deletePack": {
+    "description": "Accion para eliminar un tipo de sobre."
+  },
+  "deletePackDescription": "Se eliminarÃ¡ este sobre, sus cartas elegibles, reglas y probabilidades.",
+  "@deletePackDescription": {
+    "description": "Descripcion de confirmacion para eliminar sobre."
+  },
+  "packDeleted": "Sobre eliminado",
+  "@packDeleted": {
+    "description": "Confirmacion de sobre eliminado."
+  },
+  "packSaved": "Sobre guardado",
+  "@packSaved": {
+    "description": "Confirmacion de sobre guardado."
+  },
+  "atLeastOnePack": "Debe existir al menos un sobre",
+  "@atLeastOnePack": {
+    "description": "Requisito de completitud de sobres."
+  },
+  "noPacksTitle": "TodavÃ­a no hay sobres",
+  "@noPacksTitle": {
+    "description": "Titulo de estado vacio de sobres."
+  },
+  "noPacksDescription": "Crea un sobre para configurar cartas elegibles y probabilidades.",
+  "@noPacksDescription": {
+    "description": "Descripcion de estado vacio de sobres."
+  },
+  "mainPack": "Sobre principal",
+  "@mainPack": {
+    "description": "Etiqueta de sobre principal."
+  },
+  "packSecondary": "Sobre secundario",
+  "@packSecondary": {
+    "description": "Etiqueta de sobre no principal."
+  },
+  "cardsPerPack": "Cartas por sobre",
+  "@cardsPerPack": {
+    "description": "Campo de cantidad de cartas por sobre."
+  },
+  "rechargeTime": "Tiempo de recarga",
+  "@rechargeTime": {
+    "description": "Campo de tiempo de recarga."
+  },
+  "maxAccumulated": "Maximo acumulable",
+  "@maxAccumulated": {
+    "description": "Campo de maximo acumulable."
+  },
+  "accelerationCost": "Coste de aceleracion",
+  "@accelerationCost": {
+    "description": "Campo de coste de aceleracion completa."
+  },
+  "frontDesign": "Portada",
+  "@frontDesign": {
+    "description": "Selector de diseno frontal de sobre."
+  },
+  "backDesign": "Reverso",
+  "@backDesign": {
+    "description": "Selector de diseno trasero de sobre."
+  },
+  "eligibleCardsCount": "Cartas elegibles: {count}",
+  "@eligibleCardsCount": {
+    "description": "Contador de cartas elegibles.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchCards": "Buscar cartas",
+  "@searchCards": {
+    "description": "Campo de busqueda de cartas."
+  },
+  "allCards": "Todas las cartas",
+  "@allCards": {
+    "description": "Filtro para todas las cartas."
+  },
+  "selectAll": "Seleccionar todas",
+  "@selectAll": {
+    "description": "Accion para seleccionar todas las cartas."
+  },
+  "deselectAll": "Deseleccionar todas",
+  "@deselectAll": {
+    "description": "Accion para deseleccionar todas las cartas."
+  },
+  "slotRules": "Reglas por posicion",
+  "@slotRules": {
+    "description": "Seccion de reglas de posicion del sobre."
+  },
+  "slotPosition": "Posicion {index}",
+  "@slotPosition": {
+    "description": "Etiqueta de posicion del sobre.",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "fixedRarity": "Rareza fija",
+  "@fixedRarity": {
+    "description": "Tipo de regla de rareza fija."
+  },
+  "probabilityDistribution": "Distribucion",
+  "@probabilityDistribution": {
+    "description": "Tipo de regla de distribucion por probabilidades."
+  },
+  "minimumRarity": "Rareza minima",
+  "@minimumRarity": {
+    "description": "Tipo de regla de rareza minima."
+  },
+  "validation": "Validacion",
+  "@validation": {
+    "description": "Seccion de validacion."
+  },
+  "packConfigurationValid": "Configuracion valida",
+  "@packConfigurationValid": {
+    "description": "Estado de sobre valido."
+  },
+  "packConfigurationIncomplete": "Configuracion incompleta",
+  "@packConfigurationIncomplete": {
+    "description": "Estado de sobre incompleto."
+  },
+  "noEligibleCards": "No hay cartas elegibles",
+  "@noEligibleCards": {
+    "description": "Error de sobre sin cartas elegibles."
+  },
+  "mainPackNeedsThree": "El principal debe acumular al menos tres",
+  "@mainPackNeedsThree": {
+    "description": "Error de acumulacion minima del sobre principal."
+  },
+  "probabilityNeedsWeight": "Cada distribucion necesita algun peso positivo",
+  "@probabilityNeedsWeight": {
+    "description": "Error de distribucion sin pesos positivos."
+  },
+  "packNameRequired": "Escribe un nombre para el sobre",
+  "@packNameRequired": {
+    "description": "Error de nombre obligatorio de sobre."
+  },
+  "duplicatePackName": "Ya existe un sobre con ese nombre",
+  "@duplicatePackName": {
+    "description": "Error de nombre duplicado de sobre."
+  },
+  "simulation": "Simulacion",
+  "@simulation": {
+    "description": "Seccion de simulacion de sobres."
+  },
+  "simulate": "Simular",
+  "@simulate": {
+    "description": "Accion para simular aperturas."
+  },
+  "savePackBeforeSimulating": "Guarda el sobre antes de simular",
+  "@savePackBeforeSimulating": {
+    "description": "Mensaje de simulacion para sobres nuevos."
+  },
+  "packPreviewName": "Sobre",
+  "@packPreviewName": {
+    "description": "Nombre provisional mostrado en previsualizacion de sobre."
   }
 }

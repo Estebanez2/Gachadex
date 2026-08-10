@@ -55,9 +55,9 @@ final class PackSlotRule {
       case PackSlotRuleType.minimumRarity:
         if (minimumRarityOrder == null ||
             fixedRarityId != null ||
-            probabilityGroupId != null) {
+            probabilityGroupId == null) {
           throw ArgumentError(
-            'minimumRarity requires only minimumRarityOrder.',
+            'minimumRarity requires minimumRarityOrder and probabilityGroupId.',
           );
         }
 

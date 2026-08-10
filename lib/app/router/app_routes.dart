@@ -27,6 +27,16 @@ abstract final class AppRoutes {
     return '${createProjectPath(projectId)}/cards/$cardId';
   }
 
+  static const createPackNewName = 'create-pack-new';
+  static String createPackNewPath(String projectId) {
+    return '${createProjectPath(projectId)}/packs/new';
+  }
+
+  static const createPackEditName = 'create-pack-edit';
+  static String createPackEditPath(String projectId, String packTypeId) {
+    return '${createProjectPath(projectId)}/packs/$packTypeId';
+  }
+
   static const settingsName = 'settings';
   static const settingsPath = '/settings';
 

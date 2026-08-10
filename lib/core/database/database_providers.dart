@@ -62,7 +62,10 @@ final rarityRepositoryProvider = Provider<RarityRepository>((ref) {
 });
 
 final packTypeRepositoryProvider = Provider<PackTypeRepository>((ref) {
-  return DriftPackTypeRepository(database: ref.watch(appDatabaseProvider));
+  return DriftPackTypeRepository(
+    database: ref.watch(appDatabaseProvider),
+    clock: ref.watch(clockProvider),
+  );
 });
 
 final installedCollectionRepositoryProvider =

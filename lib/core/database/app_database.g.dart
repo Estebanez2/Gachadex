@@ -1424,6 +1424,103 @@ class $PackTypesTable extends PackTypes
       'REFERENCES media_assets (id) ON DELETE SET NULL',
     ),
   );
+  static const VerificationMeta _frontColorIdMeta = const VerificationMeta(
+    'frontColorId',
+  );
+  @override
+  late final GeneratedColumn<String> frontColorId = GeneratedColumn<String>(
+    'front_color_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(PackVisualCatalog.defaultColorId),
+  );
+  static const VerificationMeta _frontAccentColorIdMeta =
+      const VerificationMeta('frontAccentColorId');
+  @override
+  late final GeneratedColumn<String> frontAccentColorId =
+      GeneratedColumn<String>(
+        'front_accent_color_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(PackVisualCatalog.defaultAccentColorId),
+      );
+  static const VerificationMeta _frontIconIdMeta = const VerificationMeta(
+    'frontIconId',
+  );
+  @override
+  late final GeneratedColumn<String> frontIconId = GeneratedColumn<String>(
+    'front_icon_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(PackVisualCatalog.defaultIconId),
+  );
+  static const VerificationMeta _frontPatternIdMeta = const VerificationMeta(
+    'frontPatternId',
+  );
+  @override
+  late final GeneratedColumn<String> frontPatternId = GeneratedColumn<String>(
+    'front_pattern_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(PackVisualCatalog.defaultPatternId),
+  );
+  static const VerificationMeta _backColorIdMeta = const VerificationMeta(
+    'backColorId',
+  );
+  @override
+  late final GeneratedColumn<String> backColorId = GeneratedColumn<String>(
+    'back_color_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('ink'),
+  );
+  static const VerificationMeta _backAccentColorIdMeta = const VerificationMeta(
+    'backAccentColorId',
+  );
+  @override
+  late final GeneratedColumn<String> backAccentColorId =
+      GeneratedColumn<String>(
+        'back_accent_color_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('rose'),
+      );
+  static const VerificationMeta _backIconIdMeta = const VerificationMeta(
+    'backIconId',
+  );
+  @override
+  late final GeneratedColumn<String> backIconId = GeneratedColumn<String>(
+    'back_icon_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('cards'),
+  );
+  static const VerificationMeta _backPatternIdMeta = const VerificationMeta(
+    'backPatternId',
+  );
+  @override
+  late final GeneratedColumn<String> backPatternId = GeneratedColumn<String>(
+    'back_pattern_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('dots'),
+  );
   static const VerificationMeta _cardCountMeta = const VerificationMeta(
     'cardCount',
   );
@@ -1499,6 +1596,14 @@ class $PackTypesTable extends PackTypes
     description,
     frontAssetId,
     backAssetId,
+    frontColorId,
+    frontAccentColorId,
+    frontIconId,
+    frontPatternId,
+    backColorId,
+    backAccentColorId,
+    backIconId,
+    backPatternId,
     cardCount,
     rechargeSeconds,
     maxAccumulated,
@@ -1577,6 +1682,78 @@ class $PackTypesTable extends PackTypes
         backAssetId.isAcceptableOrUnknown(
           data['back_asset_id']!,
           _backAssetIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('front_color_id')) {
+      context.handle(
+        _frontColorIdMeta,
+        frontColorId.isAcceptableOrUnknown(
+          data['front_color_id']!,
+          _frontColorIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('front_accent_color_id')) {
+      context.handle(
+        _frontAccentColorIdMeta,
+        frontAccentColorId.isAcceptableOrUnknown(
+          data['front_accent_color_id']!,
+          _frontAccentColorIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('front_icon_id')) {
+      context.handle(
+        _frontIconIdMeta,
+        frontIconId.isAcceptableOrUnknown(
+          data['front_icon_id']!,
+          _frontIconIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('front_pattern_id')) {
+      context.handle(
+        _frontPatternIdMeta,
+        frontPatternId.isAcceptableOrUnknown(
+          data['front_pattern_id']!,
+          _frontPatternIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('back_color_id')) {
+      context.handle(
+        _backColorIdMeta,
+        backColorId.isAcceptableOrUnknown(
+          data['back_color_id']!,
+          _backColorIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('back_accent_color_id')) {
+      context.handle(
+        _backAccentColorIdMeta,
+        backAccentColorId.isAcceptableOrUnknown(
+          data['back_accent_color_id']!,
+          _backAccentColorIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('back_icon_id')) {
+      context.handle(
+        _backIconIdMeta,
+        backIconId.isAcceptableOrUnknown(
+          data['back_icon_id']!,
+          _backIconIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('back_pattern_id')) {
+      context.handle(
+        _backPatternIdMeta,
+        backPatternId.isAcceptableOrUnknown(
+          data['back_pattern_id']!,
+          _backPatternIdMeta,
         ),
       );
     }
@@ -1679,6 +1856,38 @@ class $PackTypesTable extends PackTypes
         DriftSqlType.string,
         data['${effectivePrefix}back_asset_id'],
       ),
+      frontColorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front_color_id'],
+      )!,
+      frontAccentColorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front_accent_color_id'],
+      )!,
+      frontIconId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front_icon_id'],
+      )!,
+      frontPatternId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front_pattern_id'],
+      )!,
+      backColorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}back_color_id'],
+      )!,
+      backAccentColorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}back_accent_color_id'],
+      )!,
+      backIconId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}back_icon_id'],
+      )!,
+      backPatternId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}back_pattern_id'],
+      )!,
       cardCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}card_count'],
@@ -1720,6 +1929,14 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
   final String? description;
   final String? frontAssetId;
   final String? backAssetId;
+  final String frontColorId;
+  final String frontAccentColorId;
+  final String frontIconId;
+  final String frontPatternId;
+  final String backColorId;
+  final String backAccentColorId;
+  final String backIconId;
+  final String backPatternId;
   final int cardCount;
   final int rechargeSeconds;
   final int maxAccumulated;
@@ -1734,6 +1951,14 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
     this.description,
     this.frontAssetId,
     this.backAssetId,
+    required this.frontColorId,
+    required this.frontAccentColorId,
+    required this.frontIconId,
+    required this.frontPatternId,
+    required this.backColorId,
+    required this.backAccentColorId,
+    required this.backIconId,
+    required this.backPatternId,
     required this.cardCount,
     required this.rechargeSeconds,
     required this.maxAccumulated,
@@ -1757,6 +1982,14 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
     if (!nullToAbsent || backAssetId != null) {
       map['back_asset_id'] = Variable<String>(backAssetId);
     }
+    map['front_color_id'] = Variable<String>(frontColorId);
+    map['front_accent_color_id'] = Variable<String>(frontAccentColorId);
+    map['front_icon_id'] = Variable<String>(frontIconId);
+    map['front_pattern_id'] = Variable<String>(frontPatternId);
+    map['back_color_id'] = Variable<String>(backColorId);
+    map['back_accent_color_id'] = Variable<String>(backAccentColorId);
+    map['back_icon_id'] = Variable<String>(backIconId);
+    map['back_pattern_id'] = Variable<String>(backPatternId);
     map['card_count'] = Variable<int>(cardCount);
     map['recharge_seconds'] = Variable<int>(rechargeSeconds);
     map['max_accumulated'] = Variable<int>(maxAccumulated);
@@ -1781,6 +2014,14 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
       backAssetId: backAssetId == null && nullToAbsent
           ? const Value.absent()
           : Value(backAssetId),
+      frontColorId: Value(frontColorId),
+      frontAccentColorId: Value(frontAccentColorId),
+      frontIconId: Value(frontIconId),
+      frontPatternId: Value(frontPatternId),
+      backColorId: Value(backColorId),
+      backAccentColorId: Value(backAccentColorId),
+      backIconId: Value(backIconId),
+      backPatternId: Value(backPatternId),
       cardCount: Value(cardCount),
       rechargeSeconds: Value(rechargeSeconds),
       maxAccumulated: Value(maxAccumulated),
@@ -1803,6 +2044,16 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
       description: serializer.fromJson<String?>(json['description']),
       frontAssetId: serializer.fromJson<String?>(json['frontAssetId']),
       backAssetId: serializer.fromJson<String?>(json['backAssetId']),
+      frontColorId: serializer.fromJson<String>(json['frontColorId']),
+      frontAccentColorId: serializer.fromJson<String>(
+        json['frontAccentColorId'],
+      ),
+      frontIconId: serializer.fromJson<String>(json['frontIconId']),
+      frontPatternId: serializer.fromJson<String>(json['frontPatternId']),
+      backColorId: serializer.fromJson<String>(json['backColorId']),
+      backAccentColorId: serializer.fromJson<String>(json['backAccentColorId']),
+      backIconId: serializer.fromJson<String>(json['backIconId']),
+      backPatternId: serializer.fromJson<String>(json['backPatternId']),
       cardCount: serializer.fromJson<int>(json['cardCount']),
       rechargeSeconds: serializer.fromJson<int>(json['rechargeSeconds']),
       maxAccumulated: serializer.fromJson<int>(json['maxAccumulated']),
@@ -1824,6 +2075,14 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
       'description': serializer.toJson<String?>(description),
       'frontAssetId': serializer.toJson<String?>(frontAssetId),
       'backAssetId': serializer.toJson<String?>(backAssetId),
+      'frontColorId': serializer.toJson<String>(frontColorId),
+      'frontAccentColorId': serializer.toJson<String>(frontAccentColorId),
+      'frontIconId': serializer.toJson<String>(frontIconId),
+      'frontPatternId': serializer.toJson<String>(frontPatternId),
+      'backColorId': serializer.toJson<String>(backColorId),
+      'backAccentColorId': serializer.toJson<String>(backAccentColorId),
+      'backIconId': serializer.toJson<String>(backIconId),
+      'backPatternId': serializer.toJson<String>(backPatternId),
       'cardCount': serializer.toJson<int>(cardCount),
       'rechargeSeconds': serializer.toJson<int>(rechargeSeconds),
       'maxAccumulated': serializer.toJson<int>(maxAccumulated),
@@ -1841,6 +2100,14 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
     Value<String?> description = const Value.absent(),
     Value<String?> frontAssetId = const Value.absent(),
     Value<String?> backAssetId = const Value.absent(),
+    String? frontColorId,
+    String? frontAccentColorId,
+    String? frontIconId,
+    String? frontPatternId,
+    String? backColorId,
+    String? backAccentColorId,
+    String? backIconId,
+    String? backPatternId,
     int? cardCount,
     int? rechargeSeconds,
     int? maxAccumulated,
@@ -1855,6 +2122,14 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
     description: description.present ? description.value : this.description,
     frontAssetId: frontAssetId.present ? frontAssetId.value : this.frontAssetId,
     backAssetId: backAssetId.present ? backAssetId.value : this.backAssetId,
+    frontColorId: frontColorId ?? this.frontColorId,
+    frontAccentColorId: frontAccentColorId ?? this.frontAccentColorId,
+    frontIconId: frontIconId ?? this.frontIconId,
+    frontPatternId: frontPatternId ?? this.frontPatternId,
+    backColorId: backColorId ?? this.backColorId,
+    backAccentColorId: backAccentColorId ?? this.backAccentColorId,
+    backIconId: backIconId ?? this.backIconId,
+    backPatternId: backPatternId ?? this.backPatternId,
     cardCount: cardCount ?? this.cardCount,
     rechargeSeconds: rechargeSeconds ?? this.rechargeSeconds,
     maxAccumulated: maxAccumulated ?? this.maxAccumulated,
@@ -1881,6 +2156,30 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
       backAssetId: data.backAssetId.present
           ? data.backAssetId.value
           : this.backAssetId,
+      frontColorId: data.frontColorId.present
+          ? data.frontColorId.value
+          : this.frontColorId,
+      frontAccentColorId: data.frontAccentColorId.present
+          ? data.frontAccentColorId.value
+          : this.frontAccentColorId,
+      frontIconId: data.frontIconId.present
+          ? data.frontIconId.value
+          : this.frontIconId,
+      frontPatternId: data.frontPatternId.present
+          ? data.frontPatternId.value
+          : this.frontPatternId,
+      backColorId: data.backColorId.present
+          ? data.backColorId.value
+          : this.backColorId,
+      backAccentColorId: data.backAccentColorId.present
+          ? data.backAccentColorId.value
+          : this.backAccentColorId,
+      backIconId: data.backIconId.present
+          ? data.backIconId.value
+          : this.backIconId,
+      backPatternId: data.backPatternId.present
+          ? data.backPatternId.value
+          : this.backPatternId,
       cardCount: data.cardCount.present ? data.cardCount.value : this.cardCount,
       rechargeSeconds: data.rechargeSeconds.present
           ? data.rechargeSeconds.value
@@ -1906,6 +2205,14 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
           ..write('description: $description, ')
           ..write('frontAssetId: $frontAssetId, ')
           ..write('backAssetId: $backAssetId, ')
+          ..write('frontColorId: $frontColorId, ')
+          ..write('frontAccentColorId: $frontAccentColorId, ')
+          ..write('frontIconId: $frontIconId, ')
+          ..write('frontPatternId: $frontPatternId, ')
+          ..write('backColorId: $backColorId, ')
+          ..write('backAccentColorId: $backAccentColorId, ')
+          ..write('backIconId: $backIconId, ')
+          ..write('backPatternId: $backPatternId, ')
           ..write('cardCount: $cardCount, ')
           ..write('rechargeSeconds: $rechargeSeconds, ')
           ..write('maxAccumulated: $maxAccumulated, ')
@@ -1917,7 +2224,7 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     collectionId,
     contentVersionId,
@@ -1925,13 +2232,21 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
     description,
     frontAssetId,
     backAssetId,
+    frontColorId,
+    frontAccentColorId,
+    frontIconId,
+    frontPatternId,
+    backColorId,
+    backAccentColorId,
+    backIconId,
+    backPatternId,
     cardCount,
     rechargeSeconds,
     maxAccumulated,
     isMain,
     coinsPerFullRecharge,
     sortIndex,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1943,6 +2258,14 @@ class PackTypeRow extends DataClass implements Insertable<PackTypeRow> {
           other.description == this.description &&
           other.frontAssetId == this.frontAssetId &&
           other.backAssetId == this.backAssetId &&
+          other.frontColorId == this.frontColorId &&
+          other.frontAccentColorId == this.frontAccentColorId &&
+          other.frontIconId == this.frontIconId &&
+          other.frontPatternId == this.frontPatternId &&
+          other.backColorId == this.backColorId &&
+          other.backAccentColorId == this.backAccentColorId &&
+          other.backIconId == this.backIconId &&
+          other.backPatternId == this.backPatternId &&
           other.cardCount == this.cardCount &&
           other.rechargeSeconds == this.rechargeSeconds &&
           other.maxAccumulated == this.maxAccumulated &&
@@ -1959,6 +2282,14 @@ class PackTypesCompanion extends UpdateCompanion<PackTypeRow> {
   final Value<String?> description;
   final Value<String?> frontAssetId;
   final Value<String?> backAssetId;
+  final Value<String> frontColorId;
+  final Value<String> frontAccentColorId;
+  final Value<String> frontIconId;
+  final Value<String> frontPatternId;
+  final Value<String> backColorId;
+  final Value<String> backAccentColorId;
+  final Value<String> backIconId;
+  final Value<String> backPatternId;
   final Value<int> cardCount;
   final Value<int> rechargeSeconds;
   final Value<int> maxAccumulated;
@@ -1974,6 +2305,14 @@ class PackTypesCompanion extends UpdateCompanion<PackTypeRow> {
     this.description = const Value.absent(),
     this.frontAssetId = const Value.absent(),
     this.backAssetId = const Value.absent(),
+    this.frontColorId = const Value.absent(),
+    this.frontAccentColorId = const Value.absent(),
+    this.frontIconId = const Value.absent(),
+    this.frontPatternId = const Value.absent(),
+    this.backColorId = const Value.absent(),
+    this.backAccentColorId = const Value.absent(),
+    this.backIconId = const Value.absent(),
+    this.backPatternId = const Value.absent(),
     this.cardCount = const Value.absent(),
     this.rechargeSeconds = const Value.absent(),
     this.maxAccumulated = const Value.absent(),
@@ -1990,6 +2329,14 @@ class PackTypesCompanion extends UpdateCompanion<PackTypeRow> {
     this.description = const Value.absent(),
     this.frontAssetId = const Value.absent(),
     this.backAssetId = const Value.absent(),
+    this.frontColorId = const Value.absent(),
+    this.frontAccentColorId = const Value.absent(),
+    this.frontIconId = const Value.absent(),
+    this.frontPatternId = const Value.absent(),
+    this.backColorId = const Value.absent(),
+    this.backAccentColorId = const Value.absent(),
+    this.backIconId = const Value.absent(),
+    this.backPatternId = const Value.absent(),
     required int cardCount,
     required int rechargeSeconds,
     required int maxAccumulated,
@@ -2015,6 +2362,14 @@ class PackTypesCompanion extends UpdateCompanion<PackTypeRow> {
     Expression<String>? description,
     Expression<String>? frontAssetId,
     Expression<String>? backAssetId,
+    Expression<String>? frontColorId,
+    Expression<String>? frontAccentColorId,
+    Expression<String>? frontIconId,
+    Expression<String>? frontPatternId,
+    Expression<String>? backColorId,
+    Expression<String>? backAccentColorId,
+    Expression<String>? backIconId,
+    Expression<String>? backPatternId,
     Expression<int>? cardCount,
     Expression<int>? rechargeSeconds,
     Expression<int>? maxAccumulated,
@@ -2031,6 +2386,15 @@ class PackTypesCompanion extends UpdateCompanion<PackTypeRow> {
       if (description != null) 'description': description,
       if (frontAssetId != null) 'front_asset_id': frontAssetId,
       if (backAssetId != null) 'back_asset_id': backAssetId,
+      if (frontColorId != null) 'front_color_id': frontColorId,
+      if (frontAccentColorId != null)
+        'front_accent_color_id': frontAccentColorId,
+      if (frontIconId != null) 'front_icon_id': frontIconId,
+      if (frontPatternId != null) 'front_pattern_id': frontPatternId,
+      if (backColorId != null) 'back_color_id': backColorId,
+      if (backAccentColorId != null) 'back_accent_color_id': backAccentColorId,
+      if (backIconId != null) 'back_icon_id': backIconId,
+      if (backPatternId != null) 'back_pattern_id': backPatternId,
       if (cardCount != null) 'card_count': cardCount,
       if (rechargeSeconds != null) 'recharge_seconds': rechargeSeconds,
       if (maxAccumulated != null) 'max_accumulated': maxAccumulated,
@@ -2050,6 +2414,14 @@ class PackTypesCompanion extends UpdateCompanion<PackTypeRow> {
     Value<String?>? description,
     Value<String?>? frontAssetId,
     Value<String?>? backAssetId,
+    Value<String>? frontColorId,
+    Value<String>? frontAccentColorId,
+    Value<String>? frontIconId,
+    Value<String>? frontPatternId,
+    Value<String>? backColorId,
+    Value<String>? backAccentColorId,
+    Value<String>? backIconId,
+    Value<String>? backPatternId,
     Value<int>? cardCount,
     Value<int>? rechargeSeconds,
     Value<int>? maxAccumulated,
@@ -2066,6 +2438,14 @@ class PackTypesCompanion extends UpdateCompanion<PackTypeRow> {
       description: description ?? this.description,
       frontAssetId: frontAssetId ?? this.frontAssetId,
       backAssetId: backAssetId ?? this.backAssetId,
+      frontColorId: frontColorId ?? this.frontColorId,
+      frontAccentColorId: frontAccentColorId ?? this.frontAccentColorId,
+      frontIconId: frontIconId ?? this.frontIconId,
+      frontPatternId: frontPatternId ?? this.frontPatternId,
+      backColorId: backColorId ?? this.backColorId,
+      backAccentColorId: backAccentColorId ?? this.backAccentColorId,
+      backIconId: backIconId ?? this.backIconId,
+      backPatternId: backPatternId ?? this.backPatternId,
       cardCount: cardCount ?? this.cardCount,
       rechargeSeconds: rechargeSeconds ?? this.rechargeSeconds,
       maxAccumulated: maxAccumulated ?? this.maxAccumulated,
@@ -2099,6 +2479,30 @@ class PackTypesCompanion extends UpdateCompanion<PackTypeRow> {
     }
     if (backAssetId.present) {
       map['back_asset_id'] = Variable<String>(backAssetId.value);
+    }
+    if (frontColorId.present) {
+      map['front_color_id'] = Variable<String>(frontColorId.value);
+    }
+    if (frontAccentColorId.present) {
+      map['front_accent_color_id'] = Variable<String>(frontAccentColorId.value);
+    }
+    if (frontIconId.present) {
+      map['front_icon_id'] = Variable<String>(frontIconId.value);
+    }
+    if (frontPatternId.present) {
+      map['front_pattern_id'] = Variable<String>(frontPatternId.value);
+    }
+    if (backColorId.present) {
+      map['back_color_id'] = Variable<String>(backColorId.value);
+    }
+    if (backAccentColorId.present) {
+      map['back_accent_color_id'] = Variable<String>(backAccentColorId.value);
+    }
+    if (backIconId.present) {
+      map['back_icon_id'] = Variable<String>(backIconId.value);
+    }
+    if (backPatternId.present) {
+      map['back_pattern_id'] = Variable<String>(backPatternId.value);
     }
     if (cardCount.present) {
       map['card_count'] = Variable<int>(cardCount.value);
@@ -2136,6 +2540,14 @@ class PackTypesCompanion extends UpdateCompanion<PackTypeRow> {
           ..write('description: $description, ')
           ..write('frontAssetId: $frontAssetId, ')
           ..write('backAssetId: $backAssetId, ')
+          ..write('frontColorId: $frontColorId, ')
+          ..write('frontAccentColorId: $frontAccentColorId, ')
+          ..write('frontIconId: $frontIconId, ')
+          ..write('frontPatternId: $frontPatternId, ')
+          ..write('backColorId: $backColorId, ')
+          ..write('backAccentColorId: $backAccentColorId, ')
+          ..write('backIconId: $backIconId, ')
+          ..write('backPatternId: $backPatternId, ')
           ..write('cardCount: $cardCount, ')
           ..write('rechargeSeconds: $rechargeSeconds, ')
           ..write('maxAccumulated: $maxAccumulated, ')
@@ -11553,6 +11965,14 @@ typedef $$PackTypesTableCreateCompanionBuilder =
       Value<String?> description,
       Value<String?> frontAssetId,
       Value<String?> backAssetId,
+      Value<String> frontColorId,
+      Value<String> frontAccentColorId,
+      Value<String> frontIconId,
+      Value<String> frontPatternId,
+      Value<String> backColorId,
+      Value<String> backAccentColorId,
+      Value<String> backIconId,
+      Value<String> backPatternId,
       required int cardCount,
       required int rechargeSeconds,
       required int maxAccumulated,
@@ -11570,6 +11990,14 @@ typedef $$PackTypesTableUpdateCompanionBuilder =
       Value<String?> description,
       Value<String?> frontAssetId,
       Value<String?> backAssetId,
+      Value<String> frontColorId,
+      Value<String> frontAccentColorId,
+      Value<String> frontIconId,
+      Value<String> frontPatternId,
+      Value<String> backColorId,
+      Value<String> backAccentColorId,
+      Value<String> backIconId,
+      Value<String> backPatternId,
       Value<int> cardCount,
       Value<int> rechargeSeconds,
       Value<int> maxAccumulated,
@@ -11804,6 +12232,46 @@ class $$PackTypesTableFilterComposer
 
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get frontColorId => $composableBuilder(
+    column: $table.frontColorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get frontAccentColorId => $composableBuilder(
+    column: $table.frontAccentColorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get frontIconId => $composableBuilder(
+    column: $table.frontIconId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get frontPatternId => $composableBuilder(
+    column: $table.frontPatternId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get backColorId => $composableBuilder(
+    column: $table.backColorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get backAccentColorId => $composableBuilder(
+    column: $table.backAccentColorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get backIconId => $composableBuilder(
+    column: $table.backIconId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get backPatternId => $composableBuilder(
+    column: $table.backPatternId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12111,6 +12579,46 @@ class $$PackTypesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get frontColorId => $composableBuilder(
+    column: $table.frontColorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get frontAccentColorId => $composableBuilder(
+    column: $table.frontAccentColorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get frontIconId => $composableBuilder(
+    column: $table.frontIconId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get frontPatternId => $composableBuilder(
+    column: $table.frontPatternId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get backColorId => $composableBuilder(
+    column: $table.backColorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get backAccentColorId => $composableBuilder(
+    column: $table.backAccentColorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get backIconId => $composableBuilder(
+    column: $table.backIconId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get backPatternId => $composableBuilder(
+    column: $table.backPatternId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get cardCount => $composableBuilder(
     column: $table.cardCount,
     builder: (column) => ColumnOrderings(column),
@@ -12233,6 +12741,46 @@ class $$PackTypesTableAnnotationComposer
 
   GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get frontColorId => $composableBuilder(
+    column: $table.frontColorId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get frontAccentColorId => $composableBuilder(
+    column: $table.frontAccentColorId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get frontIconId => $composableBuilder(
+    column: $table.frontIconId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get frontPatternId => $composableBuilder(
+    column: $table.frontPatternId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get backColorId => $composableBuilder(
+    column: $table.backColorId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get backAccentColorId => $composableBuilder(
+    column: $table.backAccentColorId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get backIconId => $composableBuilder(
+    column: $table.backIconId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get backPatternId => $composableBuilder(
+    column: $table.backPatternId,
     builder: (column) => column,
   );
 
@@ -12553,6 +13101,14 @@ class $$PackTypesTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<String?> frontAssetId = const Value.absent(),
                 Value<String?> backAssetId = const Value.absent(),
+                Value<String> frontColorId = const Value.absent(),
+                Value<String> frontAccentColorId = const Value.absent(),
+                Value<String> frontIconId = const Value.absent(),
+                Value<String> frontPatternId = const Value.absent(),
+                Value<String> backColorId = const Value.absent(),
+                Value<String> backAccentColorId = const Value.absent(),
+                Value<String> backIconId = const Value.absent(),
+                Value<String> backPatternId = const Value.absent(),
                 Value<int> cardCount = const Value.absent(),
                 Value<int> rechargeSeconds = const Value.absent(),
                 Value<int> maxAccumulated = const Value.absent(),
@@ -12568,6 +13124,14 @@ class $$PackTypesTableTableManager
                 description: description,
                 frontAssetId: frontAssetId,
                 backAssetId: backAssetId,
+                frontColorId: frontColorId,
+                frontAccentColorId: frontAccentColorId,
+                frontIconId: frontIconId,
+                frontPatternId: frontPatternId,
+                backColorId: backColorId,
+                backAccentColorId: backAccentColorId,
+                backIconId: backIconId,
+                backPatternId: backPatternId,
                 cardCount: cardCount,
                 rechargeSeconds: rechargeSeconds,
                 maxAccumulated: maxAccumulated,
@@ -12585,6 +13149,14 @@ class $$PackTypesTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<String?> frontAssetId = const Value.absent(),
                 Value<String?> backAssetId = const Value.absent(),
+                Value<String> frontColorId = const Value.absent(),
+                Value<String> frontAccentColorId = const Value.absent(),
+                Value<String> frontIconId = const Value.absent(),
+                Value<String> frontPatternId = const Value.absent(),
+                Value<String> backColorId = const Value.absent(),
+                Value<String> backAccentColorId = const Value.absent(),
+                Value<String> backIconId = const Value.absent(),
+                Value<String> backPatternId = const Value.absent(),
                 required int cardCount,
                 required int rechargeSeconds,
                 required int maxAccumulated,
@@ -12600,6 +13172,14 @@ class $$PackTypesTableTableManager
                 description: description,
                 frontAssetId: frontAssetId,
                 backAssetId: backAssetId,
+                frontColorId: frontColorId,
+                frontAccentColorId: frontAccentColorId,
+                frontIconId: frontIconId,
+                frontPatternId: frontPatternId,
+                backColorId: backColorId,
+                backAccentColorId: backAccentColorId,
+                backIconId: backIconId,
+                backPatternId: backPatternId,
                 cardCount: cardCount,
                 rechargeSeconds: rechargeSeconds,
                 maxAccumulated: maxAccumulated,

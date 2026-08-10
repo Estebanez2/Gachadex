@@ -19,8 +19,10 @@ import 'package:gachadex/features/collections/data/repositories/drift_installed_
 import 'package:gachadex/features/collections/domain/entities/installed_collection.dart';
 import 'package:gachadex/features/packs/data/repositories/drift_pack_type_repository.dart';
 import 'package:gachadex/features/packs/domain/entities/pack_card_pool_entry.dart';
+import 'package:gachadex/features/packs/domain/entities/pack_configuration.dart';
 import 'package:gachadex/features/packs/domain/entities/pack_rarity_probability.dart';
 import 'package:gachadex/features/packs/domain/entities/pack_slot_rule.dart';
+import 'package:gachadex/features/packs/domain/entities/pack_type.dart';
 import 'package:gachadex/features/rarities/data/repositories/drift_rarity_repository.dart';
 import 'package:gachadex/features/rarities/domain/catalogs/rarity_visual_catalog.dart';
 import 'package:gachadex/features/rarities/domain/entities/rarity.dart';
@@ -205,7 +207,10 @@ void main() {
         database: database,
         cardRepository: cardRepository,
       );
-      packTypeRepository = DriftPackTypeRepository(database: database);
+      packTypeRepository = DriftPackTypeRepository(
+        database: database,
+        clock: FakeClock(DateTime.utc(2026, 1, 1)),
+      );
     });
 
     tearDown(() async {
@@ -387,6 +392,85 @@ void main() {
         expect(probability.weight, 10);
       },
     );
+
+    test('keeps a single main pack and returns full configuration', () async {
+      final definition = await seedDefinition(database, seed: 8);
+      final packId = PackTypeId(testUuid(8600));
+      final groupId = ProbabilityGroupId(testUuid(8601));
+      final ruleId = PackSlotRuleId(testUuid(8602));
+
+      final created = await packTypeRepository.createConfiguration(
+        PackConfiguration(
+          packType: PackType(
+            id: packId,
+            collectionId: CollectionId(definition.collectionId),
+            contentVersionId: ContentVersionId(definition.contentVersionId),
+            name: 'Segundo sobre',
+            description: 'Tematico',
+            frontAssetId: null,
+            backAssetId: null,
+            cardCount: 1,
+            rechargeSeconds: 7200,
+            maxAccumulated: 3,
+            isMain: true,
+            coinsPerFullRecharge: 5,
+            sortIndex: 1,
+          ),
+          pool: [
+            PackCardPoolEntry(
+              packTypeId: packId,
+              cardId: CardId(definition.cardId),
+              isEnabled: true,
+            ),
+          ],
+          slotRules: [
+            PackSlotRule(
+              id: ruleId,
+              packTypeId: packId,
+              slotIndex: 0,
+              ruleType: PackSlotRuleType.probabilityDistribution,
+              fixedRarityId: null,
+              minimumRarityOrder: null,
+              probabilityGroupId: groupId,
+            ),
+          ],
+          probabilities: [
+            PackRarityProbability(
+              probabilityGroupId: groupId,
+              rarityId: RarityId(definition.rarityId),
+              weight: 10,
+            ),
+          ],
+        ),
+      );
+
+      final packs = await packTypeRepository
+          .watchByCollectionVersion(
+            collectionId: CollectionId(definition.collectionId),
+            contentVersionId: ContentVersionId(definition.contentVersionId),
+          )
+          .first;
+      final full = await packTypeRepository.getFullConfiguration(packId);
+
+      expect(created.packType.isMain, isTrue);
+      expect(packs.where((pack) => pack.isMain), hasLength(1));
+      expect(packs.singleWhere((pack) => pack.id == packId).sortIndex, 1);
+      expect(full.pool, hasLength(1));
+      expect(full.slotRules, hasLength(1));
+      expect(full.probabilities.single.weight, 10);
+
+      await packTypeRepository.delete(packId);
+      final remaining = await packTypeRepository
+          .watchByCollectionVersion(
+            collectionId: CollectionId(definition.collectionId),
+            contentVersionId: ContentVersionId(definition.contentVersionId),
+          )
+          .first;
+
+      expect(remaining, hasLength(1));
+      expect(remaining.single.isMain, isTrue);
+      expect(remaining.single.sortIndex, 0);
+    });
 
     test(
       'inserts, watches and deletes installed collections with progress',

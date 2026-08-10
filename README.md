@@ -7,18 +7,20 @@ dinero real.
 
 ## Estado actual
 
-Fase 4: borradores, rarezas y cartas con fotografias.
+Fase 5: borradores, rarezas, cartas con fotografias y configuracion de sobres.
 
 Incluye la base tecnica de Fase 1, el dominio y persistencia local de Fase 2,
-schema version 3, biblioteca de borradores, creacion atomica de borradores,
+schema version 4, biblioteca de borradores, creacion atomica de borradores,
 editor con autosave, portada provisional generada en Flutter y CRUD/reordenacion
 de rarezas. La seccion Cartas permite seleccionar una foto de galeria,
 recortarla, guardarla como WebP privado con miniatura, completar datos, ver
-preview, editar y eliminar.
+preview, editar y eliminar. La seccion Sobres permite crear varios tipos de
+sobre, elegir principal, configurar cartas elegibles, reglas por posicion,
+pesos por rareza y simular aperturas sin modificar progreso.
 
-No incluye todavia videos, tipos de sobre, apertura visual, probabilidades
-ejecutables, temporizadores reales, economia visible, notificaciones,
-importacion ni exportacion.
+No incluye todavia videos, finalizacion, coleccion instalada, entrega de
+sobres, apertura visual, temporizadores reales, economia visible,
+notificaciones, importacion ni exportacion.
 
 ## Requisitos
 
@@ -85,7 +87,7 @@ Selecciona un dispositivo Android concreto:
 flutter run -d <device-id>
 ```
 
-Flujo manual de Fase 4:
+Flujo manual de Fase 5:
 
 1. Abrir la pestana `Crear`.
 2. Crear una coleccion nueva.
@@ -97,7 +99,17 @@ Flujo manual de Fase 4:
 7. Guardar, cerrar completamente la app y volver a abrirla.
 8. Verificar que la carta y su miniatura siguen en la cuadricula.
 9. Editar la carta, sustituir la foto y guardar.
-10. Eliminar la carta y confirmar que desaparece de la cuadricula.
+10. Entrar en `Sobres` y pulsar `Anadir sobre`.
+11. Configurar nombre, cinco cartas por sobre, 12 horas, maximo 3 y coste.
+12. Elegir cartas elegibles, revisar reglas por posicion y pesos por rareza.
+13. Guardar; el primer sobre queda como principal.
+14. Crear un segundo sobre, marcarlo como principal y comprobar que el anterior
+    deja de serlo.
+15. Editar un sobre guardado y ejecutar `Simular`; no se crean cartas obtenidas
+    ni inventario.
+16. Cerrar y reabrir la app; verificar que sobres, reglas, pesos y principal se
+    conservan.
+17. Eliminar un sobre y confirmar que no se borran cartas ni rarezas.
 
 ## Analisis y pruebas
 

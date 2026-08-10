@@ -15,6 +15,8 @@ import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../cards/application/card_providers.dart';
 import '../../../cards/domain/repositories/card_repository.dart';
+import '../../../packs/application/pack_providers.dart';
+import '../../../packs/domain/entities/pack_configuration.dart';
 import '../../../rarities/application/rarity_use_case_providers.dart';
 import '../../../rarities/application/rarity_use_cases.dart';
 import '../../../rarities/domain/catalogs/rarity_visual_catalog.dart';
@@ -28,7 +30,7 @@ import '../controllers/collection_draft_controller.dart';
 import '../widgets/draft_cover_preview.dart';
 import '../widgets/visual_option_labels.dart';
 
-enum _EditorSection { information, rarities, cards }
+enum _EditorSection { information, rarities, cards, packs }
 
 class CollectionDraftEditorPage extends ConsumerStatefulWidget {
   const CollectionDraftEditorPage({super.key, required this.projectId});
@@ -202,6 +204,11 @@ class _EditorBody extends ConsumerWidget {
                       icon: const Icon(Icons.style_outlined),
                       label: Text(l10n.cards),
                     ),
+                    ButtonSegment(
+                      value: _EditorSection.packs,
+                      icon: const Icon(Icons.inventory_2_outlined),
+                      label: Text(l10n.packs),
+                    ),
                   ],
                   selected: {section},
                   onSelectionChanged: (selection) {
@@ -222,6 +229,10 @@ class _EditorBody extends ConsumerWidget {
                     ),
                     _EditorSection.cards => _CardsSection(
                       key: const ValueKey('cards'),
+                      state: state,
+                    ),
+                    _EditorSection.packs => _PacksSection(
+                      key: const ValueKey('packs'),
                       state: state,
                     ),
                   },
@@ -304,7 +315,12 @@ class _CompletionPanel extends StatelessWidget {
               onTap: () => onSectionChanged(_EditorSection.cards),
             ),
             const Divider(),
-            _FutureRow(title: l10n.packs),
+            _CompletionRow(
+              title: l10n.packs,
+              status: state.completeness.packs,
+              missingText: l10n.atLeastOnePack,
+              onTap: () => onSectionChanged(_EditorSection.packs),
+            ),
             const Divider(),
             _FutureRow(title: l10n.review),
           ],
@@ -809,6 +825,220 @@ class _CardsSection extends ConsumerWidget {
   }
 }
 
+class _PacksSection extends ConsumerWidget {
+  const _PacksSection({super.key, required this.state});
+
+  final CollectionDraftEditorState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final contentVersionId = state.project.currentContentVersionId;
+    if (contentVersionId == null) {
+      return AppErrorView(
+        title: l10n.screenErrorTitle,
+        description: l10n.projectNotFound,
+      );
+    }
+    final packsAsync = ref.watch(
+      packsByVersionProvider((
+        collectionId: state.project.collectionId,
+        contentVersionId: contentVersionId,
+      )),
+    );
+
+    return packsAsync.when(
+      loading: () => const AppLoadingView(),
+      error: (_, _) => AppErrorView(
+        title: l10n.screenErrorTitle,
+        description: l10n.saveError,
+      ),
+      data: (packs) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.packs,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              ),
+              FilledButton.icon(
+                onPressed: state.cardCount <= 0
+                    ? null
+                    : () => context.go(
+                        AppRoutes.createPackNewPath(state.project.id.value),
+                      ),
+                icon: const Icon(Icons.add),
+                label: Text(l10n.addPack),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingMd),
+          if (state.cardCount <= 0)
+            AppEmptyView(
+              icon: Icons.style_outlined,
+              title: l10n.noCardsTitle,
+              description: l10n.atLeastOneCard,
+            )
+          else if (packs.isEmpty)
+            AppEmptyView(
+              icon: Icons.inventory_2_outlined,
+              title: l10n.noPacksTitle,
+              description: l10n.noPacksDescription,
+            )
+          else
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: packs.length,
+              onReorderItem: (oldIndex, newIndex) async {
+                final ordered = [...packs];
+                final moved = ordered.removeAt(oldIndex);
+                ordered.insert(newIndex, moved);
+                await ref
+                    .read(packEditorUseCasesProvider)
+                    .reorder(
+                      collectionId: state.project.collectionId,
+                      contentVersionId: contentVersionId,
+                      orderedIds: ordered
+                          .map((config) => config.packType.id)
+                          .toList(),
+                    );
+              },
+              itemBuilder: (context, index) {
+                final config = packs[index];
+                return _PackListItem(
+                  key: ValueKey(config.packType.id.value),
+                  config: config,
+                  index: index,
+                  isFirst: index == 0,
+                  isLast: index == packs.length - 1,
+                  onEdit: () => context.go(
+                    AppRoutes.createPackEditPath(
+                      state.project.id.value,
+                      config.packType.id.value,
+                    ),
+                  ),
+                  onSetMain: config.packType.isMain
+                      ? null
+                      : () => ref
+                            .read(packEditorUseCasesProvider)
+                            .setMain(config.packType.id),
+                  onDelete: () => _confirmDeletePack(context, ref, config),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PackListItem extends StatelessWidget {
+  const _PackListItem({
+    super.key,
+    required this.config,
+    required this.index,
+    required this.isFirst,
+    required this.isLast,
+    required this.onEdit,
+    required this.onSetMain,
+    required this.onDelete,
+  });
+
+  final PackConfiguration config;
+  final int index;
+  final bool isFirst;
+  final bool isLast;
+  final VoidCallback onEdit;
+  final VoidCallback? onSetMain;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final pack = config.packType;
+    final complete =
+        config.pool.any((entry) => entry.isEnabled) &&
+        config.slotRules.length == pack.cardCount &&
+        config.slotRules
+            .where((rule) => rule.probabilityGroupId != null)
+            .every(
+              (rule) => config.probabilities.any(
+                (probability) =>
+                    probability.probabilityGroupId == rule.probabilityGroupId,
+              ),
+            );
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingMd),
+      child: ListTile(
+        onTap: onEdit,
+        leading: ReorderableDragStartListener(
+          index: index,
+          child: const Icon(Icons.drag_handle),
+        ),
+        title: Text(pack.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        subtitle: Text(
+          '${l10n.cardsPerPack}: ${pack.cardCount} · '
+          '${l10n.maxAccumulated}: ${pack.maxAccumulated}\n'
+          '${pack.isMain ? l10n.mainPack : l10n.packSecondary} · '
+          '${complete ? l10n.packConfigurationValid : l10n.packConfigurationIncomplete}',
+        ),
+        trailing: PopupMenuButton<_PackAction>(
+          onSelected: (action) {
+            switch (action) {
+              case _PackAction.edit:
+                onEdit();
+              case _PackAction.main:
+                onSetMain?.call();
+              case _PackAction.delete:
+                onDelete();
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(value: _PackAction.edit, child: Text(l10n.editPack)),
+            if (onSetMain != null)
+              PopupMenuItem(
+                value: _PackAction.main,
+                child: Text(l10n.mainPack),
+              ),
+            PopupMenuItem(
+              value: _PackAction.delete,
+              child: Text(l10n.deletePack),
+            ),
+          ],
+        ),
+        isThreeLine: true,
+        dense: false,
+        selected: pack.isMain,
+        selectedTileColor: Theme.of(context).colorScheme.secondaryContainer,
+        minLeadingWidth: 32,
+        titleTextStyle: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.spacingMd,
+          vertical: AppConstants.spacingSm,
+        ),
+        visualDensity: VisualDensity.standard,
+        enabled: true,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        horizontalTitleGap: AppConstants.spacingSm,
+        tileColor: complete
+            ? null
+            : Theme.of(context).colorScheme.errorContainer,
+      ),
+    );
+  }
+}
+
+enum _PackAction { edit, main, delete }
+
 class _CardGridItem extends StatelessWidget {
   const _CardGridItem({
     required this.details,
@@ -1121,6 +1351,51 @@ Future<void> _confirmDeleteCard(
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.cardDeleted)));
+    }
+  } on Object {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.saveError)));
+    }
+  }
+}
+
+Future<void> _confirmDeletePack(
+  BuildContext context,
+  WidgetRef ref,
+  PackConfiguration config,
+) async {
+  final l10n = context.l10n;
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.deletePack),
+      content: Text('${config.packType.name}\n\n${l10n.deletePackDescription}'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).pop(true),
+          icon: const Icon(Icons.delete_outline),
+          label: Text(l10n.delete),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed != true) {
+    return;
+  }
+
+  try {
+    await ref.read(packEditorUseCasesProvider).delete(config.packType.id);
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.packDeleted)));
     }
   } on Object {
     if (context.mounted) {

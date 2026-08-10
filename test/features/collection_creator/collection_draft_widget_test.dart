@@ -22,6 +22,12 @@ import 'package:gachadex/features/collection_creator/domain/repositories/collect
 import 'package:gachadex/features/collection_creator/domain/value_objects/draft_cover_style.dart';
 import 'package:gachadex/features/collection_creator/presentation/pages/collection_draft_editor_page.dart';
 import 'package:gachadex/features/creator/presentation/creator_page.dart';
+import 'package:gachadex/features/packs/domain/entities/pack_card_pool_entry.dart';
+import 'package:gachadex/features/packs/domain/entities/pack_configuration.dart';
+import 'package:gachadex/features/packs/domain/entities/pack_rarity_probability.dart';
+import 'package:gachadex/features/packs/domain/entities/pack_slot_rule.dart';
+import 'package:gachadex/features/packs/domain/entities/pack_type.dart';
+import 'package:gachadex/features/packs/domain/repositories/pack_type_repository.dart';
 import 'package:gachadex/features/rarities/domain/entities/rarity.dart';
 import 'package:gachadex/features/rarities/domain/repositories/rarity_repository.dart';
 import 'package:gachadex/features/rarities/domain/validation/rarity_validation.dart';
@@ -161,6 +167,7 @@ final class _Phase3Fakes {
     );
     rarityRepository = _InMemoryRarityRepository();
     cardRepository = _InMemoryCardRepository();
+    packRepository = _InMemoryPackTypeRepository();
   }
 
   final FixedUuidGenerator uuidGenerator;
@@ -168,6 +175,7 @@ final class _Phase3Fakes {
   late final _InMemoryCollectionProjectRepository projectRepository;
   late final _InMemoryRarityRepository rarityRepository;
   late final _InMemoryCardRepository cardRepository;
+  late final _InMemoryPackTypeRepository packRepository;
 
   List<dynamic> get overrides => [
     clockProvider.overrideWithValue(clock),
@@ -175,12 +183,14 @@ final class _Phase3Fakes {
     collectionProjectRepositoryProvider.overrideWithValue(projectRepository),
     rarityRepositoryProvider.overrideWithValue(rarityRepository),
     cardRepositoryProvider.overrideWithValue(cardRepository),
+    packTypeRepositoryProvider.overrideWithValue(packRepository),
   ];
 
   Future<void> dispose() async {
     await projectRepository.close();
     await rarityRepository.close();
     await cardRepository.close();
+    await packRepository.close();
   }
 }
 
@@ -538,6 +548,121 @@ final class _InMemoryCardRepository implements CardRepository {
   }) async* {
     yield const [];
     yield* _changes.stream.map((_) => const <ImageCardDetails>[]);
+  }
+
+  Future<void> close() => _changes.close();
+}
+
+final class _InMemoryPackTypeRepository implements PackTypeRepository {
+  final _changes = StreamController<void>.broadcast();
+
+  @override
+  Future<PackCardPoolEntry> addCardToPool(PackCardPoolEntry entry) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PackRarityProbability> addRarityProbability(
+    PackRarityProbability probability,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PackSlotRule> addSlotRule(PackSlotRule rule) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PackConfiguration> createConfiguration(PackConfiguration config) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> delete(PackTypeId id) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PackType> getById(PackTypeId id) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PackConfiguration> getFullConfiguration(PackTypeId id) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PackType> insert(PackType packType) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> nameExists({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+    required String name,
+    PackTypeId? excludingPackTypeId,
+  }) async {
+    return false;
+  }
+
+  @override
+  Future<void> reorder({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+    required List<PackTypeId> orderedIds,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> replaceCardPool({
+    required PackTypeId packTypeId,
+    required List<PackCardPoolEntry> entries,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> replaceProbabilityGroup({
+    required ProbabilityGroupId probabilityGroupId,
+    required List<PackRarityProbability> probabilities,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> replaceSlotRules({
+    required PackTypeId packTypeId,
+    required List<PackSlotRule> rules,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setMain(PackTypeId id) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PackType> update(PackType packType) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<PackConfiguration> updateConfiguration(PackConfiguration config) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<List<PackType>> watchByCollectionVersion({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+  }) async* {
+    yield const [];
+    yield* _changes.stream.map((_) => const <PackType>[]);
   }
 
   Future<void> close() => _changes.close();

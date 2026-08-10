@@ -600,4 +600,128 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get backToDraft => 'Volver al borrador';
+
+  @override
+  String get addPack => 'AÃ±adir sobre';
+
+  @override
+  String get editPack => 'Editar sobre';
+
+  @override
+  String get deletePack => 'Eliminar sobre';
+
+  @override
+  String get deletePackDescription =>
+      'Se eliminarÃ¡ este sobre, sus cartas elegibles, reglas y probabilidades.';
+
+  @override
+  String get packDeleted => 'Sobre eliminado';
+
+  @override
+  String get packSaved => 'Sobre guardado';
+
+  @override
+  String get atLeastOnePack => 'Debe existir al menos un sobre';
+
+  @override
+  String get noPacksTitle => 'TodavÃ­a no hay sobres';
+
+  @override
+  String get noPacksDescription =>
+      'Crea un sobre para configurar cartas elegibles y probabilidades.';
+
+  @override
+  String get mainPack => 'Sobre principal';
+
+  @override
+  String get packSecondary => 'Sobre secundario';
+
+  @override
+  String get cardsPerPack => 'Cartas por sobre';
+
+  @override
+  String get rechargeTime => 'Tiempo de recarga';
+
+  @override
+  String get maxAccumulated => 'Maximo acumulable';
+
+  @override
+  String get accelerationCost => 'Coste de aceleracion';
+
+  @override
+  String get frontDesign => 'Portada';
+
+  @override
+  String get backDesign => 'Reverso';
+
+  @override
+  String eligibleCardsCount(int count) {
+    return 'Cartas elegibles: $count';
+  }
+
+  @override
+  String get searchCards => 'Buscar cartas';
+
+  @override
+  String get allCards => 'Todas las cartas';
+
+  @override
+  String get selectAll => 'Seleccionar todas';
+
+  @override
+  String get deselectAll => 'Deseleccionar todas';
+
+  @override
+  String get slotRules => 'Reglas por posicion';
+
+  @override
+  String slotPosition(int index) {
+    return 'Posicion $index';
+  }
+
+  @override
+  String get fixedRarity => 'Rareza fija';
+
+  @override
+  String get probabilityDistribution => 'Distribucion';
+
+  @override
+  String get minimumRarity => 'Rareza minima';
+
+  @override
+  String get validation => 'Validacion';
+
+  @override
+  String get packConfigurationValid => 'Configuracion valida';
+
+  @override
+  String get packConfigurationIncomplete => 'Configuracion incompleta';
+
+  @override
+  String get noEligibleCards => 'No hay cartas elegibles';
+
+  @override
+  String get mainPackNeedsThree => 'El principal debe acumular al menos tres';
+
+  @override
+  String get probabilityNeedsWeight =>
+      'Cada distribucion necesita algun peso positivo';
+
+  @override
+  String get packNameRequired => 'Escribe un nombre para el sobre';
+
+  @override
+  String get duplicatePackName => 'Ya existe un sobre con ese nombre';
+
+  @override
+  String get simulation => 'Simulacion';
+
+  @override
+  String get simulate => 'Simular';
+
+  @override
+  String get savePackBeforeSimulating => 'Guarda el sobre antes de simular';
+
+  @override
+  String get packPreviewName => 'Sobre';
 }

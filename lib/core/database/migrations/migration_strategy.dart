@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../features/collection_creator/domain/catalogs/draft_cover_catalog.dart';
+import '../../../features/packs/domain/catalogs/pack_visual_catalog.dart';
 import '../../errors/app_exception.dart';
 import '../../logging/app_logger.dart';
 import 'schema_versions.dart';
@@ -37,7 +38,10 @@ MigrationStrategy createMigrationStrategy(GeneratedDatabase database) {
       if (from <= 2 && to >= 3) {
         await _migrateCardFieldValuesToFixedComicCatalog(database);
       }
-      if (from > 3 || to > currentDatabaseSchemaVersion) {
+      if (from <= 3 && to >= 4) {
+        await _migratePackConfigurationSchema(database);
+      }
+      if (from > 4 || to > currentDatabaseSchemaVersion) {
         throw AppException(
           code: 'migration_not_implemented',
           safeMessage: 'No se puede actualizar la base de datos todavia.',
@@ -51,6 +55,88 @@ MigrationStrategy createMigrationStrategy(GeneratedDatabase database) {
         'created=${details.wasCreated}.',
       );
     },
+  );
+}
+
+Future<void> _migratePackConfigurationSchema(GeneratedDatabase database) async {
+  await database.customStatement(
+    'ALTER TABLE pack_types ADD COLUMN front_color_id TEXT NOT NULL '
+    "DEFAULT '${PackVisualCatalog.defaultColorId}'",
+  );
+  await database.customStatement(
+    'ALTER TABLE pack_types ADD COLUMN front_accent_color_id TEXT NOT NULL '
+    "DEFAULT '${PackVisualCatalog.defaultAccentColorId}'",
+  );
+  await database.customStatement(
+    'ALTER TABLE pack_types ADD COLUMN front_icon_id TEXT NOT NULL '
+    "DEFAULT '${PackVisualCatalog.defaultIconId}'",
+  );
+  await database.customStatement(
+    'ALTER TABLE pack_types ADD COLUMN front_pattern_id TEXT NOT NULL '
+    "DEFAULT '${PackVisualCatalog.defaultPatternId}'",
+  );
+  await database.customStatement(
+    "ALTER TABLE pack_types ADD COLUMN back_color_id TEXT NOT NULL DEFAULT 'ink'",
+  );
+  await database.customStatement(
+    "ALTER TABLE pack_types ADD COLUMN back_accent_color_id TEXT NOT NULL DEFAULT 'rose'",
+  );
+  await database.customStatement(
+    "ALTER TABLE pack_types ADD COLUMN back_icon_id TEXT NOT NULL DEFAULT 'cards'",
+  );
+  await database.customStatement(
+    "ALTER TABLE pack_types ADD COLUMN back_pattern_id TEXT NOT NULL DEFAULT 'dots'",
+  );
+  await database.customStatement(
+    'ALTER TABLE pack_slot_rules RENAME TO pack_slot_rules_old',
+  );
+  await database.customStatement('''
+CREATE TABLE pack_slot_rules (
+  id TEXT NOT NULL PRIMARY KEY,
+  pack_type_id TEXT NOT NULL REFERENCES pack_types(id) ON DELETE CASCADE,
+  slot_index INTEGER NOT NULL,
+  rule_type TEXT NOT NULL,
+  fixed_rarity_id TEXT REFERENCES rarities(id) ON DELETE RESTRICT,
+  minimum_rarity_order INTEGER,
+  probability_group_id TEXT,
+  UNIQUE(pack_type_id, slot_index),
+  CHECK (slot_index >= 0),
+  CHECK (minimum_rarity_order IS NULL OR minimum_rarity_order >= 0),
+  CHECK ((rule_type = 'fixedRarity' AND fixed_rarity_id IS NOT NULL
+    AND minimum_rarity_order IS NULL AND probability_group_id IS NULL) OR
+    (rule_type = 'probabilityDistribution' AND fixed_rarity_id IS NULL
+    AND minimum_rarity_order IS NULL AND probability_group_id IS NOT NULL) OR
+    (rule_type = 'minimumRarity' AND fixed_rarity_id IS NULL
+    AND minimum_rarity_order IS NOT NULL AND probability_group_id IS NOT NULL))
+)
+''');
+  await database.customStatement('''
+INSERT INTO pack_slot_rules (
+  id,
+  pack_type_id,
+  slot_index,
+  rule_type,
+  fixed_rarity_id,
+  minimum_rarity_order,
+  probability_group_id
+)
+SELECT
+  id,
+  pack_type_id,
+  slot_index,
+  rule_type,
+  fixed_rarity_id,
+  minimum_rarity_order,
+  CASE
+    WHEN rule_type = 'minimumRarity' THEN id
+    ELSE probability_group_id
+  END
+FROM pack_slot_rules_old
+''');
+  await database.customStatement('DROP TABLE pack_slot_rules_old');
+  await database.customStatement(
+    'CREATE INDEX idx_pack_slot_rules_pack_type_id '
+    'ON pack_slot_rules(pack_type_id)',
   );
 }
 

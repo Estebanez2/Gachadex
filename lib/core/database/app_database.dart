@@ -4,6 +4,7 @@ import '../database/converters/domain_enum_converters.dart';
 import '../domain/domain_enums.dart';
 import '../logging/app_logger.dart';
 import '../../features/collection_creator/domain/catalogs/draft_cover_catalog.dart';
+import '../../features/packs/domain/catalogs/pack_visual_catalog.dart';
 import 'database_connection.dart';
 import 'migrations/migration_strategy.dart';
 import 'migrations/schema_versions.dart';
@@ -300,6 +301,20 @@ class PackTypes extends Table {
   TextColumn get backAssetId => text()
       .references(MediaAssets, #id, onDelete: KeyAction.setNull)
       .nullable()();
+  TextColumn get frontColorId =>
+      text().withDefault(const Constant(PackVisualCatalog.defaultColorId))();
+  TextColumn get frontAccentColorId => text().withDefault(
+    const Constant(PackVisualCatalog.defaultAccentColorId),
+  )();
+  TextColumn get frontIconId =>
+      text().withDefault(const Constant(PackVisualCatalog.defaultIconId))();
+  TextColumn get frontPatternId =>
+      text().withDefault(const Constant(PackVisualCatalog.defaultPatternId))();
+  TextColumn get backColorId => text().withDefault(const Constant('ink'))();
+  TextColumn get backAccentColorId =>
+      text().withDefault(const Constant('rose'))();
+  TextColumn get backIconId => text().withDefault(const Constant('cards'))();
+  TextColumn get backPatternId => text().withDefault(const Constant('dots'))();
   IntColumn get cardCount => integer()();
   IntColumn get rechargeSeconds => integer()();
   IntColumn get maxAccumulated => integer()();
@@ -372,7 +387,7 @@ class PackSlotRules extends Table {
         'AND probability_group_id IS NOT NULL) OR '
         "(rule_type = 'minimumRarity' AND fixed_rarity_id IS NULL "
         'AND minimum_rarity_order IS NOT NULL '
-        'AND probability_group_id IS NULL))',
+        'AND probability_group_id IS NOT NULL))',
   ];
 }
 

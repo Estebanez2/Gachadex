@@ -1,5 +1,7 @@
 import '../../../../core/domain/domain_validation.dart';
 import '../../../../core/identifiers/entity_id.dart';
+import '../catalogs/pack_visual_catalog.dart';
+import '../value_objects/pack_visual_style.dart';
 
 final class PackType {
   PackType({
@@ -10,6 +12,8 @@ final class PackType {
     required String? description,
     required this.frontAssetId,
     required this.backAssetId,
+    PackVisualStyle? frontStyle,
+    PackVisualStyle? backStyle,
     required int cardCount,
     required int rechargeSeconds,
     required int maxAccumulated,
@@ -18,6 +22,8 @@ final class PackType {
     required int sortIndex,
   }) : name = DomainValidation.requireTrimmedNotEmpty(name, 'name'),
        description = DomainValidation.optionalTrimmed(description),
+       frontStyle = frontStyle ?? PackVisualCatalog.defaultFrontStyle,
+       backStyle = backStyle ?? PackVisualCatalog.defaultBackStyle,
        cardCount = DomainValidation.requirePositive(cardCount, 'cardCount'),
        rechargeSeconds = DomainValidation.requirePositive(
          rechargeSeconds,
@@ -40,6 +46,8 @@ final class PackType {
   final String? description;
   final MediaAssetId? frontAssetId;
   final MediaAssetId? backAssetId;
+  final PackVisualStyle frontStyle;
+  final PackVisualStyle backStyle;
   final int cardCount;
   final int rechargeSeconds;
   final int maxAccumulated;

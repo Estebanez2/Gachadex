@@ -2,8 +2,8 @@
 
 Fecha: 2026-08-06
 
-Este documento describe el estado tecnico tras la Fase 4: borradores,
-rarezas y cartas con fotografias. La fuente funcional sigue siendo
+Este documento describe el estado tecnico tras la Fase 5: borradores,
+rarezas, cartas con fotografias y configuracion de sobres. La fuente funcional sigue siendo
 `docs/PRODUCT_SPEC.md`.
 
 ## Principios
@@ -58,7 +58,7 @@ por `ProviderScope` y la cierra con `ref.onDispose`.
 ## Migraciones
 
 `currentDatabaseSchemaVersion` vive en
-`lib/core/database/migrations/schema_versions.dart` y actualmente vale `3`.
+`lib/core/database/migrations/schema_versions.dart` y actualmente vale `4`.
 
 `createMigrationStrategy`:
 
@@ -69,6 +69,8 @@ por `ProviderScope` y la cierra con `ref.onDispose`.
   `collection_projects`.
 - Migra de v2 a v3 recreando `card_field_values` con el catalogo fijo de campos
   comicos de Fase 4.
+- Migra de v3 a v4 anadiendo ids de diseno generado para sobres y permitiendo
+  grupos de probabilidad en reglas `minimumRarity`.
 - Rechaza upgrades no implementados con un mensaje seguro.
 
 Para anadir una nueva version se debe subir `currentDatabaseSchemaVersion`,
@@ -136,6 +138,25 @@ projects/{projectId}/cards/images/{assetId}.webp
 projects/{projectId}/cards/thumbnails/{assetId}.webp
 ```
 
+## Sobres y motor de seleccion
+
+La Fase 5 habilita la seccion `Sobres` dentro del borrador:
+
+- Lista, crea, edita, reordena y elimina tipos de sobre.
+- Mantiene exactamente un sobre principal por version de contenido.
+- Guarda pool de cartas elegibles, reglas por posicion y pesos por rareza.
+- Guarda portada/reverso provisionales como ids estables de catalogo, no como
+  rutas multimedia falsas.
+
+`PackGenerator` vive en `features/packs/domain/services/` y es puro. Recibe
+`PackConfiguration`, cartas elegibles, rarezas y `Random` inyectado. Para cada
+slot lee su regla, selecciona rareza, aplica fallback cuando procede y elige una
+carta uniforme sin retirarla del pool, por lo que puede repetir cartas en el
+mismo sobre. `fixedRarity` no usa fallback silencioso.
+
+El simulador del editor usa el mismo motor y no escribe progreso, inventario,
+aperturas, album ni monedas.
+
 ## Repositorios
 
 Interfaces de dominio:
@@ -157,6 +178,8 @@ Implementaciones Drift:
 - Evitan borrar rarezas usadas por cartas.
 - Detectan nombres duplicados de rarezas normalizados.
 - Reordenan rarezas compactando `orderIndex`.
+- Reordenan sobres compactando `sortIndex`, reemplazan pools/reglas/pesos en
+  transaccion y actualizan `updatedAtUtc` del borrador.
 - Evitan instalar dos veces la misma coleccion/version.
 - Borran progreso local al eliminar una coleccion instalada.
 - No devuelven filas Drift a dominio o presentacion.
@@ -197,11 +220,10 @@ persistencia real queda cubierta por tests de repositorio y controlador.
 
 ## Limites de la fase
 
-Queda fuera de Fase 4:
+Queda fuera de Fase 5:
 
 - Videos.
 - Apertura visual de sobres.
-- Tipos de sobre, pools y probabilidades.
 - Temporizadores reales.
 - Entrega de sobres iniciales.
 - Economia visible.

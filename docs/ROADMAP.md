@@ -111,7 +111,30 @@ No incluye:
 
 Depende de: fase 3.
 
-## Fase 5 - Coleccion jugable local
+## Fase 5 - Configuracion de sobres
+
+Estado: implementada en la rama `phase/05-pack-configuration`.
+
+Incluye:
+
+- Seccion Sobres dentro del editor de borrador.
+- Crear, editar, reordenar, eliminar y marcar sobre principal.
+- Portada y reverso generados en Flutter mediante ids estables.
+- Cartas elegibles con seleccion multiple.
+- Reglas por posicion: rareza fija, distribucion y rareza minima.
+- Pesos enteros por rareza.
+- Motor puro de seleccion con `Random` inyectado, fallback y repetidas.
+- Simulador dentro del editor sin modificar progreso.
+- Migracion de esquema v4 para diseno de sobres y `minimumRarity` ponderada.
+- Tests de motor, validacion, repositorio y persistencia.
+
+No incluye finalizacion, coleccion instalada, entrega de sobres, temporizadores
+activos, apertura visual, album jugable, monedas funcionales, videos,
+notificaciones, importacion ni exportacion.
+
+Depende de: fase 4.
+
+## Fase 6 - Coleccion jugable local
 
 Objetivo: finalizar una coleccion y abrir sobres en el mismo dispositivo.
 
@@ -119,9 +142,9 @@ Incluye snapshot inmutable, coleccion instalada, separacion contenido/progreso,
 tres sobres iniciales, temporizadores locales, generador de sobres, apertura
 atomica antes de animar, album, duplicados y apertura visual basica.
 
-Depende de: fase 4.
+Depende de: fase 5.
 
-## Fase 6 - Videos
+## Fase 7 - Videos
 
 Objetivo: soportar cartas con video de forma completa.
 
@@ -129,9 +152,9 @@ Incluye seleccion de videos, lectura de duracion y dimensiones, recorte temporal
 normalizacion MP4 H.264/AAC, conservacion de sonido, primer fotograma,
 miniaturas y reproduccion controlada.
 
-Depende de: fase 5.
+Depende de: fase 6.
 
-## Fase 7 - Exportacion e importacion
+## Fase 8 - Exportacion e importacion
 
 Objetivo: compartir colecciones sin servidor.
 
@@ -139,27 +162,27 @@ Incluye formato `.friendpack`, manifest, JSON de contenido, activos,
 checksums SHA-256, exportacion por streaming, comparticion nativa, importacion
 segura, validacion, duplicados e importacion atomica.
 
-Depende de: fases 5 y 6.
+Depende de: fases 6 y 7.
 
-## Fase 8 - Economia
+## Fase 9 - Economia
 
 Objetivo: cerrar el ciclo de duplicados.
 
 Incluye venta parcial, valores por rareza, monedas por coleccion, historial,
 aceleracion de temporizadores y validaciones de saldo.
 
-Depende de: fase 5.
+Depende de: fase 6.
 
-## Fase 9 - Notificaciones locales
+## Fase 10 - Notificaciones locales
 
 Objetivo: avisar de sobres disponibles sin servidor.
 
 Incluye permisos, programacion/cancelacion/reprogramacion local, apertura desde
 notificacion y recuperacion tras reinicio cuando la plataforma lo permita.
 
-Depende de: fase 5 y de la estrategia de temporizadores.
+Depende de: fase 6 y de la estrategia de temporizadores.
 
-## Fase 10 - Diseno y animaciones
+## Fase 11 - Diseno y animaciones
 
 Objetivo: elevar la experiencia visual con identidad propia.
 
@@ -167,9 +190,9 @@ Incluye disenos de sobres, animacion de apertura, giro/revelado, efectos propios
 por rareza, sonido, vibracion, transiciones, indicadores y modo reducir
 animaciones. No debe copiar Pokemon TCG ni efectos de Altare de forma literal.
 
-Depende de: fases 5, 6 y 9.
+Depende de: fases 6, 7 y 10.
 
-## Fase 11 - Estabilizacion y lanzamiento
+## Fase 12 - Estabilizacion y lanzamiento
 
 Objetivo: preparar una primera version distribuible.
 

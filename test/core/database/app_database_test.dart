@@ -21,43 +21,46 @@ void main() {
       await database.close();
     });
 
-    test('creates schema v2 with expected tables and foreign keys', () async {
-      final tables = await database
-          .customSelect(
-            "SELECT name FROM sqlite_master WHERE type = 'table' "
-            "AND name NOT LIKE 'sqlite_%' ORDER BY name",
-          )
-          .map((row) => row.read<String>('name'))
-          .get();
+    test(
+      'creates current schema with expected tables and foreign keys',
+      () async {
+        final tables = await database
+            .customSelect(
+              "SELECT name FROM sqlite_master WHERE type = 'table' "
+              "AND name NOT LIKE 'sqlite_%' ORDER BY name",
+            )
+            .map((row) => row.read<String>('name'))
+            .get();
 
-      expect(
-        tables,
-        containsAll(<String>[
-          'collection_projects',
-          'content_versions',
-          'installed_collections',
-          'rarities',
-          'cards',
-          'card_field_values',
-          'media_assets',
-          'pack_types',
-          'pack_card_pool',
-          'pack_slot_rules',
-          'pack_rarity_probabilities',
-          'pack_inventory',
-          'owned_cards',
-          'pack_openings',
-          'pack_opening_cards',
-          'coin_transactions',
-        ]),
-      );
-      expect(database.schemaVersion, 3);
+        expect(
+          tables,
+          containsAll(<String>[
+            'collection_projects',
+            'content_versions',
+            'installed_collections',
+            'rarities',
+            'cards',
+            'card_field_values',
+            'media_assets',
+            'pack_types',
+            'pack_card_pool',
+            'pack_slot_rules',
+            'pack_rarity_probabilities',
+            'pack_inventory',
+            'owned_cards',
+            'pack_openings',
+            'pack_opening_cards',
+            'coin_transactions',
+          ]),
+        );
+        expect(database.schemaVersion, 4);
 
-      final foreignKeys = await database
-          .customSelect('PRAGMA foreign_keys')
-          .get();
-      expect(foreignKeys.single.read<int>('foreign_keys'), 1);
-    });
+        final foreignKeys = await database
+            .customSelect('PRAGMA foreign_keys')
+            .get();
+        expect(foreignKeys.single.read<int>('foreign_keys'), 1);
+      },
+    );
 
     test('creates draft cover columns with safe defaults', () async {
       final columns = await database

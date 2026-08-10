@@ -7,6 +7,7 @@ import '../../../../core/errors/app_failure.dart';
 import '../../../../core/identifiers/entity_id.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../cards/domain/entities/card.dart' as card_domain;
+import '../../../packs/domain/entities/pack_type.dart';
 import '../../../rarities/domain/entities/rarity.dart';
 import '../../application/collection_draft_use_case_providers.dart';
 import '../../domain/entities/collection_project.dart';
@@ -20,12 +21,14 @@ final class CollectionDraftSummary {
     required this.project,
     required this.rarityCount,
     required this.cardCount,
+    required this.packCount,
     required this.completeness,
   });
 
   final CollectionProject project;
   final int rarityCount;
   final int cardCount;
+  final int packCount;
   final CollectionDraftCompleteness completeness;
 }
 
@@ -38,6 +41,7 @@ final class CollectionDraftEditorState {
     required this.draftCoverStyle,
     required this.rarities,
     required this.cardCount,
+    required this.packCount,
     required this.saveStatus,
     required this.infoErrors,
     required this.saveError,
@@ -47,6 +51,7 @@ final class CollectionDraftEditorState {
     required CollectionProject project,
     required List<Rarity> rarities,
     required int cardCount,
+    required int packCount,
   }) {
     final author = project.author ?? '';
     final description = project.description ?? '';
@@ -64,6 +69,7 @@ final class CollectionDraftEditorState {
       draftCoverStyle: project.draftCoverStyle,
       rarities: rarities,
       cardCount: cardCount,
+      packCount: packCount,
       saveStatus: DraftSaveStatus.saved,
       infoErrors: errors,
       saveError: null,
@@ -77,6 +83,7 @@ final class CollectionDraftEditorState {
   final DraftCoverStyle draftCoverStyle;
   final List<Rarity> rarities;
   final int cardCount;
+  final int packCount;
   final DraftSaveStatus saveStatus;
   final CollectionDraftInfoErrors infoErrors;
   final Object? saveError;
@@ -87,6 +94,7 @@ final class CollectionDraftEditorState {
       coverStyle: draftCoverStyle,
       rarityCount: rarities.length,
       cardCount: cardCount,
+      packCount: packCount,
       infoErrors: infoErrors,
     );
   }
@@ -101,6 +109,7 @@ final class CollectionDraftEditorState {
     DraftCoverStyle? draftCoverStyle,
     List<Rarity>? rarities,
     int? cardCount,
+    int? packCount,
     DraftSaveStatus? saveStatus,
     CollectionDraftInfoErrors? infoErrors,
     Object? saveError,
@@ -114,6 +123,7 @@ final class CollectionDraftEditorState {
       draftCoverStyle: draftCoverStyle ?? this.draftCoverStyle,
       rarities: rarities ?? this.rarities,
       cardCount: cardCount ?? this.cardCount,
+      packCount: packCount ?? this.packCount,
       saveStatus: saveStatus ?? this.saveStatus,
       infoErrors: infoErrors ?? this.infoErrors,
       saveError: clearSaveError ? null : saveError ?? this.saveError,
@@ -126,6 +136,7 @@ final collectionDraftSummariesProvider =
       final projectRepository = ref.watch(collectionProjectRepositoryProvider);
       final rarityRepository = ref.watch(rarityRepositoryProvider);
       final cardRepository = ref.watch(cardRepositoryProvider);
+      final packRepository = ref.watch(packTypeRepositoryProvider);
 
       return projectRepository.watchAllDrafts().asyncMap((projects) async {
         final summaries = <CollectionDraftSummary>[];
@@ -146,6 +157,15 @@ final collectionDraftSummariesProvider =
                     )
                     .first
                     .then((cards) => cards.length);
+          final packCount = contentVersionId == null
+              ? 0
+              : await packRepository
+                    .watchByCollectionVersion(
+                      collectionId: project.collectionId,
+                      contentVersionId: contentVersionId,
+                    )
+                    .first
+                    .then((packs) => packs.length);
           final errors = CollectionDraftValidation.validateInfo(
             name: project.name,
             author: project.author ?? '',
@@ -156,6 +176,7 @@ final collectionDraftSummariesProvider =
             coverStyle: project.draftCoverStyle,
             rarityCount: rarityCount,
             cardCount: cardCount,
+            packCount: packCount,
             infoErrors: errors,
           );
           summaries.add(
@@ -163,6 +184,7 @@ final collectionDraftSummariesProvider =
               project: project,
               rarityCount: rarityCount,
               cardCount: cardCount,
+              packCount: packCount,
               completeness: completeness,
             ),
           );
@@ -226,6 +248,7 @@ final class CollectionDraftController
   StreamSubscription<CollectionProject?>? _projectSubscription;
   StreamSubscription<List<Rarity>>? _raritySubscription;
   StreamSubscription<List<card_domain.Card>>? _cardSubscription;
+  StreamSubscription<List<PackType>>? _packSubscription;
   int _revision = 0;
   bool _disposed = false;
 
@@ -337,6 +360,13 @@ final class CollectionDraftController
             contentVersionId: contentVersionId,
           )
           .first;
+      final packs = await ref
+          .read(packTypeRepositoryProvider)
+          .watchByCollectionVersion(
+            collectionId: project.collectionId,
+            contentVersionId: contentVersionId,
+          )
+          .first;
 
       if (_disposed) {
         return;
@@ -347,6 +377,7 @@ final class CollectionDraftController
           project: project,
           rarities: rarities,
           cardCount: cards.length,
+          packCount: packs.length,
         ),
       );
       _listenForDeletion();
@@ -355,6 +386,10 @@ final class CollectionDraftController
         contentVersionId: contentVersionId,
       );
       _listenForCards(
+        collectionId: project.collectionId,
+        contentVersionId: contentVersionId,
+      );
+      _listenForPacks(
         collectionId: project.collectionId,
         contentVersionId: contentVersionId,
       );
@@ -427,6 +462,29 @@ final class CollectionDraftController
             return;
           }
           state = AsyncData(current.copyWith(cardCount: cards.length));
+        });
+  }
+
+  void _listenForPacks({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+  }) {
+    _packSubscription?.cancel();
+    _packSubscription = ref
+        .read(packTypeRepositoryProvider)
+        .watchByCollectionVersion(
+          collectionId: collectionId,
+          contentVersionId: contentVersionId,
+        )
+        .listen((packs) {
+          if (_disposed) {
+            return;
+          }
+          final current = state.asData?.value;
+          if (current == null) {
+            return;
+          }
+          state = AsyncData(current.copyWith(packCount: packs.length));
         });
   }
 
@@ -511,5 +569,6 @@ final class CollectionDraftController
     _projectSubscription?.cancel();
     _raritySubscription?.cancel();
     _cardSubscription?.cancel();
+    _packSubscription?.cancel();
   }
 }

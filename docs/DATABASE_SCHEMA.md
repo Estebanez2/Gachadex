@@ -2,7 +2,7 @@
 
 Fecha: 2026-08-06
 
-Schema version: `3`
+Schema version: `4`
 
 Motor: SQLite mediante Drift.
 
@@ -147,6 +147,16 @@ Restricciones:
 - `health BETWEEN 1 AND 9999`.
 - `sort_index >= 0`.
 
+Columnas de Fase 5:
+
+- `front_color_id`, `front_accent_color_id`, `front_icon_id`,
+  `front_pattern_id`: ids estables de la portada generada en Flutter.
+- `back_color_id`, `back_accent_color_id`, `back_icon_id`,
+  `back_pattern_id`: ids estables del reverso generado en Flutter.
+
+No guardan rutas ficticias ni activos multimedia; los ids se interpretan contra
+`PackVisualCatalog`.
+
 ### `card_field_values`
 
 Campos comicos predefinidos por carta.
@@ -235,7 +245,9 @@ Restricciones:
 
 - `slot_index >= 0`.
 - `minimum_rarity_order` nulo o no negativo.
-- Configuracion coherente segun `rule_type`.
+- Configuracion coherente segun `rule_type`. `minimumRarity` guarda
+  `minimum_rarity_order` y `probability_group_id` para ponderar solo rarezas
+  iguales o superiores.
 
 ### `pack_rarity_probabilities`
 
@@ -394,6 +406,19 @@ Durante la copia se preservan datos existentes mapeando IDs antiguos:
 
 La tabla nueva conserva PK, unique `card_id + field_type_id`, indice por
 `card_id` y `ON DELETE CASCADE` hacia `cards`.
+
+### Version 3 -> 4
+
+Anade a `pack_types` ids estables para portada y reverso provisionales:
+
+- `front_color_id`, `front_accent_color_id`, `front_icon_id`,
+  `front_pattern_id`.
+- `back_color_id`, `back_accent_color_id`, `back_icon_id`,
+  `back_pattern_id`.
+
+Tambien recrea `pack_slot_rules` para permitir que `minimumRarity` tenga
+`probability_group_id`, necesario para seleccionar entre rarezas permitidas con
+pesos enteros.
 
 ### Proximas versiones
 

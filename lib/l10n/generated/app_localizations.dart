@@ -1227,6 +1227,240 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Volver al borrador'**
   String get backToDraft;
+
+  /// Accion para crear un tipo de sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'AÃ±adir sobre'**
+  String get addPack;
+
+  /// Accion para editar un tipo de sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar sobre'**
+  String get editPack;
+
+  /// Accion para eliminar un tipo de sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar sobre'**
+  String get deletePack;
+
+  /// Descripcion de confirmacion para eliminar sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Se eliminarÃ¡ este sobre, sus cartas elegibles, reglas y probabilidades.'**
+  String get deletePackDescription;
+
+  /// Confirmacion de sobre eliminado.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobre eliminado'**
+  String get packDeleted;
+
+  /// Confirmacion de sobre guardado.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobre guardado'**
+  String get packSaved;
+
+  /// Requisito de completitud de sobres.
+  ///
+  /// In es, this message translates to:
+  /// **'Debe existir al menos un sobre'**
+  String get atLeastOnePack;
+
+  /// Titulo de estado vacio de sobres.
+  ///
+  /// In es, this message translates to:
+  /// **'TodavÃ­a no hay sobres'**
+  String get noPacksTitle;
+
+  /// Descripcion de estado vacio de sobres.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea un sobre para configurar cartas elegibles y probabilidades.'**
+  String get noPacksDescription;
+
+  /// Etiqueta de sobre principal.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobre principal'**
+  String get mainPack;
+
+  /// Etiqueta de sobre no principal.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobre secundario'**
+  String get packSecondary;
+
+  /// Campo de cantidad de cartas por sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Cartas por sobre'**
+  String get cardsPerPack;
+
+  /// Campo de tiempo de recarga.
+  ///
+  /// In es, this message translates to:
+  /// **'Tiempo de recarga'**
+  String get rechargeTime;
+
+  /// Campo de maximo acumulable.
+  ///
+  /// In es, this message translates to:
+  /// **'Maximo acumulable'**
+  String get maxAccumulated;
+
+  /// Campo de coste de aceleracion completa.
+  ///
+  /// In es, this message translates to:
+  /// **'Coste de aceleracion'**
+  String get accelerationCost;
+
+  /// Selector de diseno frontal de sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Portada'**
+  String get frontDesign;
+
+  /// Selector de diseno trasero de sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Reverso'**
+  String get backDesign;
+
+  /// Contador de cartas elegibles.
+  ///
+  /// In es, this message translates to:
+  /// **'Cartas elegibles: {count}'**
+  String eligibleCardsCount(int count);
+
+  /// Campo de busqueda de cartas.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar cartas'**
+  String get searchCards;
+
+  /// Filtro para todas las cartas.
+  ///
+  /// In es, this message translates to:
+  /// **'Todas las cartas'**
+  String get allCards;
+
+  /// Accion para seleccionar todas las cartas.
+  ///
+  /// In es, this message translates to:
+  /// **'Seleccionar todas'**
+  String get selectAll;
+
+  /// Accion para deseleccionar todas las cartas.
+  ///
+  /// In es, this message translates to:
+  /// **'Deseleccionar todas'**
+  String get deselectAll;
+
+  /// Seccion de reglas de posicion del sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Reglas por posicion'**
+  String get slotRules;
+
+  /// Etiqueta de posicion del sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Posicion {index}'**
+  String slotPosition(int index);
+
+  /// Tipo de regla de rareza fija.
+  ///
+  /// In es, this message translates to:
+  /// **'Rareza fija'**
+  String get fixedRarity;
+
+  /// Tipo de regla de distribucion por probabilidades.
+  ///
+  /// In es, this message translates to:
+  /// **'Distribucion'**
+  String get probabilityDistribution;
+
+  /// Tipo de regla de rareza minima.
+  ///
+  /// In es, this message translates to:
+  /// **'Rareza minima'**
+  String get minimumRarity;
+
+  /// Seccion de validacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Validacion'**
+  String get validation;
+
+  /// Estado de sobre valido.
+  ///
+  /// In es, this message translates to:
+  /// **'Configuracion valida'**
+  String get packConfigurationValid;
+
+  /// Estado de sobre incompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Configuracion incompleta'**
+  String get packConfigurationIncomplete;
+
+  /// Error de sobre sin cartas elegibles.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay cartas elegibles'**
+  String get noEligibleCards;
+
+  /// Error de acumulacion minima del sobre principal.
+  ///
+  /// In es, this message translates to:
+  /// **'El principal debe acumular al menos tres'**
+  String get mainPackNeedsThree;
+
+  /// Error de distribucion sin pesos positivos.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada distribucion necesita algun peso positivo'**
+  String get probabilityNeedsWeight;
+
+  /// Error de nombre obligatorio de sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un nombre para el sobre'**
+  String get packNameRequired;
+
+  /// Error de nombre duplicado de sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya existe un sobre con ese nombre'**
+  String get duplicatePackName;
+
+  /// Seccion de simulacion de sobres.
+  ///
+  /// In es, this message translates to:
+  /// **'Simulacion'**
+  String get simulation;
+
+  /// Accion para simular aperturas.
+  ///
+  /// In es, this message translates to:
+  /// **'Simular'**
+  String get simulate;
+
+  /// Mensaje de simulacion para sobres nuevos.
+  ///
+  /// In es, this message translates to:
+  /// **'Guarda el sobre antes de simular'**
+  String get savePackBeforeSimulating;
+
+  /// Nombre provisional mostrado en previsualizacion de sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobre'**
+  String get packPreviewName;
 }
 
 class _AppLocalizationsDelegate

@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/identifiers/entity_id.dart';
 import '../../domain/entities/pack_type.dart';
+import '../../domain/value_objects/pack_visual_style.dart';
 
 extension PackTypeRowMapper on PackTypeRow {
   PackType toDomain() {
@@ -14,6 +15,18 @@ extension PackTypeRowMapper on PackTypeRow {
       description: description,
       frontAssetId: frontAssetId == null ? null : MediaAssetId(frontAssetId!),
       backAssetId: backAssetId == null ? null : MediaAssetId(backAssetId!),
+      frontStyle: PackVisualStyle(
+        colorId: frontColorId,
+        accentColorId: frontAccentColorId,
+        iconId: frontIconId,
+        patternId: frontPatternId,
+      ),
+      backStyle: PackVisualStyle(
+        colorId: backColorId,
+        accentColorId: backAccentColorId,
+        iconId: backIconId,
+        patternId: backPatternId,
+      ),
       cardCount: cardCount,
       rechargeSeconds: rechargeSeconds,
       maxAccumulated: maxAccumulated,
@@ -34,6 +47,14 @@ extension PackTypeDomainMapper on PackType {
       description: Value(description),
       frontAssetId: Value(frontAssetId?.value),
       backAssetId: Value(backAssetId?.value),
+      frontColorId: Value(frontStyle.colorId),
+      frontAccentColorId: Value(frontStyle.accentColorId),
+      frontIconId: Value(frontStyle.iconId),
+      frontPatternId: Value(frontStyle.patternId),
+      backColorId: Value(backStyle.colorId),
+      backAccentColorId: Value(backStyle.accentColorId),
+      backIconId: Value(backStyle.iconId),
+      backPatternId: Value(backStyle.patternId),
       cardCount: Value(cardCount),
       rechargeSeconds: Value(rechargeSeconds),
       maxAccumulated: Value(maxAccumulated),

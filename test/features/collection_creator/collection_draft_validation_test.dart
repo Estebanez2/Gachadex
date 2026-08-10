@@ -18,6 +18,7 @@ void main() {
         coverStyle: DraftCoverStyle.defaultStyle(),
         rarityCount: 0,
         cardCount: 0,
+        packCount: 0,
         infoErrors: errors,
       );
 
@@ -40,26 +41,31 @@ void main() {
       expect(errors.canSave, isFalse);
     });
 
-    test('marks information, rarities and cards complete for this phase', () {
-      final errors = CollectionDraftValidation.validateInfo(
-        name: 'Viaje',
-        author: 'Grupo',
-        description: 'Momentos del viaje',
-      );
-      final completeness = CollectionDraftValidation.completeness(
-        name: 'Viaje',
-        coverStyle: DraftCoverStyle.defaultStyle(),
-        rarityCount: 1,
-        cardCount: 1,
-        infoErrors: errors,
-      );
+    test(
+      'marks information, rarities, cards and packs complete for this phase',
+      () {
+        final errors = CollectionDraftValidation.validateInfo(
+          name: 'Viaje',
+          author: 'Grupo',
+          description: 'Momentos del viaje',
+        );
+        final completeness = CollectionDraftValidation.completeness(
+          name: 'Viaje',
+          coverStyle: DraftCoverStyle.defaultStyle(),
+          rarityCount: 1,
+          cardCount: 1,
+          packCount: 1,
+          infoErrors: errors,
+        );
 
-      expect(completeness.infoComplete, isTrue);
-      expect(completeness.raritiesComplete, isTrue);
-      expect(completeness.cardsComplete, isTrue);
-      expect(completeness.completeForThisPhase, isTrue);
-      expect(completeness.hasFuturePendingWork, isTrue);
-    });
+        expect(completeness.infoComplete, isTrue);
+        expect(completeness.raritiesComplete, isTrue);
+        expect(completeness.cardsComplete, isTrue);
+        expect(completeness.packsComplete, isTrue);
+        expect(completeness.completeForThisPhase, isTrue);
+        expect(completeness.hasFuturePendingWork, isTrue);
+      },
+    );
 
     test('validates draft cover identifiers against the catalog', () {
       final style = DraftCoverStyle(

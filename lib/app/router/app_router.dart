@@ -13,6 +13,7 @@ import '../../features/collection_creator/presentation/pages/create_draft_page.d
 import '../../features/controlled_error/presentation/controlled_error_page.dart';
 import '../../features/creator/presentation/creator_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/packs/presentation/pages/pack_editor_page.dart';
 import '../../features/settings/presentation/settings_page.dart';
 import '../localization/app_localizations.dart';
 import 'app_routes.dart';
@@ -157,6 +158,45 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
             return CardEditorPage(
               projectId: CollectionProjectId(projectId),
               cardId: CardId(cardId),
+            );
+          } on FormatException {
+            return _RouteError(description: context.l10n.projectNotFound);
+          }
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '${AppRoutes.createProjectPathPrefix}/:projectId/packs/new',
+        name: AppRoutes.createPackNewName,
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId'];
+          if (projectId == null) {
+            return _RouteError(description: context.l10n.projectNotFound);
+          }
+
+          try {
+            return PackEditorPage(projectId: CollectionProjectId(projectId));
+          } on FormatException {
+            return _RouteError(description: context.l10n.projectNotFound);
+          }
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path:
+            '${AppRoutes.createProjectPathPrefix}/:projectId/packs/:packTypeId',
+        name: AppRoutes.createPackEditName,
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId'];
+          final packTypeId = state.pathParameters['packTypeId'];
+          if (projectId == null || packTypeId == null) {
+            return _RouteError(description: context.l10n.projectNotFound);
+          }
+
+          try {
+            return PackEditorPage(
+              projectId: CollectionProjectId(projectId),
+              packTypeId: PackTypeId(packTypeId),
             );
           } on FormatException {
             return _RouteError(description: context.l10n.projectNotFound);
