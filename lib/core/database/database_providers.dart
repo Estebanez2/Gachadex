@@ -11,6 +11,8 @@ import '../../features/collection_creator/domain/repositories/content_version_re
 import '../../features/collections/data/repositories/drift_installed_collection_repository.dart';
 import '../../features/collections/domain/repositories/installed_collection_repository.dart';
 import '../../features/packs/data/repositories/drift_pack_type_repository.dart';
+import '../../features/packs/data/repositories/drift_pack_inventory_repository.dart';
+import '../../features/packs/domain/repositories/pack_inventory_repository.dart';
 import '../../features/packs/domain/repositories/pack_type_repository.dart';
 import '../../features/rarities/data/repositories/drift_rarity_repository.dart';
 import '../../features/rarities/domain/repositories/rarity_repository.dart';
@@ -66,6 +68,12 @@ final packTypeRepositoryProvider = Provider<PackTypeRepository>((ref) {
     database: ref.watch(appDatabaseProvider),
     clock: ref.watch(clockProvider),
   );
+});
+
+final packInventoryRepositoryProvider = Provider<PackInventoryRepository>((
+  ref,
+) {
+  return DriftPackInventoryRepository(database: ref.watch(appDatabaseProvider));
 });
 
 final installedCollectionRepositoryProvider =

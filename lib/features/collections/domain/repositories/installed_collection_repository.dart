@@ -6,6 +6,13 @@ abstract interface class InstalledCollectionRepository {
 
   Future<InstalledCollection> getByCollectionId(CollectionId collectionId);
 
+  Future<InstalledCollection> getById(InstalledCollectionId id);
+
+  Future<InstalledCollection?> getByCollectionVersion({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+  });
+
   Stream<List<InstalledCollection>> watchAll();
 
   Future<void> deleteWithProgress(InstalledCollectionId id);

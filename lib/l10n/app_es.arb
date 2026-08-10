@@ -939,5 +939,90 @@
   "packPreviewName": "Sobre",
   "@packPreviewName": {
     "description": "Nombre provisional mostrado en previsualizacion de sobre."
+  },
+  "reviewNeedsCompleteDraft": "Completa informacion, rarezas, cartas y sobres",
+  "@reviewNeedsCompleteDraft": {
+    "description": "Requisito para poder revisar la coleccion."
+  },
+  "finalizationReviewDescription": "Comprueba que la coleccion esta lista antes de instalarla localmente.",
+  "@finalizationReviewDescription": {
+    "description": "Descripcion de la revision de finalizacion."
+  },
+  "ready": "Listo",
+  "@ready": {
+    "description": "Estado listo para finalizar."
+  },
+  "finalizeCollection": "Finalizar coleccion",
+  "@finalizeCollection": {
+    "description": "Accion para finalizar un borrador."
+  },
+  "finalizeCollectionDialogDescription": "Se instalara una copia local de esta coleccion y el borrador quedara solo lectura.",
+  "@finalizeCollectionDialogDescription": {
+    "description": "Confirmacion antes de finalizar coleccion."
+  },
+  "collectionFinalized": "Coleccion finalizada",
+  "@collectionFinalized": {
+    "description": "Confirmacion de finalizacion correcta."
+  },
+  "finalizeCollectionError": "No se ha podido finalizar la coleccion",
+  "@finalizeCollectionError": {
+    "description": "Error al finalizar coleccion."
+  },
+  "installedCollection": "Coleccion instalada",
+  "@installedCollection": {
+    "description": "Titulo generico de detalle de coleccion instalada."
+  },
+  "collectionProgress": "{owned}/{total} cartas descubiertas",
+  "@collectionProgress": {
+    "description": "Progreso de cartas de una coleccion instalada.",
+    "placeholders": {
+      "owned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "packInventory": "Sobres disponibles",
+  "@packInventory": {
+    "description": "Titulo del inventario de sobres."
+  },
+  "noPackInventoryTitle": "No hay sobres instalados",
+  "@noPackInventoryTitle": {
+    "description": "Titulo de estado vacio de inventario de sobres."
+  },
+  "noPackInventoryDescription": "Esta coleccion no tiene tipos de sobre preparados.",
+  "@noPackInventoryDescription": {
+    "description": "Descripcion de estado vacio de inventario de sobres."
+  },
+  "availablePacks": "{available}/{max} disponibles",
+  "@availablePacks": {
+    "description": "Cantidad de sobres disponibles.",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "nextPackIn": "Siguiente sobre en {time}",
+  "@nextPackIn": {
+    "description": "Tiempo restante hasta el siguiente sobre.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "packRechargeFull": "Acumulacion completa",
+  "@packRechargeFull": {
+    "description": "Estado de inventario de sobre completo."
+  },
+  "openPackComingSoon": "Abrir sobre proximamente",
+  "@openPackComingSoon": {
+    "description": "Boton deshabilitado de apertura futura."
   }
 }

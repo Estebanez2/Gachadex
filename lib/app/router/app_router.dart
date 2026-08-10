@@ -8,6 +8,7 @@ import '../../core/widgets/app_scaffold.dart';
 import '../../core/identifiers/entity_id.dart';
 import '../../features/cards/presentation/pages/card_editor_page.dart';
 import '../../features/collections/presentation/collections_page.dart';
+import '../../features/collections/presentation/installed_collection_detail_page.dart';
 import '../../features/collection_creator/presentation/pages/collection_draft_editor_page.dart';
 import '../../features/collection_creator/presentation/pages/create_draft_page.dart';
 import '../../features/controlled_error/presentation/controlled_error_page.dart';
@@ -76,6 +77,33 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
                 path: AppRoutes.collectionsPath,
                 name: AppRoutes.collectionsName,
                 builder: (context, state) => const CollectionsPage(),
+                routes: [
+                  GoRoute(
+                    path: ':installedCollectionId',
+                    name: AppRoutes.installedCollectionName,
+                    builder: (context, state) {
+                      final installedCollectionId =
+                          state.pathParameters['installedCollectionId'];
+                      if (installedCollectionId == null) {
+                        return _RouteError(
+                          description: context.l10n.projectNotFound,
+                        );
+                      }
+
+                      try {
+                        return InstalledCollectionDetailPage(
+                          installedCollectionId: InstalledCollectionId(
+                            installedCollectionId,
+                          ),
+                        );
+                      } on FormatException {
+                        return _RouteError(
+                          description: context.l10n.projectNotFound,
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
             ],
           ),

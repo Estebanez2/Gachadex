@@ -7,7 +7,8 @@ dinero real.
 
 ## Estado actual
 
-Fase 5: borradores, rarezas, cartas con fotografias y configuracion de sobres.
+Fase 6: borradores, rarezas, cartas con fotografias, configuracion de sobres,
+finalizacion local e inventario con temporizadores.
 
 Incluye la base tecnica de Fase 1, el dominio y persistencia local de Fase 2,
 schema version 4, biblioteca de borradores, creacion atomica de borradores,
@@ -16,11 +17,13 @@ de rarezas. La seccion Cartas permite seleccionar una foto de galeria,
 recortarla, guardarla como WebP privado con miniatura, completar datos, ver
 preview, editar y eliminar. La seccion Sobres permite crear varios tipos de
 sobre, elegir principal, configurar cartas elegibles, reglas por posicion,
-pesos por rareza y simular aperturas sin modificar progreso.
+pesos por rareza y simular aperturas sin modificar progreso. La seccion
+Revision valida la coleccion, la finaliza de forma local, instala la copia
+jugable del creador, entrega tres sobres iniciales del sobre principal y crea
+temporizadores independientes para cada tipo de sobre.
 
-No incluye todavia videos, finalizacion, coleccion instalada, entrega de
-sobres, apertura visual, temporizadores reales, economia visible,
-notificaciones, importacion ni exportacion.
+No incluye todavia videos, apertura real de sobres, album jugable, duplicados
+visibles, economia usable, notificaciones, importacion ni exportacion.
 
 ## Requisitos
 
@@ -87,7 +90,7 @@ Selecciona un dispositivo Android concreto:
 flutter run -d <device-id>
 ```
 
-Flujo manual de Fase 5:
+Flujo manual de Fase 6:
 
 1. Abrir la pestana `Crear`.
 2. Crear una coleccion nueva.
@@ -109,7 +112,20 @@ Flujo manual de Fase 5:
     ni inventario.
 16. Cerrar y reabrir la app; verificar que sobres, reglas, pesos y principal se
     conservan.
-17. Eliminar un sobre y confirmar que no se borran cartas ni rarezas.
+17. Entrar en `Revision` y comprobar que Informacion, Rarezas, Cartas y Sobres
+    aparecen listos.
+18. Pulsar `Finalizar coleccion`, confirmar y verificar que se abre el detalle
+    de la coleccion instalada.
+19. En `Colecciones`, abrir la coleccion instalada y comprobar que el sobre
+    principal muestra `3/3 disponibles`.
+20. Si hay sobres secundarios, comprobar que aparecen con `0/max` y su propio
+    tiempo restante.
+21. Cerrar y reabrir la app; verificar que la coleccion instalada y el
+    inventario siguen ahi.
+22. Esperar o adelantar el reloj del emulador hasta superar una recarga,
+    reabrir o volver a primer plano y verificar que el inventario se actualiza.
+23. Comprobar que el boton de apertura aparece deshabilitado como marcador de
+    funcionalidad futura.
 
 ## Analisis y pruebas
 

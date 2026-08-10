@@ -4,6 +4,7 @@ import '../../../core/database/database_providers.dart';
 import '../../../core/identifiers/entity_id.dart';
 import '../domain/entities/pack_configuration.dart';
 import '../domain/repositories/pack_type_repository.dart';
+import 'pack_recharge_service.dart';
 import 'pack_use_cases.dart';
 
 typedef PacksByVersionArgs = ({
@@ -39,4 +40,15 @@ final packEditorUseCasesProvider = Provider<PackEditorUseCases>((ref) {
 
 final packRepositoryProvider = Provider<PackTypeRepository>((ref) {
   return ref.watch(packTypeRepositoryProvider);
+});
+
+final packRechargeServiceProvider = Provider<PackRechargeService>((ref) {
+  return PackRechargeService(
+    installedCollectionRepository: ref.watch(
+      installedCollectionRepositoryProvider,
+    ),
+    packInventoryRepository: ref.watch(packInventoryRepositoryProvider),
+    packTypeRepository: ref.watch(packTypeRepositoryProvider),
+    clock: ref.watch(clockProvider),
+  );
 });
