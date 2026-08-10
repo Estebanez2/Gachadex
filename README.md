@@ -23,7 +23,8 @@ jugable del creador, entrega tres sobres iniciales del sobre principal y crea
 temporizadores independientes para cada tipo de sobre. Las colecciones
 instaladas permiten abrir sobres disponibles, revelar cartas una a una, saltar
 la apertura, recuperar aperturas pendientes y consultar album con obtenidas,
-faltantes, cantidades, favoritas, filtros y orden.
+faltantes, repetidas, cantidades, favoritas, filtros por rareza/tipo de medio y
+orden.
 
 No incluye todavia videos, venta de duplicados, economia usable, notificaciones,
 importacion ni exportacion.
@@ -131,8 +132,10 @@ Flujo manual de Fase 7:
 24. Revelar cartas una a una y comprobar indicador `Nueva` o `Repetida`.
 25. Usar `Saltar` en otra apertura y comprobar que aparece el resumen.
 26. Entrar en `Album` y verificar obtenidas, faltantes, cantidades y porcentaje.
-27. Abrir una carta obtenida, marcarla como favorita y filtrar `Favoritas`.
-28. Ordenar por `Cantidad`.
+27. Abrir una carta obtenida, revisar vida, descripcion, plantilla, marco y
+    campos comicos, marcarla como favorita y filtrar `Favoritas`.
+28. Filtrar por `Repetidas`, rareza y tipo de medio; ordenar por `Cantidad` y
+    `Primera obtencion`.
 29. Cerrar la app a mitad de una apertura y volver a abrir la coleccion:
     debe aparecer `Continuar apertura` sin consumir otro sobre.
 

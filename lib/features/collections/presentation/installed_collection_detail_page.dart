@@ -328,14 +328,15 @@ class _AlbumTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final filter = ref.watch(albumFilterProvider);
-    final sort = ref.watch(albumSortProvider);
+    final query = ref.watch(albumQueryProvider);
     final statsAsync = ref.watch(albumStatsProvider(installedCollectionId));
+    final raritiesAsync = ref.watch(
+      albumRaritiesProvider(installedCollectionId),
+    );
     final cardsAsync = ref.watch(
       albumCardsProvider((
         installedCollectionId: installedCollectionId,
-        filter: filter,
-        sort: sort,
+        query: query,
       )),
     );
 
@@ -352,34 +353,84 @@ class _AlbumTab extends ConsumerWidget {
           spacing: AppConstants.spacingSm,
           runSpacing: AppConstants.spacingSm,
           children: [
-            DropdownButton<AlbumFilter>(
-              value: filter,
+            DropdownButton<AlbumStatusFilter>(
+              value: query.status,
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(albumFilterProvider.notifier).setFilter(value);
+                  ref.read(albumQueryProvider.notifier).setStatus(value);
                 }
               },
               items: [
-                DropdownMenuItem(value: AlbumFilter.all, child: Text(l10n.all)),
                 DropdownMenuItem(
-                  value: AlbumFilter.owned,
+                  value: AlbumStatusFilter.all,
+                  child: Text(l10n.all),
+                ),
+                DropdownMenuItem(
+                  value: AlbumStatusFilter.owned,
                   child: Text(l10n.owned),
                 ),
                 DropdownMenuItem(
-                  value: AlbumFilter.missing,
+                  value: AlbumStatusFilter.missing,
                   child: Text(l10n.missing),
                 ),
                 DropdownMenuItem(
-                  value: AlbumFilter.favorites,
+                  value: AlbumStatusFilter.repeated,
+                  child: Text(l10n.repeated),
+                ),
+                DropdownMenuItem(
+                  value: AlbumStatusFilter.favorites,
                   child: Text(l10n.favorites),
                 ),
               ],
             ),
-            DropdownButton<AlbumSort>(
-              value: sort,
+            raritiesAsync.when(
+              loading: () => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
+              data: (rarities) => DropdownButton<RarityId?>(
+                value: query.rarityId,
+                onChanged: (value) {
+                  ref.read(albumQueryProvider.notifier).setRarity(value);
+                },
+                items: [
+                  DropdownMenuItem<RarityId?>(
+                    value: null,
+                    child: Text(l10n.allRarities),
+                  ),
+                  for (final rarity in rarities)
+                    DropdownMenuItem<RarityId?>(
+                      value: rarity.id,
+                      child: Text(rarity.name),
+                    ),
+                ],
+              ),
+            ),
+            DropdownButton<AlbumMediaFilter>(
+              value: query.media,
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(albumSortProvider.notifier).setSort(value);
+                  ref.read(albumQueryProvider.notifier).setMedia(value);
+                }
+              },
+              items: [
+                DropdownMenuItem(
+                  value: AlbumMediaFilter.all,
+                  child: Text(l10n.allMedia),
+                ),
+                DropdownMenuItem(
+                  value: AlbumMediaFilter.image,
+                  child: Text(l10n.photo),
+                ),
+                DropdownMenuItem(
+                  value: AlbumMediaFilter.video,
+                  child: Text(l10n.video),
+                ),
+              ],
+            ),
+            DropdownButton<AlbumSort>(
+              value: query.sort,
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(albumQueryProvider.notifier).setSort(value);
                 }
               },
               items: [
@@ -391,6 +442,10 @@ class _AlbumTab extends ConsumerWidget {
                 DropdownMenuItem(
                   value: AlbumSort.rarity,
                   child: Text(l10n.rarity),
+                ),
+                DropdownMenuItem(
+                  value: AlbumSort.firstObtained,
+                  child: Text(l10n.firstObtainedSort),
                 ),
                 DropdownMenuItem(
                   value: AlbumSort.quantity,
@@ -421,6 +476,12 @@ class _AlbumTab extends ConsumerWidget {
               return _AlbumCardTile(
                 entry: cards[index],
                 installedCollectionId: installedCollectionId,
+                onToggleFavorite: () => ref
+                    .read(toggleFavoriteCardProvider)
+                    .call(
+                      installedCollectionId: installedCollectionId,
+                      cardId: cards[index].cardId,
+                    ),
               );
             },
           ),
@@ -472,10 +533,12 @@ class _AlbumCardTile extends StatelessWidget {
   const _AlbumCardTile({
     required this.entry,
     required this.installedCollectionId,
+    required this.onToggleFavorite,
   });
 
   final AlbumCardEntry entry;
   final InstalledCollectionId installedCollectionId;
+  final VoidCallback onToggleFavorite;
 
   @override
   Widget build(BuildContext context) {
@@ -520,12 +583,28 @@ class _AlbumCardTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
-                  Text(
-                    entry.isOwned
-                        ? '${entry.rarityName} · x${entry.quantity}'
-                        : l10n.missing,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          entry.isOwned
+                              ? '${entry.rarityName} · x${entry.quantity}'
+                              : l10n.missing,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (entry.isOwned)
+                        IconButton(
+                          tooltip: l10n.favoriteToggle,
+                          onPressed: onToggleFavorite,
+                          icon: Icon(
+                            entry.isFavorite
+                                ? Icons.star
+                                : Icons.star_border_outlined,
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),

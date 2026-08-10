@@ -1612,6 +1612,42 @@ abstract class AppLocalizations {
   /// **'Favoritas'**
   String get favorites;
 
+  /// Filtro de cartas repetidas.
+  ///
+  /// In es, this message translates to:
+  /// **'Repetidas'**
+  String get repeated;
+
+  /// Filtro de todas las rarezas.
+  ///
+  /// In es, this message translates to:
+  /// **'Todas las rarezas'**
+  String get allRarities;
+
+  /// Filtro de todos los tipos de medio.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos los medios'**
+  String get allMedia;
+
+  /// Tipo de medio video.
+  ///
+  /// In es, this message translates to:
+  /// **'Video'**
+  String get video;
+
+  /// Orden por primera obtencion.
+  ///
+  /// In es, this message translates to:
+  /// **'Primera obtencion'**
+  String get firstObtainedSort;
+
+  /// Accion para marcar o desmarcar favorita.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar favorita'**
+  String get favoriteToggle;
+
   /// Orden por cantidad.
   ///
   /// In es, this message translates to:

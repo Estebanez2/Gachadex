@@ -1061,6 +1061,30 @@
   "@favorites": {
     "description": "Filtro de cartas favoritas."
   },
+  "repeated": "Repetidas",
+  "@repeated": {
+    "description": "Filtro de cartas repetidas."
+  },
+  "allRarities": "Todas las rarezas",
+  "@allRarities": {
+    "description": "Filtro de todas las rarezas."
+  },
+  "allMedia": "Todos los medios",
+  "@allMedia": {
+    "description": "Filtro de todos los tipos de medio."
+  },
+  "video": "Video",
+  "@video": {
+    "description": "Tipo de medio video."
+  },
+  "firstObtainedSort": "Primera obtencion",
+  "@firstObtainedSort": {
+    "description": "Orden por primera obtencion."
+  },
+  "favoriteToggle": "Marcar favorita",
+  "@favoriteToggle": {
+    "description": "Accion para marcar o desmarcar favorita."
+  },
   "quantity": "Cantidad",
   "@quantity": {
     "description": "Orden por cantidad."

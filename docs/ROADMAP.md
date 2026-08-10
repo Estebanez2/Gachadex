@@ -171,8 +171,8 @@ Incluye:
 - Actualizacion de `OwnedCard`, repetidas, `wasNew` y `quantityAfter`.
 - Recuperacion de apertura pendiente sin consumir otro sobre.
 - Revelado basico carta a carta, salto y resumen.
-- Album con obtenidas, faltantes ocultas, cantidades, favoritas, filtros,
-  orden y estadisticas basicas.
+- Album con obtenidas, faltantes ocultas, repetidas, cantidades, favoritas,
+  filtros por estado/rareza/medio, orden y estadisticas basicas.
 
 No incluye videos, venta de duplicados, economia usable, aceleracion,
 notificaciones, importacion ni exportacion.

@@ -84,7 +84,17 @@ class AlbumCardDetailPage extends ConsumerWidget {
                   ],
                 ),
                 Text('${l10n.collectionNumber}: ${entry.collectionNumber}'),
+                if (entry.health != null)
+                  Text('${l10n.health}: ${entry.health}'),
                 Text('${l10n.rarity}: ${entry.rarityName ?? ''}'),
+                if (entry.description != null) ...[
+                  const SizedBox(height: AppConstants.spacingSm),
+                  Text('${l10n.description}: ${entry.description}'),
+                ],
+                if (entry.templateId != null)
+                  Text('${l10n.template}: ${entry.templateId}'),
+                if (entry.frameId != null)
+                  Text('${l10n.frame}: ${entry.frameId}'),
                 Text('${l10n.copies}: ${entry.quantity}'),
                 if (entry.firstObtainedAtUtc != null)
                   Text(
@@ -94,6 +104,22 @@ class AlbumCardDetailPage extends ConsumerWidget {
                       ).formatShortDate(entry.firstObtainedAtUtc!.toLocal()),
                     ),
                   ),
+                if (entry.fieldValues.isNotEmpty) ...[
+                  const SizedBox(height: AppConstants.spacingMd),
+                  Text(
+                    l10n.comicFields,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingSm),
+                  for (final field in entry.fieldValues)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(field.label),
+                      subtitle: Text(field.value),
+                    ),
+                ],
               ],
             );
           },

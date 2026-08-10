@@ -45,6 +45,10 @@ void main() {
       installedCollectionId = InstalledCollectionId(
         await seedInstalledCollection(database, definition, seed: 30),
       );
+      await _insertMissingCard(database, definition);
+      await (database.update(database.installedCollections)
+            ..where((table) => table.id.equals(installedCollectionId.value)))
+          .write(const InstalledCollectionsCompanion(totalCardCount: Value(2)));
       cardRepository = DriftCardRepository(database: database);
       rarityRepository = DriftRarityRepository(
         database: database,
@@ -177,8 +181,29 @@ void main() {
         final favorites = await albumRepository
             .watchCards(
               installedCollectionId: installedCollectionId,
-              filter: AlbumFilter.favorites,
-              sort: AlbumSort.quantity,
+              query: AlbumQuery.initial.copyWith(
+                status: AlbumStatusFilter.favorites,
+                sort: AlbumSort.quantity,
+              ),
+            )
+            .first;
+        final missing = await albumRepository
+            .watchCards(
+              installedCollectionId: installedCollectionId,
+              query: AlbumQuery.initial.copyWith(
+                status: AlbumStatusFilter.missing,
+              ),
+            )
+            .first;
+        final repeated = await albumRepository
+            .watchCards(
+              installedCollectionId: installedCollectionId,
+              query: AlbumQuery.initial.copyWith(
+                status: AlbumStatusFilter.repeated,
+                rarityId: RarityId(definition.rarityId),
+                media: AlbumMediaFilter.image,
+                sort: AlbumSort.firstObtained,
+              ),
             )
             .first;
 
@@ -186,12 +211,71 @@ void main() {
         expect(resumed?.cards.first.result.revealed, isTrue);
         expect(activeAfterComplete, isNull);
         expect(stats.distinctOwnedCount, 1);
+        expect(stats.totalCardCount, 2);
         expect(stats.totalCopies, 3);
         expect(favorites.single.cardId, CardId(definition.cardId));
         expect(favorites.single.isFavorite, isTrue);
+        expect(missing.single.name, isNull);
+        expect(missing.single.thumbnailRelativePath, isNull);
+        expect(repeated.single.quantity, 3);
       },
     );
   });
+}
+
+Future<void> _insertMissingCard(
+  AppDatabase database,
+  SeededDefinition definition,
+) async {
+  final cardId = testUuid(3910);
+  final mediaAssetId = testUuid(3911);
+  await database
+      .into(database.mediaAssets)
+      .insert(
+        MediaAssetsCompanion(
+          id: Value(mediaAssetId),
+          collectionId: Value(definition.collectionId),
+          ownerType: const Value(MediaOwnerType.card),
+          ownerId: Value(cardId),
+          mediaType: const Value(MediaType.image),
+          relativePath: Value(
+            'collections/${definition.collectionId}/cards/$cardId.webp',
+          ),
+          thumbnailRelativePath: Value(
+            'collections/${definition.collectionId}/cards/$cardId-thumb.webp',
+          ),
+          mimeType: const Value('image/webp'),
+          width: const Value(720),
+          height: const Value(960),
+          durationMs: const Value(null),
+          fileSize: const Value(1024),
+          sha256: const Value(null),
+          createdAtUtc: Value(testNowUtc(32)),
+        ),
+      );
+  await database
+      .into(database.cards)
+      .insert(
+        CardsCompanion(
+          id: Value(cardId),
+          collectionId: Value(definition.collectionId),
+          contentVersionId: Value(definition.contentVersionId),
+          collectionNumber: const Value(2),
+          name: const Value('Carta oculta'),
+          health: const Value(90),
+          rarityId: Value(definition.rarityId),
+          mediaAssetId: Value(mediaAssetId),
+          mediaType: const Value(MediaType.image),
+          thumbnailAssetId: const Value(null),
+          templateId: const Value('classic'),
+          frameId: const Value('clean'),
+          primaryColor: const Value(0xFF3366CC),
+          secondaryColor: const Value(0xFFFFCC33),
+          description: const Value('No debe verse hasta obtenerla'),
+          sortIndex: const Value(2),
+          createdAtUtc: Value(testNowUtc(32)),
+        ),
+      );
 }
 
 Future<void> _completeMainPack(
