@@ -233,9 +233,11 @@ El album expone:
 - Obtenidas / total y porcentaje.
 - Total de copias calculado con las cantidades actuales.
 - Numero de favoritas.
-- Filtros: todas, obtenidas, faltantes y favoritas.
-- Orden: numero, nombre, rareza y cantidad.
-- Detalle de carta obtenida con imagen completa y favorito.
+- Filtros: todas, obtenidas, faltantes, repetidas, favoritas, rareza y tipo de
+  medio.
+- Orden: numero, nombre, rareza, primera obtencion y cantidad.
+- Detalle de carta obtenida con imagen completa, vida, descripcion, plantilla,
+  marco, campos comicos y favorito.
 
 ## Repositorios
 

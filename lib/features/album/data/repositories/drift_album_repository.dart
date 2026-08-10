@@ -2,9 +2,12 @@ import 'package:drift/drift.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/mappers/date_time_mapper.dart';
+import '../../../../core/domain/domain_enums.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/identifiers/entity_id.dart';
 import '../../../../core/value_objects/relative_media_path.dart';
+import '../../../cards/domain/catalogs/card_template_catalog.dart';
+import '../../../cards/domain/value_objects/card_field_type.dart';
 import '../../domain/entities/album_card_entry.dart';
 import '../../domain/repositories/album_repository.dart';
 
@@ -16,38 +19,71 @@ final class DriftAlbumRepository implements AlbumRepository {
   @override
   Stream<List<AlbumCardEntry>> watchCards({
     required InstalledCollectionId installedCollectionId,
-    required AlbumFilter filter,
-    required AlbumSort sort,
+    required AlbumQuery query,
   }) {
     return _collectionVersion(installedCollectionId).asStream().asyncExpand((
       version,
     ) {
-      final query = _albumQuery(
+      final albumQuery = _albumQuery(
         installedCollectionId: installedCollectionId,
         collectionId: version.collectionId,
         contentVersionId: version.contentVersionId,
       );
-      return query.watch().map((rows) {
+      return albumQuery.watch().map((rows) {
         final entries = rows.map(_entryFromRow).where((entry) {
-          return switch (filter) {
-            AlbumFilter.all => true,
-            AlbumFilter.owned => entry.isOwned,
-            AlbumFilter.missing => !entry.isOwned,
-            AlbumFilter.favorites => entry.isFavorite,
+          final statusMatches = switch (query.status) {
+            AlbumStatusFilter.all => true,
+            AlbumStatusFilter.owned => entry.isOwned,
+            AlbumStatusFilter.missing => !entry.isOwned,
+            AlbumStatusFilter.repeated => entry.isRepeated,
+            AlbumStatusFilter.favorites => entry.isFavorite,
           };
+          final rarityMatches =
+              query.rarityId == null || entry.rarityId == query.rarityId;
+          final mediaMatches = switch (query.media) {
+            AlbumMediaFilter.all => true,
+            AlbumMediaFilter.image => entry.mediaType == MediaType.image,
+            AlbumMediaFilter.video => entry.mediaType == MediaType.video,
+          };
+          return statusMatches && rarityMatches && mediaMatches;
         }).toList();
         entries.sort((a, b) {
-          return switch (sort) {
+          return switch (query.sort) {
             AlbumSort.number => a.collectionNumber.compareTo(
               b.collectionNumber,
             ),
             AlbumSort.name => (a.name ?? '').compareTo(b.name ?? ''),
             AlbumSort.rarity => a.rarityOrder.compareTo(b.rarityOrder),
+            AlbumSort.firstObtained => _compareObtainedDate(a, b),
             AlbumSort.quantity => b.quantity.compareTo(a.quantity),
           };
         });
         return entries;
       });
+    });
+  }
+
+  @override
+  Stream<List<AlbumRarityOption>> watchRarities(
+    InstalledCollectionId installedCollectionId,
+  ) {
+    return _collectionVersion(installedCollectionId).asStream().asyncExpand((
+      version,
+    ) {
+      final query = database.select(database.rarities)
+        ..where(
+          (table) =>
+              table.collectionId.equals(version.collectionId.value) &
+              table.contentVersionId.equals(version.contentVersionId.value),
+        )
+        ..orderBy([(table) => OrderingTerm.asc(table.orderIndex)]);
+      return query.watch().map(
+        (rows) => rows
+            .map(
+              (row) => AlbumRarityOption(id: RarityId(row.id), name: row.name),
+            )
+            .toList(),
+      );
     });
   }
 
@@ -100,7 +136,10 @@ final class DriftAlbumRepository implements AlbumRepository {
     if (row == null) {
       throw const EntityNotFoundFailure('No se encontro la carta.');
     }
-    return _entryFromRow(row);
+    return _entryFromRow(
+      row,
+      fieldValues: await _fieldEntriesFor(cardId.value),
+    );
   }
 
   @override
@@ -175,7 +214,10 @@ final class DriftAlbumRepository implements AlbumRepository {
     );
   }
 
-  AlbumCardEntry _entryFromRow(TypedResult row) {
+  AlbumCardEntry _entryFromRow(
+    TypedResult row, {
+    List<AlbumCardFieldEntry> fieldValues = const [],
+  }) {
     final card = row.readTable(database.cards);
     final rarity = row.readTable(database.rarities);
     final media = row.readTable(database.mediaAssets);
@@ -183,20 +225,73 @@ final class DriftAlbumRepository implements AlbumRepository {
     final isOwned = owned != null;
     return AlbumCardEntry(
       cardId: CardId(card.id),
+      rarityId: RarityId(card.rarityId),
       collectionNumber: card.collectionNumber,
       name: isOwned ? card.name : null,
+      health: isOwned ? card.health : null,
       rarityName: isOwned ? rarity.name : null,
       rarityOrder: rarity.orderIndex,
+      mediaType: card.mediaType,
       thumbnailRelativePath: isOwned
           ? RelativeMediaPath(media.thumbnailRelativePath ?? media.relativePath)
           : null,
       imageRelativePath: isOwned ? RelativeMediaPath(media.relativePath) : null,
+      description: isOwned ? card.description : null,
+      templateId: isOwned ? _templateName(card.templateId) : null,
+      frameId: isOwned ? _frameName(card.frameId) : null,
+      fieldValues: isOwned ? fieldValues : const [],
       quantity: owned?.quantity ?? 0,
       isFavorite: owned?.isFavorite ?? false,
       firstObtainedAtUtc: owned == null
           ? null
           : fromDatabaseUtc(owned.firstObtainedAtUtc),
     );
+  }
+
+  Future<List<AlbumCardFieldEntry>> _fieldEntriesFor(String cardId) async {
+    final rows =
+        await (database.select(database.cardFieldValues)
+              ..where((table) => table.cardId.equals(cardId))
+              ..orderBy([(table) => OrderingTerm.asc(table.displayOrder)]))
+            .get();
+    return rows
+        .map(
+          (row) => AlbumCardFieldEntry(
+            label: CardTemplateCatalog.labelForField(
+              CardFieldType.parse(row.fieldTypeId),
+            ),
+            value: row.value,
+          ),
+        )
+        .toList();
+  }
+
+  static int _compareObtainedDate(AlbumCardEntry a, AlbumCardEntry b) {
+    final aDate = a.firstObtainedAtUtc;
+    final bDate = b.firstObtainedAtUtc;
+    if (aDate == null && bDate == null) {
+      return a.collectionNumber.compareTo(b.collectionNumber);
+    }
+    if (aDate == null) {
+      return 1;
+    }
+    if (bDate == null) {
+      return -1;
+    }
+    return aDate.compareTo(bDate);
+  }
+
+  static String _templateName(String id) {
+    return CardTemplateCatalog.templateById(id).name;
+  }
+
+  static String _frameName(String id) {
+    return CardTemplateCatalog.frames
+        .firstWhere(
+          (frame) => frame.id == id,
+          orElse: () => CardTemplateCatalog.frames.first,
+        )
+        .name;
   }
 }
 

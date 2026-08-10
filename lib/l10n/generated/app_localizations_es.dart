@@ -813,6 +813,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get favorites => 'Favoritas';
 
   @override
+  String get repeated => 'Repetidas';
+
+  @override
+  String get allRarities => 'Todas las rarezas';
+
+  @override
+  String get allMedia => 'Todos los medios';
+
+  @override
+  String get video => 'Video';
+
+  @override
+  String get firstObtainedSort => 'Primera obtencion';
+
+  @override
+  String get favoriteToggle => 'Marcar favorita';
+
+  @override
   String get quantity => 'Cantidad';
 
   @override

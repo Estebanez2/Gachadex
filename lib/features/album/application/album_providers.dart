@@ -6,31 +6,34 @@ import '../domain/entities/album_card_entry.dart';
 
 typedef AlbumCardsArgs = ({
   InstalledCollectionId installedCollectionId,
-  AlbumFilter filter,
-  AlbumSort sort,
+  AlbumQuery query,
 });
 
-final albumFilterProvider =
-    NotifierProvider<AlbumFilterController, AlbumFilter>(
-      AlbumFilterController.new,
-    );
-
-final albumSortProvider = NotifierProvider<AlbumSortController, AlbumSort>(
-  AlbumSortController.new,
+final albumQueryProvider = NotifierProvider<AlbumQueryController, AlbumQuery>(
+  AlbumQueryController.new,
 );
 
-final class AlbumFilterController extends Notifier<AlbumFilter> {
+final class AlbumQueryController extends Notifier<AlbumQuery> {
   @override
-  AlbumFilter build() => AlbumFilter.all;
+  AlbumQuery build() => AlbumQuery.initial;
 
-  void setFilter(AlbumFilter value) => state = value;
-}
+  void setStatus(AlbumStatusFilter value) {
+    state = state.copyWith(status: value);
+  }
 
-final class AlbumSortController extends Notifier<AlbumSort> {
-  @override
-  AlbumSort build() => AlbumSort.number;
+  void setSort(AlbumSort value) {
+    state = state.copyWith(sort: value);
+  }
 
-  void setSort(AlbumSort value) => state = value;
+  void setRarity(RarityId? value) {
+    state = value == null
+        ? state.copyWith(clearRarity: true)
+        : state.copyWith(rarityId: value);
+  }
+
+  void setMedia(AlbumMediaFilter value) {
+    state = state.copyWith(media: value);
+  }
 }
 
 final albumCardsProvider = StreamProvider.autoDispose
@@ -39,9 +42,13 @@ final albumCardsProvider = StreamProvider.autoDispose
           .watch(albumRepositoryProvider)
           .watchCards(
             installedCollectionId: args.installedCollectionId,
-            filter: args.filter,
-            sort: args.sort,
+            query: args.query,
           );
+    });
+
+final albumRaritiesProvider = StreamProvider.autoDispose
+    .family<List<AlbumRarityOption>, InstalledCollectionId>((ref, id) {
+      return ref.watch(albumRepositoryProvider).watchRarities(id);
     });
 
 final albumStatsProvider = StreamProvider.autoDispose
