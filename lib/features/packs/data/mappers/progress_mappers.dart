@@ -21,6 +21,19 @@ extension PackInventoryRowMapper on PackInventoryRow {
   }
 }
 
+extension PackInventoryDomainMapper on PackInventory {
+  PackInventoryCompanion toCompanion() {
+    return PackInventoryCompanion(
+      installedCollectionId: Value(installedCollectionId.value),
+      packTypeId: Value(packTypeId.value),
+      availableCount: Value(availableCount),
+      maxAccumulated: Value(maxAccumulated),
+      nextRechargeAtUtc: Value(toDatabaseUtc(nextRechargeAtUtc)),
+      lastCalculatedAtUtc: Value(toDatabaseUtc(lastCalculatedAtUtc)),
+    );
+  }
+}
+
 extension OwnedCardRowMapper on OwnedCardRow {
   OwnedCard toDomain() {
     return OwnedCard(

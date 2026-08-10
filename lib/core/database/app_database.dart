@@ -843,6 +843,24 @@ class InstalledCollectionsDao extends DatabaseAccessor<AppDatabase>
         .getSingleOrNull();
   }
 
+  Future<InstalledCollectionRow?> getById(String id) {
+    return (select(
+      installedCollections,
+    )..where((table) => table.id.equals(id))).getSingleOrNull();
+  }
+
+  Future<InstalledCollectionRow?> getByCollectionVersion({
+    required String collectionId,
+    required String contentVersionId,
+  }) {
+    return (select(installedCollections)..where(
+          (table) =>
+              table.collectionId.equals(collectionId) &
+              table.contentVersionId.equals(contentVersionId),
+        ))
+        .getSingleOrNull();
+  }
+
   Stream<List<InstalledCollectionRow>> watchAll() {
     final query = select(installedCollections)
       ..orderBy([(table) => OrderingTerm.desc(table.installedAtUtc)]);
@@ -884,6 +902,15 @@ class PlayerProgressDao extends DatabaseAccessor<AppDatabase>
           (table) => table.installedCollectionId.equals(installedCollectionId),
         ))
         .get();
+  }
+
+  Stream<List<PackInventoryRow>> watchPackInventory(
+    String installedCollectionId,
+  ) {
+    return (select(packInventory)..where(
+          (table) => table.installedCollectionId.equals(installedCollectionId),
+        ))
+        .watch();
   }
 
   Future<int> getCoinBalance(String installedCollectionId) async {

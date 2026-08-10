@@ -1,6 +1,6 @@
 # Roadmap
 
-Fecha: 2026-08-06
+Fecha: 2026-08-10
 
 Este roadmap ordena el trabajo practico. La fase 0 documental queda separada de
 la implementacion tecnica.
@@ -136,11 +136,25 @@ Depende de: fase 4.
 
 ## Fase 6 - Coleccion jugable local
 
-Objetivo: finalizar una coleccion y abrir sobres en el mismo dispositivo.
+Estado: implementada en la rama `phase/06-finalize-install-timers`.
 
-Incluye snapshot inmutable, coleccion instalada, separacion contenido/progreso,
-tres sobres iniciales, temporizadores locales, generador de sobres, apertura
-atomica antes de animar, album, duplicados y apertura visual basica.
+Incluye:
+
+- Seccion Revision en el editor de borrador.
+- Validacion completa por Informacion, Rarezas, Cartas y Sobres.
+- Finalizacion transaccional e idempotente de una coleccion valida.
+- Proyecto marcado como finalizado y fuera de la lista editable de borradores.
+- Coleccion instalada local para el creador.
+- Tres sobres iniciales en el sobre principal.
+- Inventario para cada tipo de sobre.
+- Temporizadores locales independientes por tipo de sobre, calculados en UTC.
+- Refresco de inventarios al arrancar, al volver a primer plano y al abrir el
+  detalle de una coleccion instalada.
+- Pantalla Colecciones con colecciones instaladas y detalle de inventario.
+
+No incluye apertura real de sobres, escritura de cartas obtenidas, album
+jugable, venta de duplicados, economia usable, notificaciones, videos,
+importacion ni exportacion.
 
 Depende de: fase 5.
 

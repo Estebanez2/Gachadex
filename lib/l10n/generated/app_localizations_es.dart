@@ -724,4 +724,63 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get packPreviewName => 'Sobre';
+
+  @override
+  String get reviewNeedsCompleteDraft =>
+      'Completa informacion, rarezas, cartas y sobres';
+
+  @override
+  String get finalizationReviewDescription =>
+      'Comprueba que la coleccion esta lista antes de instalarla localmente.';
+
+  @override
+  String get ready => 'Listo';
+
+  @override
+  String get finalizeCollection => 'Finalizar coleccion';
+
+  @override
+  String get finalizeCollectionDialogDescription =>
+      'Se instalara una copia local de esta coleccion y el borrador quedara solo lectura.';
+
+  @override
+  String get collectionFinalized => 'Coleccion finalizada';
+
+  @override
+  String get finalizeCollectionError =>
+      'No se ha podido finalizar la coleccion';
+
+  @override
+  String get installedCollection => 'Coleccion instalada';
+
+  @override
+  String collectionProgress(int owned, int total) {
+    return '$owned/$total cartas descubiertas';
+  }
+
+  @override
+  String get packInventory => 'Sobres disponibles';
+
+  @override
+  String get noPackInventoryTitle => 'No hay sobres instalados';
+
+  @override
+  String get noPackInventoryDescription =>
+      'Esta coleccion no tiene tipos de sobre preparados.';
+
+  @override
+  String availablePacks(int available, int max) {
+    return '$available/$max disponibles';
+  }
+
+  @override
+  String nextPackIn(String time) {
+    return 'Siguiente sobre en $time';
+  }
+
+  @override
+  String get packRechargeFull => 'Acumulacion completa';
+
+  @override
+  String get openPackComingSoon => 'Abrir sobre proximamente';
 }

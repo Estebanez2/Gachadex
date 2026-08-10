@@ -26,11 +26,12 @@ import '../../../rarities/presentation/widgets/rarity_preview.dart';
 import '../../application/collection_draft_use_case_providers.dart';
 import '../../domain/catalogs/draft_cover_catalog.dart';
 import '../../domain/validation/collection_draft_validation.dart';
+import '../../domain/validation/collection_finalization_validation.dart';
 import '../controllers/collection_draft_controller.dart';
 import '../widgets/draft_cover_preview.dart';
 import '../widgets/visual_option_labels.dart';
 
-enum _EditorSection { information, rarities, cards, packs }
+enum _EditorSection { information, rarities, cards, packs, review }
 
 class CollectionDraftEditorPage extends ConsumerStatefulWidget {
   const CollectionDraftEditorPage({super.key, required this.projectId});
@@ -209,6 +210,11 @@ class _EditorBody extends ConsumerWidget {
                       icon: const Icon(Icons.inventory_2_outlined),
                       label: Text(l10n.packs),
                     ),
+                    ButtonSegment(
+                      value: _EditorSection.review,
+                      icon: const Icon(Icons.fact_check_outlined),
+                      label: Text(l10n.review),
+                    ),
                   ],
                   selected: {section},
                   onSelectionChanged: (selection) {
@@ -233,6 +239,10 @@ class _EditorBody extends ConsumerWidget {
                     ),
                     _EditorSection.packs => _PacksSection(
                       key: const ValueKey('packs'),
+                      state: state,
+                    ),
+                    _EditorSection.review => _ReviewSection(
+                      key: const ValueKey('review'),
                       state: state,
                     ),
                   },
@@ -322,7 +332,14 @@ class _CompletionPanel extends StatelessWidget {
               onTap: () => onSectionChanged(_EditorSection.packs),
             ),
             const Divider(),
-            _FutureRow(title: l10n.review),
+            _CompletionRow(
+              title: l10n.review,
+              status: state.completeness.completeForThisPhase
+                  ? DraftSectionCompletion.completeForThisPhase
+                  : DraftSectionCompletion.incomplete,
+              missingText: l10n.reviewNeedsCompleteDraft,
+              onTap: () => onSectionChanged(_EditorSection.review),
+            ),
           ],
         ),
       ),
@@ -363,25 +380,6 @@ class _CompletionRow extends StatelessWidget {
       title: Text(title),
       subtitle: complete ? null : Text(missingText),
       trailing: Text(label),
-    );
-  }
-}
-
-class _FutureRow extends StatelessWidget {
-  const _FutureRow({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return ListTile(
-      enabled: false,
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.lock_outline),
-      title: Text(title),
-      trailing: Text(l10n.availableLater),
     );
   }
 }
@@ -938,6 +936,121 @@ class _PacksSection extends ConsumerWidget {
   }
 }
 
+class _ReviewSection extends ConsumerWidget {
+  const _ReviewSection({super.key, required this.state});
+
+  final CollectionDraftEditorState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final reportAsync = ref.watch(
+      collectionFinalizationReportProvider(state.project.id),
+    );
+
+    return reportAsync.when(
+      loading: () => const AppLoadingView(),
+      error: (_, _) => AppErrorView(
+        title: l10n.screenErrorTitle,
+        description: l10n.saveError,
+      ),
+      data: (report) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.review,
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: AppConstants.spacingSm),
+          Text(l10n.finalizationReviewDescription),
+          const SizedBox(height: AppConstants.spacingMd),
+          _FinalizationSectionCard(
+            title: l10n.information,
+            issues: report.issuesFor(FinalizationSection.information),
+          ),
+          _FinalizationSectionCard(
+            title: l10n.rarities,
+            issues: report.issuesFor(FinalizationSection.rarities),
+          ),
+          _FinalizationSectionCard(
+            title: l10n.cards,
+            issues: report.issuesFor(FinalizationSection.cards),
+          ),
+          _FinalizationSectionCard(
+            title: l10n.packs,
+            issues: report.issuesFor(FinalizationSection.packs),
+          ),
+          const SizedBox(height: AppConstants.spacingMd),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              onPressed: report.canFinalize
+                  ? () => _confirmFinalizeCollection(context, ref, state)
+                  : null,
+              icon: const Icon(Icons.check_circle_outline),
+              label: Text(l10n.finalizeCollection),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FinalizationSectionCard extends StatelessWidget {
+  const _FinalizationSectionCard({required this.title, required this.issues});
+
+  final String title;
+  final List<CollectionFinalizationIssue> issues;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final complete = issues.isEmpty;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingSm),
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.spacingMd),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  complete ? Icons.check_circle_outline : Icons.error_outline,
+                ),
+                const SizedBox(width: AppConstants.spacingSm),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Text(complete ? l10n.ready : l10n.withErrors),
+              ],
+            ),
+            if (!complete) ...[
+              const SizedBox(height: AppConstants.spacingSm),
+              for (final issue in issues)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: AppConstants.spacingXs,
+                  ),
+                  child: Text(issue.message),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _PackListItem extends StatelessWidget {
   const _PackListItem({
     super.key,
@@ -1256,6 +1369,64 @@ Future<void> _confirmDeleteDraft(
       context,
     ).showSnackBar(SnackBar(content: Text(l10n.draftDeleted)));
     context.go(AppRoutes.createPath);
+  }
+}
+
+Future<void> _confirmFinalizeCollection(
+  BuildContext context,
+  WidgetRef ref,
+  CollectionDraftEditorState state,
+) async {
+  final l10n = context.l10n;
+  await ref
+      .read(collectionDraftControllerProvider(state.project.id).notifier)
+      .flushPendingSave();
+  ref.invalidate(collectionFinalizationReportProvider(state.project.id));
+
+  if (!context.mounted) {
+    return;
+  }
+
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.finalizeCollection),
+      content: Text(l10n.finalizeCollectionDialogDescription),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).pop(true),
+          icon: const Icon(Icons.check_circle_outline),
+          label: Text(l10n.finalizeCollection),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed != true) {
+    return;
+  }
+
+  try {
+    final installed = await ref
+        .read(finalizeCollectionProvider)
+        .call(state.project.id);
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.collectionFinalized)));
+      context.go(AppRoutes.installedCollectionPath(installed.id.value));
+    }
+  } on Object {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.finalizeCollectionError)));
+      ref.invalidate(collectionFinalizationReportProvider(state.project.id));
+    }
   }
 }
 

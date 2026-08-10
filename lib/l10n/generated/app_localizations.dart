@@ -1461,6 +1461,102 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Sobre'**
   String get packPreviewName;
+
+  /// Requisito para poder revisar la coleccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa informacion, rarezas, cartas y sobres'**
+  String get reviewNeedsCompleteDraft;
+
+  /// Descripcion de la revision de finalizacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprueba que la coleccion esta lista antes de instalarla localmente.'**
+  String get finalizationReviewDescription;
+
+  /// Estado listo para finalizar.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo'**
+  String get ready;
+
+  /// Accion para finalizar un borrador.
+  ///
+  /// In es, this message translates to:
+  /// **'Finalizar coleccion'**
+  String get finalizeCollection;
+
+  /// Confirmacion antes de finalizar coleccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Se instalara una copia local de esta coleccion y el borrador quedara solo lectura.'**
+  String get finalizeCollectionDialogDescription;
+
+  /// Confirmacion de finalizacion correcta.
+  ///
+  /// In es, this message translates to:
+  /// **'Coleccion finalizada'**
+  String get collectionFinalized;
+
+  /// Error al finalizar coleccion.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha podido finalizar la coleccion'**
+  String get finalizeCollectionError;
+
+  /// Titulo generico de detalle de coleccion instalada.
+  ///
+  /// In es, this message translates to:
+  /// **'Coleccion instalada'**
+  String get installedCollection;
+
+  /// Progreso de cartas de una coleccion instalada.
+  ///
+  /// In es, this message translates to:
+  /// **'{owned}/{total} cartas descubiertas'**
+  String collectionProgress(int owned, int total);
+
+  /// Titulo del inventario de sobres.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobres disponibles'**
+  String get packInventory;
+
+  /// Titulo de estado vacio de inventario de sobres.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay sobres instalados'**
+  String get noPackInventoryTitle;
+
+  /// Descripcion de estado vacio de inventario de sobres.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta coleccion no tiene tipos de sobre preparados.'**
+  String get noPackInventoryDescription;
+
+  /// Cantidad de sobres disponibles.
+  ///
+  /// In es, this message translates to:
+  /// **'{available}/{max} disponibles'**
+  String availablePacks(int available, int max);
+
+  /// Tiempo restante hasta el siguiente sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente sobre en {time}'**
+  String nextPackIn(String time);
+
+  /// Estado de inventario de sobre completo.
+  ///
+  /// In es, this message translates to:
+  /// **'Acumulacion completa'**
+  String get packRechargeFull;
+
+  /// Boton deshabilitado de apertura futura.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir sobre proximamente'**
+  String get openPackComingSoon;
 }
 
 class _AppLocalizationsDelegate

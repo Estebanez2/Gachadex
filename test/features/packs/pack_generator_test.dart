@@ -10,6 +10,7 @@ import 'package:gachadex/features/packs/domain/entities/pack_rarity_probability.
 import 'package:gachadex/features/packs/domain/entities/pack_slot_rule.dart';
 import 'package:gachadex/features/packs/domain/entities/pack_type.dart';
 import 'package:gachadex/features/packs/domain/services/pack_generator.dart';
+import 'package:gachadex/features/packs/domain/services/pack_recharge_calculator.dart';
 import 'package:gachadex/features/packs/domain/validation/pack_validation.dart';
 import 'package:gachadex/features/rarities/domain/entities/rarity.dart';
 
@@ -217,6 +218,37 @@ void main() {
         ]),
       );
       expect(validation.canSave, isFalse);
+    });
+  });
+
+  group('PackRechargeCalculator', () {
+    test('accumulates due packs without exceeding the maximum', () {
+      final result = const PackRechargeCalculator().calculate(
+        availableCount: 1,
+        maxAccumulated: 3,
+        rechargeSeconds: 3600,
+        nextRechargeAtUtc: DateTime.utc(2026, 8, 5, 10),
+        currentTimeUtc: DateTime.utc(2026, 8, 5, 13, 30),
+      );
+
+      expect(result.availableCount, 3);
+      expect(result.generatedCount, 2);
+      expect(result.reachedMaximum, isTrue);
+      expect(result.nextRechargeAtUtc, DateTime.utc(2026, 8, 5, 12));
+    });
+
+    test('keeps independent countdown when no recharge is due', () {
+      final result = const PackRechargeCalculator().calculate(
+        availableCount: 0,
+        maxAccumulated: 3,
+        rechargeSeconds: 3600,
+        nextRechargeAtUtc: DateTime.utc(2026, 8, 5, 14),
+        currentTimeUtc: DateTime.utc(2026, 8, 5, 13, 30),
+      );
+
+      expect(result.availableCount, 0);
+      expect(result.generatedCount, 0);
+      expect(result.nextRechargeAtUtc, DateTime.utc(2026, 8, 5, 14));
     });
   });
 }

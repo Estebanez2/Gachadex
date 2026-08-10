@@ -6,6 +6,11 @@ abstract final class AppRoutes {
 
   static const collectionsName = 'collections';
   static const collectionsPath = '/collections';
+  static const installedCollectionName = 'installed-collection';
+  static const installedCollectionPathPrefix = '/collections';
+  static String installedCollectionPath(String installedCollectionId) {
+    return '$installedCollectionPathPrefix/$installedCollectionId';
+  }
 
   static const createName = 'create';
   static const createPath = '/create';

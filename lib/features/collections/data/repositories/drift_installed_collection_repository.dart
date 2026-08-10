@@ -54,6 +54,30 @@ final class DriftInstalledCollectionRepository
   }
 
   @override
+  Future<InstalledCollection> getById(InstalledCollectionId id) async {
+    final row = await database.installedCollectionsDao.getById(id.value);
+    if (row == null) {
+      throw const EntityNotFoundFailure(
+        'No se encontro la coleccion instalada.',
+      );
+    }
+
+    return row.toDomain();
+  }
+
+  @override
+  Future<InstalledCollection?> getByCollectionVersion({
+    required CollectionId collectionId,
+    required ContentVersionId contentVersionId,
+  }) async {
+    final row = await database.installedCollectionsDao.getByCollectionVersion(
+      collectionId: collectionId.value,
+      contentVersionId: contentVersionId.value,
+    );
+    return row?.toDomain();
+  }
+
+  @override
   Stream<List<InstalledCollection>> watchAll() {
     return database.installedCollectionsDao.watchAll().map(
       (rows) => rows.map((row) => row.toDomain()).toList(growable: false),
