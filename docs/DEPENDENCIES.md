@@ -2,7 +2,8 @@
 
 Fecha: 2026-08-11
 
-Este documento registra las dependencias directas del proyecto tras la Fase 11.
+Este documento registra las dependencias directas del proyecto tras la Fase 13.
+Las Fases 12 y 13 no anadieron dependencias directas.
 
 ## Dependencias directas actuales
 
@@ -56,6 +57,14 @@ Este documento registra las dependencias directas del proyecto tras la Fase 11.
 
 Las transitivas estan fijadas en `pubspec.lock`. Pasaran a directas solo si el
 codigo del proyecto las importa explicitamente.
+
+## Avisos de compilacion
+
+El build Android puede mostrar avisos del plugin Gradle de Kotlin aplicados por
+dependencias transitivas de multimedia, especialmente
+`flutter_image_compress_common` y `video_compress`. En Fase 13 no bloquean
+`flutter analyze`, `flutter test` ni las compilaciones Android verificadas; se
+deben revisar al actualizar Flutter, Gradle o esos plugins.
 
 ## Revision previa a la incorporacion
 

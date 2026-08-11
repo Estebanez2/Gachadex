@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:archive/archive_io.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:gachadex/core/database/app_database.dart';
@@ -135,6 +136,28 @@ void main() {
       () => importService.importFile(packageFile.path),
       throwsA(isA<GachadexPackageFailure>()),
     );
+  });
+
+  test('rejects packages with unsafe archive paths', () async {
+    final packageFile = File('${importRoot.path}/unsafe.gachadex');
+    final archive = Archive()
+      ..addFile(ArchiveFile.string('manifest.json', '{}'))
+      ..addFile(ArchiveFile.string('../escape.webp', 'bad'));
+    await packageFile.writeAsBytes(ZipEncoder().encode(archive), flush: true);
+
+    final importService = GachadexPackageService(
+      database: importDatabase,
+      mediaStorage: LocalProjectMediaStorage(rootDirectory: importRoot),
+      uuidGenerator: FixedUuidGenerator([testUuid(11002)]),
+      clock: FakeClock(DateTime.utc(2026, 8, 11, 11)),
+      tempDirectory: importRoot,
+    );
+
+    expect(
+      () => importService.previewFile(packageFile.path),
+      throwsA(isA<GachadexPackageFailure>()),
+    );
+    expect(File('${importRoot.path}/escape.webp').existsSync(), isFalse);
   });
 }
 

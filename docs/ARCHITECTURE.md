@@ -2,11 +2,13 @@
 
 Fecha: 2026-08-11
 
-Este documento describe el estado tecnico tras la Fase 12: borradores,
+Este documento describe el estado tecnico tras la Fase 13: borradores,
 rarezas, cartas con fotografias y videos, configuracion de sobres,
 finalizacion local, inventario con temporizadores, apertura de sobres, album,
 economia, importacion/exportacion, notificaciones locales y acabado visual.
-La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`.
+La Fase 13 estabiliza documentacion, CI y compilaciones Android sin ampliar el
+alcance funcional de v1. La fuente funcional sigue siendo
+`docs/PRODUCT_SPEC.md`.
 
 ## Principios
 
@@ -25,6 +27,8 @@ La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`.
 - La Fase 8 anade videos de carta como archivos privados MP4 y thumbnails WebP.
 - La Fase 12 anade efectos visuales de rareza y animaciones como presentacion
   pura, respetando `MediaQuery.disableAnimations`.
+- La Fase 13 no introduce funcionalidades nuevas; consolida la version
+  distribuible y deja separadas las mejoras futuras.
 
 ## Capas
 
@@ -389,7 +393,13 @@ Los widgets de Fase 3 se prueban con repositorios en memoria para evitar que los
 streams de Drift dejen temporizadores pendientes dentro de `testWidgets`; la
 persistencia real queda cubierta por tests de repositorio y controlador.
 
+CI ejecuta generacion de localizaciones, generacion Drift, formato en modo
+check, analisis estatico y tests en GitHub Actions. Las compilaciones Android
+de release se validan localmente antes de entregar la fase.
+
 ## Limites actuales
 
-Queda fuera de Fase 12 la estabilizacion amplia de lanzamiento, tutorial inicial
-y preparacion iOS final.
+La v1 queda estabilizada para Android. La validacion iOS final requiere macOS
+con Xcode. Siguen fuera de v1 las funciones futuras como actualizacion de
+colecciones ya instaladas, cuentas, servidor, intercambios, combates, compras
+con dinero real y exportaciones editoriales avanzadas.

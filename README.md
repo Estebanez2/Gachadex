@@ -7,13 +7,14 @@ dinero real.
 
 ## Estado actual
 
-Fase 12: borradores, rarezas, cartas con fotografias y videos, configuracion de
-sobres, finalizacion local, temporizadores, apertura de sobres, album,
-importacion/exportacion `.gachadex`, economia con gachacoin, notificaciones
-locales y acabado visual.
+Fase 13: primera version estabilizada para Android. Incluye borradores,
+rarezas, cartas con fotografias y videos, configuracion de sobres, finalizacion
+local, temporizadores, apertura de sobres, album, importacion/exportacion
+`.gachadex`, economia con gachacoin, notificaciones locales, acabado visual y
+validacion de lanzamiento.
 
 Incluye la base tecnica de Fase 1, el dominio y persistencia local de Fase 2,
-schema version 5, biblioteca de borradores, creacion atomica de borradores,
+schema version 6, biblioteca de borradores, creacion atomica de borradores,
 editor con autosave, portada provisional generada en Flutter y CRUD/reordenacion
 de rarezas. La seccion Cartas permite seleccionar una foto de galeria,
 recortarla, guardarla como WebP privado con miniatura, o seleccionar un video
@@ -35,9 +36,10 @@ automatica se pausa hasta volver a estar por debajo de ese maximo.
 
 La experiencia visual incluye efectos propios por rareza, animaciones de
 revelado, apariciones suaves, feedback tactil y respeto de reducir animaciones.
-No incluye todavia estabilizacion general de lanzamiento.
+La estabilizacion de Fase 13 mantiene el alcance offline, valida el build
+Android, documenta el estado de v1 y prepara CI basico para analisis y tests.
 
-No se han anadido dependencias nuevas para el acabado visual de Fase 12.
+No se han anadido dependencias nuevas en Fase 12 ni Fase 13.
 
 ## Probar venta y aceleracion
 
@@ -117,7 +119,7 @@ Selecciona un dispositivo Android concreto:
 flutter run -d <device-id>
 ```
 
-Flujo manual de Fase 8:
+Flujo manual de v1:
 
 1. Abrir la pestana `Crear`.
 2. Crear una coleccion nueva.
@@ -185,6 +187,13 @@ Compilacion Android debug:
 
 ```bash
 flutter build apk --debug
+```
+
+Compilaciones Android de distribucion local:
+
+```bash
+flutter build apk --release
+flutter build appbundle --release
 ```
 
 ## Base de datos

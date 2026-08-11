@@ -196,6 +196,8 @@ Depende de: fase 7.
 
 ## Fase 9 - Exportacion e importacion
 
+Estado: implementada.
+
 Objetivo: compartir colecciones sin servidor.
 
 Incluye formato `.gachadex`, manifest, JSON de contenido, activos,
@@ -206,6 +208,8 @@ Depende de: fases 7 y 8.
 
 ## Fase 10 - Economia
 
+Estado: implementada.
+
 Objetivo: cerrar el ciclo de duplicados.
 
 Incluye venta parcial, valores por rareza, gachacoin por coleccion, historial,
@@ -214,6 +218,8 @@ aceleracion de temporizadores y validaciones de saldo.
 Depende de: fase 6.
 
 ## Fase 11 - Notificaciones locales
+
+Estado: implementada.
 
 Objetivo: avisar de sobres disponibles sin servidor.
 
@@ -237,13 +243,33 @@ Depende de: fases 6, 7 y 10.
 
 ## Fase 13 - Estabilizacion y lanzamiento
 
+Estado: implementada en la rama `phase/13-stabilization`.
+
 Objetivo: preparar una primera version distribuible.
 
-Incluye suite amplia, optimizacion, almacenamiento, accesibilidad, recuperacion
-de errores, privacidad, identidad final, tutorial inicial, compilaciones
-Android y preparacion iOS en Mac con Xcode.
+Incluye revision de alcance, documentacion de v1, CI basico, validacion de
+formato, generacion, analisis, tests, compilaciones Android debug/release y
+registro de riesgos restantes. La preparacion iOS queda documentada porque
+requiere macOS con Xcode.
 
 Depende de: fases 1 a 10.
+
+## Version 1 local
+
+Estado: cerrada para Android.
+
+La primera version mantiene el contrato offline: sin cuentas, sin servidor, sin
+Firebase/Supabase, sin WebView, sin recursos oficiales de Pokemon y sin compras
+con dinero real.
+
+## Funciones futuras separadas de v1
+
+- Actualizacion de colecciones instaladas entre versiones de contenido.
+- Tutorial inicial interactivo.
+- Preparacion y firma final de iOS en Mac con Xcode.
+- Exportaciones editoriales avanzadas o impresion.
+- Copias de seguridad externas opcionales.
+- Intercambios, combates o juego competitivo.
 
 ## Regla de avance
 

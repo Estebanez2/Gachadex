@@ -1,8 +1,8 @@
 # Esquema de base de datos
 
-Fecha: 2026-08-06
+Fecha: 2026-08-11
 
-Schema version: `5`
+Schema version: `6`
 
 Motor: SQLite mediante Drift.
 
@@ -364,6 +364,23 @@ Restricciones:
 
 - `balance_after >= 0`.
 
+### `app_settings`
+
+Preferencias locales de la aplicacion.
+
+Claves:
+
+- PK: `key`.
+
+Restricciones:
+
+- `key` y `value` se guardan como texto estable.
+
+Uso actual:
+
+- Preferencias locales de notificaciones de sobres y ajustes asociados. No
+  contiene datos personales ni binarios.
+
 ## Indices
 
 Ademas de PKs y uniques, existen indices para las consultas previstas:
@@ -376,6 +393,7 @@ Ademas de PKs y uniques, existen indices para las consultas previstas:
 - Sobres por `collection_id + content_version_id`.
 - Progreso por `installed_collection_id`.
 - Aperturas por `installed_collection_id`.
+- Ajustes locales por `key`.
 
 ## Migraciones
 
@@ -429,6 +447,17 @@ Recrea `pack_inventory` para eliminar la restriccion
 `available_count <= max_accumulated`. El maximo acumulable limita solo la
 recarga automatica gratuita; las compras con gachacoin pueden dejar el
 inventario por encima de ese maximo.
+
+### Version 5 -> 6
+
+Crea `app_settings`:
+
+- `key TEXT NOT NULL PRIMARY KEY`
+- `value TEXT NOT NULL`
+- `updated_at_utc DATETIME NOT NULL`
+
+La tabla se usa para preferencias locales como notificaciones de sobres. No
+modifica contenido, progreso, inventario ni paquetes exportados.
 
 ### Proximas versiones
 
