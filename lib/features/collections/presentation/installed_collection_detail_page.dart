@@ -16,6 +16,7 @@ import '../../../core/widgets/app_error_view.dart';
 import '../../../core/widgets/app_loading_view.dart';
 import '../../album/application/album_providers.dart';
 import '../../album/domain/entities/album_card_entry.dart';
+import '../../import_export/application/gachadex_import_export_providers.dart';
 import '../../packs/application/pack_providers.dart';
 import '../../packs/domain/entities/pack_inventory.dart';
 import '../../packs/domain/entities/pack_type.dart';
@@ -43,6 +44,8 @@ class InstalledCollectionDetailPage extends ConsumerStatefulWidget {
 
 class _InstalledCollectionDetailPageState
     extends ConsumerState<InstalledCollectionDetailPage> {
+  bool _exporting = false;
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +74,24 @@ class _InstalledCollectionDetailPageState
             data: (collection) => Text(collection.name),
             orElse: () => Text(l10n.installedCollection),
           ),
+          actions: [
+            collectionAsync.maybeWhen(
+              data: (collection) =>
+                  collection.source == InstalledCollectionSource.createdLocally
+                  ? IconButton(
+                      tooltip: l10n.exportCollection,
+                      onPressed: _exporting ? null : _exportCollection,
+                      icon: _exporting
+                          ? const SizedBox.square(
+                              dimension: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.ios_share_outlined),
+                    )
+                  : const SizedBox.shrink(),
+              orElse: () => const SizedBox.shrink(),
+            ),
+          ],
           bottom: TabBar(
             tabs: [
               Tab(
@@ -98,6 +119,37 @@ class _InstalledCollectionDetailPageState
         ),
       ),
     );
+  }
+
+  Future<void> _exportCollection() async {
+    final l10n = context.l10n;
+    setState(() => _exporting = true);
+    try {
+      await ref
+          .read(gachadexPackageActionsProvider)
+          .exportAndShare(widget.installedCollectionId.value);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.collectionExported)));
+      }
+    } on GachadexPackageFailure catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.safeMessage)));
+      }
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.exportError)));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _exporting = false);
+      }
+    }
   }
 }
 

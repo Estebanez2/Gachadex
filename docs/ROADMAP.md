@@ -189,7 +189,7 @@ thumbnail WebP del primer fotograma, rutas relativas, guardado/edicion/borrado
 seguro, reproduccion en apertura y detalle de album, replay, pausa de ciclo de
 vida y uso exclusivo de thumbnails en grids.
 
-No incluye importacion/exportacion `.friendpack`, monedas, venta de duplicados,
+No incluye importacion/exportacion `.gachadex`, monedas, venta de duplicados,
 aceleracion, notificaciones ni efectos visuales finales.
 
 Depende de: fase 7.
@@ -198,7 +198,7 @@ Depende de: fase 7.
 
 Objetivo: compartir colecciones sin servidor.
 
-Incluye formato `.friendpack`, manifest, JSON de contenido, activos,
+Incluye formato `.gachadex`, manifest, JSON de contenido, activos,
 checksums SHA-256, exportacion por streaming, comparticion nativa, importacion
 segura, validacion, duplicados e importacion atomica.
 
