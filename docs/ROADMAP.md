@@ -184,10 +184,10 @@ Depende de: fase 6.
 Estado: implementada en la rama `phase/08-video-cards`.
 
 Incluye seleccion de videos desde galeria, lectura de duracion y dimensiones,
-rechazo de videos de mas de 15 segundos, normalizacion MP4 720p con audio,
-thumbnail WebP del primer fotograma, rutas relativas, guardado/edicion/borrado
-seguro, reproduccion en apertura y detalle de album, replay, pausa de ciclo de
-vida y uso exclusivo de thumbnails en grids.
+origen maximo de 1 minuto, selector de tramo para usar 15 segundos,
+normalizacion MP4 720p con audio, thumbnail WebP del primer fotograma, rutas
+relativas, guardado/edicion/borrado seguro, reproduccion en apertura y detalle
+de album, replay, pausa de ciclo de vida y uso exclusivo de thumbnails en grids.
 
 No incluye importacion/exportacion `.gachadex`, gachacoin, venta de duplicados,
 aceleracion, notificaciones ni efectos visuales finales.

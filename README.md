@@ -18,10 +18,11 @@ schema version 6, biblioteca de borradores, creacion atomica de borradores,
 editor con autosave, portada provisional generada en Flutter y CRUD/reordenacion
 de rarezas. La seccion Cartas permite seleccionar una foto de galeria,
 recortarla, guardarla como WebP privado con miniatura, o seleccionar un video
-de hasta 15 segundos, procesarlo como MP4 con audio y thumbnail, completar
-datos, ver preview, editar y eliminar. La seccion Sobres permite crear varios tipos de
-sobre, elegir principal, configurar cartas elegibles, reglas por posicion,
-pesos por rareza y simular aperturas sin modificar progreso. La seccion
+de hasta 1 minuto, elegir un tramo de 15 segundos cuando haga falta, procesarlo
+como MP4 con audio y thumbnail, completar datos, ver preview, editar y
+eliminar. La seccion Sobres permite crear varios tipos de sobre, elegir
+principal, configurar cartas elegibles, reglas por posicion, pesos por rareza y
+simular aperturas sin modificar progreso. La seccion
 Revision valida la coleccion, la finaliza de forma local, instala la copia
 jugable del creador, entrega tres sobres iniciales del sobre principal y crea
 temporizadores independientes para cada tipo de sobre. Las colecciones
@@ -167,11 +168,13 @@ Flujo manual de v1:
     debe aparecer `Continuar apertura` sin consumir otro sobre.
 31. Crear o editar otra carta, elegir `Video`, seleccionar un video de menos de
     15 segundos y verificar thumbnail, duracion y preview.
-32. Guardar, cerrar y reabrir; comprobar que el video y su thumbnail persisten.
-33. Finalizar una coleccion con esa carta, abrir sobres hasta obtenerla y
+32. Seleccionar otro video de entre 16 segundos y 1 minuto, elegir el tramo de
+    15 segundos y verificar que se guarda solo ese clip.
+33. Guardar, cerrar y reabrir; comprobar que el video y su thumbnail persisten.
+34. Finalizar una coleccion con esa carta, abrir sobres hasta obtenerla y
     confirmar que al revelar se reproduce con sonido, vuelve al thumbnail y
     permite `Repetir`.
-34. Entrar al album: el grid debe mostrar solo thumbnail con icono de video; el
+35. Entrar al album: el grid debe mostrar solo thumbnail con icono de video; el
     detalle debe reproducir el video y detenerse al salir.
 
 ## Analisis y pruebas
