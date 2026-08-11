@@ -2,7 +2,7 @@
 
 Fecha: 2026-08-10
 
-Este documento registra las dependencias directas del proyecto tras la Fase 8.
+Este documento registra las dependencias directas del proyecto tras la Fase 9.
 
 ## Dependencias directas actuales
 
@@ -20,6 +20,10 @@ Este documento registra las dependencias directas del proyecto tras la Fase 8.
 | `flutter_image_compress` | `^2.5.1`, resuelto 2.5.1 | Produccion | Compresion/conversion WebP | MIT | Android e iOS | Crear imagen principal WebP y miniatura WebP | Fase 4 | El soporte WebP depende de implementaciones nativas; mantener pruebas manuales en Android/iOS |
 | `video_player` | `^2.13.0`, resuelto 2.13.0 | Produccion | Reproduccion de video local | BSD-3-Clause | Android e iOS | Reproducir MP4 de cartas en apertura y album sin controllers en grids | Fase 8 | Soporte de codec depende de ExoPlayer/AVPlayer; usar MP4 H.264/AAC |
 | `video_compress` | `^3.1.4`, resuelto 3.1.4 | Produccion | Metadatos, compresion MP4 y thumbnail de video | MIT | Android e iOS | Normalizar videos cortos sin anadir FFmpeg completo y generar primer fotograma | Fase 8 | Plugin nativo no oficial; probar en Android/iOS y vigilar mantenimiento |
+| `archive` | `^4.0.9`, resuelto 4.0.9 | Produccion | Crear y leer contenedores ZIP `.gachadex` | MIT | Android e iOS | Exportar/importar colecciones offline con archivos JSON y multimedia | Fase 9 | Validar rutas, tamanos y hashes antes de extraer |
+| `crypto` | `^3.0.7`, resuelto 3.0.7 | Produccion | SHA-256 | BSD-3-Clause | Android e iOS | Verificar integridad de metadatos y activos del paquete `.gachadex` | Fase 9 | Hashes detectan corrupcion, no prueban autoria |
+| `file_selector` | `^1.1.0`, resuelto 1.1.0 | Produccion | Selector nativo de archivos | BSD-3-Clause | Android e iOS | Elegir paquetes `.gachadex` recibidos sin servidor ni Internet | Fase 9 | Los filtros nativos varian por plataforma; se valida tambien la extension en codigo |
+| `share_plus` | `^13.3.0`, resuelto 13.3.0 | Produccion | Comparticion nativa | BSD-3-Clause | Android e iOS | Abrir el menu del sistema para compartir el paquete exportado | Fase 9 | El resultado de compartir depende de cada sistema y app destino |
 | `drift` | `^2.34.3`, resuelto 2.34.3 | Produccion | ORM/SQL tipado sobre SQLite | MIT | Android e iOS | Esquema local, DAOs, streams y transacciones | Fase 2 | Requiere codigo generado actualizado |
 | `drift_flutter` | `^0.3.1`, resuelto 0.3.1 | Produccion | Conexion Flutter para Drift | MIT | Android e iOS | Base privada con `path_provider` e isolate de SQLite | Fase 2 | Usa dependencias nativas transitivas de SQLite |
 | `path_provider` | `^2.1.6`, resuelto 2.1.6 | Produccion | Directorios privados de app | BSD-3-Clause | Android e iOS | Ubicar `gachadex.sqlite` sin permisos de almacenamiento publico | Fase 2 | Diferencias de rutas por plataforma |
@@ -40,6 +44,9 @@ Este documento registra las dependencias directas del proyecto tras la Fase 8.
   SQLite; Gachadex no cifra la base en la version actual.
 - `cross_file`, `flutter_plugin_android_lifecycle`, `html`, `csslib` y `http`
   llegan por los plugins de imagen/video.
+- `file_selector_android`, `file_selector_ios`, `file_selector_web`,
+  `share_plus_platform_interface`, `url_launcher_*`, `posix` y `win32` llegan
+  por la seleccion de archivos, la comparticion y el empaquetado ZIP.
 
 Las transitivas estan fijadas en `pubspec.lock`. Pasaran a directas solo si el
 codigo del proyecto las importa explicitamente.
@@ -70,6 +77,16 @@ codigo del proyecto las importa explicitamente.
 - `video_compress` 3.1.4: plugin MIT con soporte Android/iOS para metadatos,
   compresion MP4 y thumbnail. Se eligio frente a FFmpeg completo por menor peso
   y licencia permisiva; el riesgo principal es su mantenimiento menos oficial.
+- `archive` 4.0.9: libreria MIT mantenida para ZIP y otros contenedores,
+  compatible con Dart/Flutter. Se usa con encoder de archivo para anadir
+  ficheros uno a uno y con validaciones propias de rutas y tamanos.
+- `crypto` 3.0.7: paquete publicado por `dart.dev`, licencia BSD-3-Clause,
+  compatible con Flutter. Se usa solo para SHA-256 de JSON y activos.
+- `file_selector` 1.1.0: plugin publicado por `flutter.dev`, licencia
+  BSD-3-Clause, soporta Android SDK 21+ e iOS 12+. Se eligio frente a
+  `file_picker` porque `file_picker` resolvio a 3.0.4 con el grafo actual.
+- `share_plus` 13.3.0: plugin mantenido por Flutter Community, licencia
+  BSD-3-Clause, usa las hojas nativas de compartir en Android e iOS.
 - `build_runner` y `drift_dev`: versiones fijadas por compatibilidad real con
   Flutter 3.44.8, `flutter_test`, `meta` y `analyzer`.
 
@@ -80,7 +97,6 @@ No incorporar todavia:
 - Plugins de camara personalizada, galeria avanzada, archivos generales o
   editor de video avanzado.
 - `flutter_local_notifications`.
-- `share_plus`, `file_selector`, `archive`.
 - Firebase, Supabase o cualquier servicio online.
 
 ## Fuentes revisadas
@@ -93,6 +109,10 @@ No incorporar todavia:
 - https://pub.dev/packages/flutter_image_compress
 - https://pub.dev/packages/video_player
 - https://pub.dev/packages/video_compress
+- https://pub.dev/packages/archive
+- https://pub.dev/packages/crypto
+- https://pub.dev/packages/file_selector
+- https://pub.dev/packages/share_plus
 - https://pub.dev/packages/drift
 - https://pub.dev/packages/drift_flutter
 - https://pub.dev/packages/path_provider

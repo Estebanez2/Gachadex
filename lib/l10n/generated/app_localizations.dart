@@ -1815,6 +1815,65 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Volver a sobres'**
   String get backToPacks;
+
+  /// Accion para importar una coleccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Importar coleccion'**
+  String get importCollection;
+
+  /// Accion para exportar una coleccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Exportar coleccion'**
+  String get exportCollection;
+
+  /// Titulo del dialogo de previsualizacion de importacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Importar paquete .gachadex'**
+  String get importPreviewTitle;
+
+  /// Resumen antes de confirmar una importacion.
+  ///
+  /// In es, this message translates to:
+  /// **'{name}\nCartas: {cardCount}\nVideos: {videoCount}\nSobres: {packTypeCount}\n\nSolo se importara la definicion de la coleccion. El progreso, monedas y album empezaran desde cero.'**
+  String importPreviewDescription(
+    String name,
+    int cardCount,
+    int videoCount,
+    int packTypeCount,
+  );
+
+  /// Confirmacion de importacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Coleccion importada.'**
+  String get collectionImported;
+
+  /// Confirmacion de exportacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Paquete .gachadex preparado.'**
+  String get collectionExported;
+
+  /// Mensaje para coleccion ya instalada.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta coleccion ya esta instalada.'**
+  String get collectionAlreadyInstalled;
+
+  /// Error generico de importacion.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo importar el paquete .gachadex.'**
+  String get importError;
+
+  /// Error generico de exportacion.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo exportar la coleccion.'**
+  String get exportError;
 }
 
 class _AppLocalizationsDelegate

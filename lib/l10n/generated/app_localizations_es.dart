@@ -929,4 +929,38 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get backToPacks => 'Volver a sobres';
+
+  @override
+  String get importCollection => 'Importar coleccion';
+
+  @override
+  String get exportCollection => 'Exportar coleccion';
+
+  @override
+  String get importPreviewTitle => 'Importar paquete .gachadex';
+
+  @override
+  String importPreviewDescription(
+    String name,
+    int cardCount,
+    int videoCount,
+    int packTypeCount,
+  ) {
+    return '$name\nCartas: $cardCount\nVideos: $videoCount\nSobres: $packTypeCount\n\nSolo se importara la definicion de la coleccion. El progreso, monedas y album empezaran desde cero.';
+  }
+
+  @override
+  String get collectionImported => 'Coleccion importada.';
+
+  @override
+  String get collectionExported => 'Paquete .gachadex preparado.';
+
+  @override
+  String get collectionAlreadyInstalled => 'Esta coleccion ya esta instalada.';
+
+  @override
+  String get importError => 'No se pudo importar el paquete .gachadex.';
+
+  @override
+  String get exportError => 'No se pudo exportar la coleccion.';
 }

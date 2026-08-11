@@ -1636,13 +1636,13 @@ Antes de confirmar se comprobará:
 Nombre provisional:
 
 ```text
-.friendpack
+.gachadex
 ```
 
 Ejemplo:
 
 ```text
-viaje_londres_2026.friendpack
+viaje_londres_2026.gachadex
 ```
 
 Internamente será un contenedor comprimido.
@@ -2244,7 +2244,7 @@ Objetivo: compartir colecciones.
 
 Implementar:
 
-* Formato `.friendpack`.
+* Formato `.gachadex`.
 * JSON.
 * ZIP.
 * Checksums.

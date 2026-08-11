@@ -333,4 +333,4 @@ Queda fuera de Fase 8:
 - Venta de duplicados.
 - Economia usable.
 - Notificaciones.
-- Importacion/exportacion `.friendpack`.
+- Importacion/exportacion `.gachadex`.

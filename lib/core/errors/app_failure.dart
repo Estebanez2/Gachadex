@@ -43,3 +43,11 @@ final class TransactionFailure extends AppFailure {
 final class MigrationFailure extends AppFailure {
   const MigrationFailure(super.safeMessage);
 }
+
+final class GachadexPackageFailure extends AppFailure {
+  const GachadexPackageFailure(super.safeMessage);
+}
+
+final class GachadexPackageCanceled extends AppFailure {
+  const GachadexPackageCanceled() : super('Operacion cancelada.');
+}

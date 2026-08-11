@@ -99,7 +99,7 @@ Archivos concretos:
 - `references/altare-tcg-2023/pages/gacha.html`
 - `references/altare-tcg-2023/pages/collection.html`
 
-Observacion para Friend Cards: no sirve para `.friendpack`; la exportacion debera ser nueva, local, atomica, por streaming y con checksums.
+Observacion para Friend Cards: no sirve para `.gachadex`; la exportacion debera ser nueva, local, atomica, por streaming y con checksums.
 
 ### Codigo que podria portarse a Dart
 
@@ -201,7 +201,7 @@ Archivos concretos:
 - `references/react-card-builder/src/components/CardPage.js`: carga imagenes y crea previsualizacion 3D.
 - `references/react-card-builder/src/components/Card.js`: mapea texturas de frente y reverso en un mesh.
 
-Observacion para Friend Cards: exportar una carta como imagen/PDF queda fuera de la primera version. La exportacion prioritaria sera `.friendpack`, por streaming, con manifiesto, JSON, activos y SHA-256.
+Observacion para Friend Cards: exportar una carta como imagen/PDF queda fuera de la primera version. La exportacion prioritaria sera `.gachadex`, por streaming, con manifiesto, JSON, activos y SHA-256.
 
 ### Codigo que podria portarse a Dart
 
@@ -258,7 +258,7 @@ Observacion para Friend Cards: exportar una carta como imagen/PDF queda fuera de
 | Colocacion de imagen | React Card Builder | `src/components/*/Card.js` | Inspirar area multimedia fija | Alto si se copian coordenadas | Usar areas propias por plantilla |
 | Exportar carta como PNG/PDF | React Card Builder | `src/App.js` | Funcion futura fuera de v1 | Medio: DOM capture no aplica a Flutter | No implementar en primera version |
 | Previsualizacion 3D | React Card Builder | `src/components/CardPage.js`, `src/components/Card.js` | Inspiracion futura | Medio: Three.js no aplica a Flutter movil | No incluir en primera version |
-| Exportar coleccion `.friendpack` | Ambos | No cubierto | Sin reutilizacion directa | Bajo | Disenar formato propio |
+| Exportar coleccion `.gachadex` | Ambos | No cubierto | Sin reutilizacion directa | Bajo | Disenar formato propio |
 | Licencias y atribucion | Ambos | `LICENSE`, `README.md`, minified libs, assets | Revisar antes de cualquier copia futura | Alto en React por LICENSE ausente y marcas | No copiar nada en fase 0 |
 
 ## Decision general

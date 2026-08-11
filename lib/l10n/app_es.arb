@@ -1248,5 +1248,55 @@
   "backToPacks": "Volver a sobres",
   "@backToPacks": {
     "description": "Accion para volver a sobres."
+  },
+  "importCollection": "Importar coleccion",
+  "@importCollection": {
+    "description": "Accion para importar una coleccion."
+  },
+  "exportCollection": "Exportar coleccion",
+  "@exportCollection": {
+    "description": "Accion para exportar una coleccion."
+  },
+  "importPreviewTitle": "Importar paquete .gachadex",
+  "@importPreviewTitle": {
+    "description": "Titulo del dialogo de previsualizacion de importacion."
+  },
+  "importPreviewDescription": "{name}\nCartas: {cardCount}\nVideos: {videoCount}\nSobres: {packTypeCount}\n\nSolo se importara la definicion de la coleccion. El progreso, monedas y album empezaran desde cero.",
+  "@importPreviewDescription": {
+    "description": "Resumen antes de confirmar una importacion.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "cardCount": {
+        "type": "int"
+      },
+      "videoCount": {
+        "type": "int"
+      },
+      "packTypeCount": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionImported": "Coleccion importada.",
+  "@collectionImported": {
+    "description": "Confirmacion de importacion."
+  },
+  "collectionExported": "Paquete .gachadex preparado.",
+  "@collectionExported": {
+    "description": "Confirmacion de exportacion."
+  },
+  "collectionAlreadyInstalled": "Esta coleccion ya esta instalada.",
+  "@collectionAlreadyInstalled": {
+    "description": "Mensaje para coleccion ya instalada."
+  },
+  "importError": "No se pudo importar el paquete .gachadex.",
+  "@importError": {
+    "description": "Error generico de importacion."
+  },
+  "exportError": "No se pudo exportar la coleccion.",
+  "@exportError": {
+    "description": "Error generico de exportacion."
   }
 }
