@@ -231,6 +231,7 @@ final class DriftAlbumRepository implements AlbumRepository {
       health: isOwned ? card.health : null,
       rarityName: isOwned ? rarity.name : null,
       rarityOrder: rarity.orderIndex,
+      sellValue: isOwned ? rarity.sellValue : null,
       mediaType: card.mediaType,
       thumbnailRelativePath: isOwned
           ? RelativeMediaPath(media.thumbnailRelativePath ?? media.relativePath)

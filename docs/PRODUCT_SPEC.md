@@ -1397,6 +1397,10 @@ Secuencia recomendada:
 9. Continuar con la siguiente.
 10. Mostrar resumen final.
 
+Cuando el inventario tenga muchos sobres acumulados, la app podrá ofrecer abrir
+lotes de 5 o 10 sobres en una sola apertura guardada. El lote consume todos esos
+sobres de golpe y muestra un único resumen con todas las cartas obtenidas.
+
 ## 21.5. Carta nueva
 
 Indicadores:
@@ -1568,7 +1572,10 @@ El usuario podrá utilizar monedas para completar:
 * Varios ciclos de ese tipo.
 * Temporizadores de varios tipos en una sola operación.
 
-No podrá superar el máximo acumulable.
+La compra con monedas podrá superar el máximo acumulable. El máximo acumulable
+solo limita la recarga automática gratuita: si el inventario queda en el máximo
+o por encima, el temporizador queda pausado hasta que el usuario abra sobres y
+el inventario baje por debajo de ese máximo.
 
 ## 24.2. Coste
 
@@ -1625,9 +1632,9 @@ Coste total: 340 monedas
 Antes de confirmar se comprobará:
 
 * Saldo suficiente.
-* Espacio disponible.
-* Máximo acumulable.
+* Saldo suficiente incluso cuando se compran sobres por encima del máximo.
 * Estado actualizado de temporizadores.
+* Pausa de recarga automática si el inventario queda en el máximo o por encima.
 
 ## 25. Exportación de una colección
 

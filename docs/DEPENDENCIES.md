@@ -33,11 +33,13 @@ Este documento registra las dependencias directas del proyecto tras la Fase 9.
 | `flutter_lints` | `^6.0.0`, resuelto 6.0.0 | Desarrollo | Reglas recomendadas de analisis | BSD-3-Clause | No aplica directamente | Calidad base del codigo | Base | Nuevas reglas pueden exigir ajustes |
 | `build_runner` | `2.15.1`, resuelto 2.15.1 | Desarrollo | Ejecucion de generadores | BSD-3-Clause | No aplica directamente | Generar `app_database.g.dart` | Fase 2 | Fijado por compatibilidad con `flutter_test`/`meta`; la opcion `--delete-conflicting-outputs` avisa que fue retirada |
 | `drift_dev` | `2.34.0`, resuelto 2.34.0 | Desarrollo | Generador Drift | MIT | No aplica directamente | Generar tablas, companions y DAOs | Fase 2 | Fijado porque 2.34.5 exige `analyzer` incompatible con Flutter 3.44.8 |
+| `sqlite3` | `^3.5.1`, resuelto 3.5.1 | Desarrollo | Preparar bases SQLite antiguas en tests | MIT | Android, iOS, desktop y web; en Gachadex se usa solo en tests | Crear una base v4 real para probar migraciones Drift | Fase 10 | Mantenerlo como dependencia de desarrollo; el runtime usa Drift/`drift_flutter` |
 
 ## Transitivas relevantes
 
-- `sqlite3` 3.5.1 llega como transitiva de Drift y se usa para SQLite local y
-  tests en memoria.
+- `sqlite3` 3.5.1 tambien llega como transitiva de Drift, pero se declara
+  directa de desarrollo porque los tests de migracion preparan bases antiguas
+  con SQLite crudo.
 - `sqlite3_flutter_libs` 0.6.0+eol llega como transitiva de `drift_flutter`;
   no se anadio directa porque Drift actual la resuelve.
 - `sqlcipher_flutter_libs` 0.7.0+eol llega transitoriamente por el arbol de
@@ -89,6 +91,9 @@ codigo del proyecto las importa explicitamente.
   BSD-3-Clause, usa las hojas nativas de compartir en Android e iOS.
 - `build_runner` y `drift_dev`: versiones fijadas por compatibilidad real con
   Flutter 3.44.8, `flutter_test`, `meta` y `analyzer`.
+- `sqlite3` 3.5.1: paquete MIT mantenido por el autor de Drift, compatible con
+  las plataformas del proyecto. Se usa solo en tests para construir una base
+  antigua y comprobar migraciones sin exponer APIs SQLite a la aplicacion.
 
 ## Dependencias fuera de alcance
 
@@ -120,4 +125,5 @@ No incorporar todavia:
 - https://pub.dev/packages/uuid
 - https://pub.dev/packages/build_runner
 - https://pub.dev/packages/drift_dev
+- https://pub.dev/packages/sqlite3
 - https://docs.flutter.dev/ui/internationalization

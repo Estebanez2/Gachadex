@@ -43,7 +43,7 @@ lib/
     cards/                   Cartas, campos y activos multimedia.
     packs/                   Sobres, pools, reglas y aperturas.
     album/                   Cartas obtenidas y progreso.
-    economy/                 Historial de monedas.
+    economy/                 Historial de gachacoin.
 ```
 
 Cada feature con logica real separa `domain/` y `data/`. Los repositorios de
@@ -62,7 +62,7 @@ por `ProviderScope` y la cierra con `ref.onDispose`.
 ## Migraciones
 
 `currentDatabaseSchemaVersion` vive en
-`lib/core/database/migrations/schema_versions.dart` y actualmente vale `4`.
+`lib/core/database/migrations/schema_versions.dart` y actualmente vale `5`.
 
 `createMigrationStrategy`:
 
@@ -75,6 +75,8 @@ por `ProviderScope` y la cierra con `ref.onDispose`.
   comicos de Fase 4.
 - Migra de v3 a v4 anadiendo ids de diseno generado para sobres y permitiendo
   grupos de probabilidad en reglas `minimumRarity`.
+- Migra de v4 a v5 recreando `pack_inventory` para permitir sobres comprados
+  con gachacoin por encima de `maxAccumulated`.
 - Rechaza upgrades no implementados con un mensaje seguro.
 
 Para anadir una nueva version se debe subir `currentDatabaseSchemaVersion`,
@@ -159,7 +161,7 @@ carta uniforme sin retirarla del pool, por lo que puede repetir cartas en el
 mismo sobre. `fixedRarity` no usa fallback silencioso.
 
 El simulador del editor usa el mismo motor y no escribe progreso, inventario,
-aperturas, album ni monedas.
+aperturas, album ni gachacoin.
 
 ## Finalizacion e instalacion local
 
@@ -183,8 +185,10 @@ tipos de sobre empiezan con cero disponibles, pero con su propio temporizador.
 
 `PackRechargeCalculator` vive en `features/packs/domain/services/` y es puro:
 recibe conteos, maximo, intervalo, proxima recarga y hora UTC actual. Calcula
-cuantos sobres se acumulan sin superar el maximo y sin depender de zona horaria
-local.
+cuantos sobres se acumulan sin superar el maximo de recarga automatica y sin
+depender de zona horaria local. Si el usuario tiene sobres comprados por encima
+de `maxAccumulated`, conserva ese excedente y pausa la recarga automatica hasta
+que las aperturas bajen el inventario por debajo del maximo.
 
 `PackRechargeService` vive en `features/packs/application/` y coordina base de
 datos, `Clock`, repositorios e inventario. La app refresca temporizadores al
@@ -206,6 +210,9 @@ La Fase 7 implementa `OpenPack` en `features/packs/application/`:
   `distinctOwnedCount` en una unica transaccion.
 - Calcula `wasNew` y `quantityAfter` dentro de la transaccion, incluyendo cartas
   repetidas dentro del mismo sobre.
+- Permite abrir lotes de 5 o 10 sobres cuando hay inventario suficiente. El lote
+  usa una unica `PackOpening` con slots consecutivos para conservar recuperacion,
+  revelado y resumen sin crear una cola de aperturas.
 - Si el inventario estaba lleno, inicia el siguiente intervalo con
   `PackRechargeCalculator.nextAfterConsumed`; si no estaba lleno, conserva el
   temporizador existente.
@@ -238,7 +245,33 @@ El album expone:
   medio.
 - Orden: numero, nombre, rareza, primera obtencion y cantidad.
 - Detalle de carta obtenida con imagen completa, vida, descripcion, plantilla,
-  marco, campos comicos y favorito.
+  marco, campos comicos, favorito, copias vendibles y valor de venta.
+
+## Economia
+
+La Fase 10 usa `InstalledCollection.coins` como saldo persistido por coleccion,
+mostrado al usuario como gachacoin. El historial vive en `CoinTransactions` y
+es inmutable: cada venta o aceleracion registra `amount`, `balanceAfter`, fecha
+UTC y la carta o sobre relacionado.
+
+`SellDuplicateCards` valida dentro de una transaccion que la carta pertenece a
+la coleccion instalada, que existe `OwnedCard`, que `quantityToSell > 0` y que
+siempre queda al menos una copia. El ingreso usa `Rarity.sellValue`; la venta
+actualiza `OwnedCard.quantity`, suma gachacoin y crea el movimiento en la misma
+transaccion.
+
+`AccelerationCalculator` calcula opciones sin tocar persistencia. El ciclo
+actual usa coste proporcional con aritmetica entera:
+`ceil(coinsPerFullRecharge * remainingSeconds / rechargeSeconds)`, con coste
+minimo 1 si queda tiempo y el coste completo es mayor que 0. Los ciclos
+siguientes cuestan `coinsPerFullRecharge`.
+
+`AcceleratePackRecharge` valida dentro de una transaccion que el inventario y el
+sobre pertenecen a la coleccion instalada y que el saldo alcanza. Descuenta
+gachacoin, incrementa `availableCount` incluso por encima de `maxAccumulated`,
+reinicia `nextRechargeAtUtc` desde el momento actual y crea `CoinTransaction`.
+El contador visible en la pestana de sobres se actualiza cada segundo mientras
+la pantalla esta abierta.
 
 ## Videos de carta
 
@@ -288,6 +321,7 @@ Implementaciones Drift:
 - Evitan instalar dos veces la misma coleccion/version.
 - Leen y actualizan inventario independiente por tipo de sobre.
 - Abren sobres de forma atomica y conservan historial de aperturas.
+- Venden duplicados y aceleran temporizadores de forma atomica.
 - Consultan album sin SQL desde widgets.
 - Borran progreso local al eliminar una coleccion instalada.
 - No devuelven filas Drift a dominio o presentacion.

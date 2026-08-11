@@ -283,17 +283,15 @@ void main() {
         ),
         throwsArgumentError,
       );
-      expect(
-        () => PackInventory(
-          installedCollectionId: InstalledCollectionId(testUuid(5)),
-          packTypeId: PackTypeId(testUuid(1)),
-          availableCount: 4,
-          maxAccumulated: 3,
-          nextRechargeAtUtc: now,
-          lastCalculatedAtUtc: now,
-        ),
-        throwsArgumentError,
+      final overstockInventory = PackInventory(
+        installedCollectionId: InstalledCollectionId(testUuid(5)),
+        packTypeId: PackTypeId(testUuid(1)),
+        availableCount: 4,
+        maxAccumulated: 3,
+        nextRechargeAtUtc: now,
+        lastCalculatedAtUtc: now,
       );
+      expect(overstockInventory.availableCount, 4);
       expect(
         () => OwnedCard(
           installedCollectionId: InstalledCollectionId(testUuid(5)),

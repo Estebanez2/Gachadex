@@ -7,11 +7,12 @@ dinero real.
 
 ## Estado actual
 
-Fase 8: borradores, rarezas, cartas con fotografias y videos, configuracion de
-sobres, finalizacion local, temporizadores, apertura de sobres y album.
+Fase 10: borradores, rarezas, cartas con fotografias y videos, configuracion de
+sobres, finalizacion local, temporizadores, apertura de sobres, album,
+importacion/exportacion `.gachadex` y economia con gachacoin.
 
 Incluye la base tecnica de Fase 1, el dominio y persistencia local de Fase 2,
-schema version 4, biblioteca de borradores, creacion atomica de borradores,
+schema version 5, biblioteca de borradores, creacion atomica de borradores,
 editor con autosave, portada provisional generada en Flutter y CRUD/reordenacion
 de rarezas. La seccion Cartas permite seleccionar una foto de galeria,
 recortarla, guardarla como WebP privado con miniatura, o seleccionar un video
@@ -22,13 +23,30 @@ pesos por rareza y simular aperturas sin modificar progreso. La seccion
 Revision valida la coleccion, la finaliza de forma local, instala la copia
 jugable del creador, entrega tres sobres iniciales del sobre principal y crea
 temporizadores independientes para cada tipo de sobre. Las colecciones
-instaladas permiten abrir sobres disponibles, revelar cartas una a una, saltar
+instaladas permiten importar/exportar paquetes `.gachadex`, abrir sobres
+disponibles de uno en uno o en lotes de 5/10, revelar cartas una a una, saltar
 la apertura, recuperar aperturas pendientes y consultar album con obtenidas,
 faltantes, repetidas, cantidades, favoritas, filtros por rareza/tipo de medio y
-orden.
+orden. Las repetidas se pueden vender conservando siempre una copia; el saldo de
+gachacoin queda separado por coleccion, genera historial y puede usarse para
+comprar uno o varios sobres incluso por encima del maximo acumulable; la recarga
+automatica se pausa hasta volver a estar por debajo de ese maximo.
 
-No incluye todavia venta de duplicados, economia usable, notificaciones,
-importacion ni exportacion.
+No incluye todavia notificaciones, efectos visuales finales ni estabilizacion
+general.
+
+## Probar venta y aceleracion
+
+1. Finaliza o importa una coleccion con sobre principal.
+2. Abre sobres hasta obtener una carta repetida.
+3. Entra en Album, filtra Repetidas y abre una carta con `x2` o mas.
+4. Pulsa Vender repetidas, elige una cantidad y confirma.
+5. Comprueba que queda al menos una copia, sube el saldo de gachacoin y aparece
+   el movimiento.
+6. Vuelve a Sobres y pulsa Acelerar en cualquier sobre con opciones asequibles.
+7. Elige una opcion asequible y confirma que aumenta `available`, baja el saldo
+   y se registra el movimiento, incluso si el contador queda por encima del
+   maximo.
 
 ## Requisitos
 
@@ -130,22 +148,24 @@ Flujo manual de Fase 8:
 22. Esperar o adelantar el reloj del emulador hasta superar una recarga,
     reabrir o volver a primer plano y verificar que el inventario se actualiza.
 23. Pulsar `Abrir sobre` y comprobar que el inventario baja de 3 a 2.
-24. Revelar cartas una a una y comprobar indicador `Nueva` o `Repetida`.
-25. Usar `Saltar` en otra apertura y comprobar que aparece el resumen.
-26. Entrar en `Album` y verificar obtenidas, faltantes, cantidades y porcentaje.
-27. Abrir una carta obtenida, revisar vida, descripcion, plantilla, marco y
+24. Si hay al menos 5 sobres disponibles, pulsar `Abrir x5` y comprobar que se
+    consume el lote completo y aparece un resumen unico.
+25. Revelar cartas una a una y comprobar indicador `Nueva` o `Repetida`.
+26. Usar `Saltar` en otra apertura y comprobar que aparece el resumen.
+27. Entrar en `Album` y verificar obtenidas, faltantes, cantidades y porcentaje.
+28. Abrir una carta obtenida, revisar vida, descripcion, plantilla, marco y
     campos comicos, marcarla como favorita y filtrar `Favoritas`.
-28. Filtrar por `Repetidas`, rareza y tipo de medio; ordenar por `Cantidad` y
+29. Filtrar por `Repetidas`, rareza y tipo de medio; ordenar por `Cantidad` y
     `Primera obtencion`.
-29. Cerrar la app a mitad de una apertura y volver a abrir la coleccion:
+30. Cerrar la app a mitad de una apertura y volver a abrir la coleccion:
     debe aparecer `Continuar apertura` sin consumir otro sobre.
-30. Crear o editar otra carta, elegir `Video`, seleccionar un video de menos de
+31. Crear o editar otra carta, elegir `Video`, seleccionar un video de menos de
     15 segundos y verificar thumbnail, duracion y preview.
-31. Guardar, cerrar y reabrir; comprobar que el video y su thumbnail persisten.
-32. Finalizar una coleccion con esa carta, abrir sobres hasta obtenerla y
+32. Guardar, cerrar y reabrir; comprobar que el video y su thumbnail persisten.
+33. Finalizar una coleccion con esa carta, abrir sobres hasta obtenerla y
     confirmar que al revelar se reproduce con sonido, vuelve al thumbnail y
     permite `Repetir`.
-33. Entrar al album: el grid debe mostrar solo thumbnail con icono de video; el
+34. Entrar al album: el grid debe mostrar solo thumbnail con icono de video; el
     detalle debe reproducir el video y detenerse al salir.
 
 ## Analisis y pruebas

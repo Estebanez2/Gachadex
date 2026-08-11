@@ -2,7 +2,7 @@
 
 Fecha: 2026-08-06
 
-Schema version: `4`
+Schema version: `5`
 
 Motor: SQLite mediante Drift.
 
@@ -289,7 +289,10 @@ Restricciones:
 
 - `available_count >= 0`.
 - `max_accumulated > 0`.
-- `available_count <= max_accumulated`.
+
+`available_count` puede ser mayor que `max_accumulated` cuando el usuario
+compra sobres con gachacoin. En ese estado la recarga automatica queda pausada
+hasta que el inventario vuelva a estar por debajo del maximo.
 
 ### `owned_cards`
 
@@ -344,7 +347,7 @@ Restricciones:
 
 ### `coin_transactions`
 
-Historial local de moneda preparado para fases posteriores.
+Historial local de gachacoin por coleccion instalada.
 
 Claves:
 
@@ -419,6 +422,13 @@ Anade a `pack_types` ids estables para portada y reverso provisionales:
 Tambien recrea `pack_slot_rules` para permitir que `minimumRarity` tenga
 `probability_group_id`, necesario para seleccionar entre rarezas permitidas con
 pesos enteros.
+
+### Version 4 -> 5
+
+Recrea `pack_inventory` para eliminar la restriccion
+`available_count <= max_accumulated`. El maximo acumulable limita solo la
+recarga automatica gratuita; las compras con gachacoin pueden dejar el
+inventario por encima de ese maximo.
 
 ### Proximas versiones
 

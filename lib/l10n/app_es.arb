@@ -1021,6 +1021,15 @@
   "@packRechargeFull": {
     "description": "Estado de inventario de sobre completo."
   },
+  "packRechargePaused": "Recarga pausada hasta bajar de {max} sobres",
+  "@packRechargePaused": {
+    "description": "Estado de temporizador pausado por inventario en el maximo o por encima.",
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "openPackComingSoon": "Abrir sobre proximamente",
   "@openPackComingSoon": {
     "description": "Boton deshabilitado de apertura futura."
@@ -1028,6 +1037,15 @@
   "openPack": "Abrir sobre",
   "@openPack": {
     "description": "Accion para abrir un sobre."
+  },
+  "openPackBatch": "Abrir x{count}",
+  "@openPackBatch": {
+    "description": "Accion para abrir varios sobres de golpe.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "pendingOpening": "Apertura pendiente",
   "@pendingOpening": {
@@ -1261,7 +1279,7 @@
   "@importPreviewTitle": {
     "description": "Titulo del dialogo de previsualizacion de importacion."
   },
-  "importPreviewDescription": "{name}\nCartas: {cardCount}\nVideos: {videoCount}\nSobres: {packTypeCount}\n\nSolo se importara la definicion de la coleccion. El progreso, monedas y album empezaran desde cero.",
+  "importPreviewDescription": "{name}\nCartas: {cardCount}\nVideos: {videoCount}\nSobres: {packTypeCount}\n\nSolo se importara la definicion de la coleccion. El progreso, gachacoin y album empezaran desde cero.",
   "@importPreviewDescription": {
     "description": "Resumen antes de confirmar una importacion.",
     "placeholders": {
@@ -1298,5 +1316,144 @@
   "exportError": "No se pudo exportar la coleccion.",
   "@exportError": {
     "description": "Error generico de exportacion."
+  },
+  "gachacoin": "gachacoin",
+  "@gachacoin": {
+    "description": "Nombre visible de la moneda local."
+  },
+  "gachacoinBalance": "{amount} gachacoin",
+  "@gachacoinBalance": {
+    "description": "Saldo de gachacoin.",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "movements": "Movimientos",
+  "@movements": {
+    "description": "Titulo del historial de movimientos."
+  },
+  "sellDuplicates": "Vender repetidas",
+  "@sellDuplicates": {
+    "description": "Accion para vender cartas repetidas."
+  },
+  "sellableCopies": "Copias vendibles: {count}",
+  "@sellableCopies": {
+    "description": "Cantidad de copias vendibles.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quantityToSell": "Cantidad a vender",
+  "@quantityToSell": {
+    "description": "Etiqueta de cantidad a vender."
+  },
+  "youWillReceive": "Recibiras {amount} gachacoin",
+  "@youWillReceive": {
+    "description": "Ingreso esperado por una venta.",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmSale": "Confirmar venta",
+  "@confirmSale": {
+    "description": "Accion para confirmar una venta."
+  },
+  "saleCompleted": "Venta realizada.",
+  "@saleCompleted": {
+    "description": "Confirmacion de venta."
+  },
+  "speedUp": "Acelerar",
+  "@speedUp": {
+    "description": "Accion para acelerar temporizador."
+  },
+  "completeTimer": "Completar temporizador",
+  "@completeTimer": {
+    "description": "Titulo de aceleracion de temporizador."
+  },
+  "addPackOption": "+{count} sobre",
+  "@addPackOption": {
+    "description": "Opcion de aceleracion singular.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addPacksOption": "+{count} sobres",
+  "@addPacksOption": {
+    "description": "Opcion de aceleracion plural.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cost": "Coste",
+  "@cost": {
+    "description": "Etiqueta de coste."
+  },
+  "balanceAfter": "Saldo despues: {amount} gachacoin",
+  "@balanceAfter": {
+    "description": "Saldo despues de una operacion.",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "notEnoughGachacoin": "No tienes suficientes gachacoin.",
+  "@notEnoughGachacoin": {
+    "description": "Error de saldo insuficiente."
+  },
+  "maxPacksReached": "Maximo de sobres alcanzado.",
+  "@maxPacksReached": {
+    "description": "Mensaje de inventario lleno."
+  },
+  "duplicateSaleMovement": "Venta de repetida",
+  "@duplicateSaleMovement": {
+    "description": "Movimiento de venta."
+  },
+  "packAccelerationMovement": "Aceleracion de sobre",
+  "@packAccelerationMovement": {
+    "description": "Movimiento de aceleracion."
+  },
+  "unitSellValue": "Valor unitario: {amount} gachacoin",
+  "@unitSellValue": {
+    "description": "Valor unitario de venta.",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "saleIncomePreview": "{quantity} x {value} = {amount} gachacoin",
+  "@saleIncomePreview": {
+    "description": "Calculo de venta.",
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "value": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "transactionBalanceAfter": "Saldo: {amount}",
+  "@transactionBalanceAfter": {
+    "description": "Saldo tras movimiento.",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
   }
 }

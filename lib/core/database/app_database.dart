@@ -434,7 +434,6 @@ class PackInventory extends Table {
   List<String> get customConstraints => [
     'CHECK (available_count >= 0)',
     'CHECK (max_accumulated > 0)',
-    'CHECK (available_count <= max_accumulated)',
   ];
 }
 

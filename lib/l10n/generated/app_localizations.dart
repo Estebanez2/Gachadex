@@ -1552,6 +1552,12 @@ abstract class AppLocalizations {
   /// **'Acumulacion completa'**
   String get packRechargeFull;
 
+  /// Estado de temporizador pausado por inventario en el maximo o por encima.
+  ///
+  /// In es, this message translates to:
+  /// **'Recarga pausada hasta bajar de {max} sobres'**
+  String packRechargePaused(int max);
+
   /// Boton deshabilitado de apertura futura.
   ///
   /// In es, this message translates to:
@@ -1563,6 +1569,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Abrir sobre'**
   String get openPack;
+
+  /// Accion para abrir varios sobres de golpe.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir x{count}'**
+  String openPackBatch(int count);
 
   /// Titulo de apertura pendiente.
   ///
@@ -1837,7 +1849,7 @@ abstract class AppLocalizations {
   /// Resumen antes de confirmar una importacion.
   ///
   /// In es, this message translates to:
-  /// **'{name}\nCartas: {cardCount}\nVideos: {videoCount}\nSobres: {packTypeCount}\n\nSolo se importara la definicion de la coleccion. El progreso, monedas y album empezaran desde cero.'**
+  /// **'{name}\nCartas: {cardCount}\nVideos: {videoCount}\nSobres: {packTypeCount}\n\nSolo se importara la definicion de la coleccion. El progreso, gachacoin y album empezaran desde cero.'**
   String importPreviewDescription(
     String name,
     int cardCount,
@@ -1874,6 +1886,138 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo exportar la coleccion.'**
   String get exportError;
+
+  /// Nombre visible de la moneda local.
+  ///
+  /// In es, this message translates to:
+  /// **'gachacoin'**
+  String get gachacoin;
+
+  /// Saldo de gachacoin.
+  ///
+  /// In es, this message translates to:
+  /// **'{amount} gachacoin'**
+  String gachacoinBalance(int amount);
+
+  /// Titulo del historial de movimientos.
+  ///
+  /// In es, this message translates to:
+  /// **'Movimientos'**
+  String get movements;
+
+  /// Accion para vender cartas repetidas.
+  ///
+  /// In es, this message translates to:
+  /// **'Vender repetidas'**
+  String get sellDuplicates;
+
+  /// Cantidad de copias vendibles.
+  ///
+  /// In es, this message translates to:
+  /// **'Copias vendibles: {count}'**
+  String sellableCopies(int count);
+
+  /// Etiqueta de cantidad a vender.
+  ///
+  /// In es, this message translates to:
+  /// **'Cantidad a vender'**
+  String get quantityToSell;
+
+  /// Ingreso esperado por una venta.
+  ///
+  /// In es, this message translates to:
+  /// **'Recibiras {amount} gachacoin'**
+  String youWillReceive(int amount);
+
+  /// Accion para confirmar una venta.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar venta'**
+  String get confirmSale;
+
+  /// Confirmacion de venta.
+  ///
+  /// In es, this message translates to:
+  /// **'Venta realizada.'**
+  String get saleCompleted;
+
+  /// Accion para acelerar temporizador.
+  ///
+  /// In es, this message translates to:
+  /// **'Acelerar'**
+  String get speedUp;
+
+  /// Titulo de aceleracion de temporizador.
+  ///
+  /// In es, this message translates to:
+  /// **'Completar temporizador'**
+  String get completeTimer;
+
+  /// Opcion de aceleracion singular.
+  ///
+  /// In es, this message translates to:
+  /// **'+{count} sobre'**
+  String addPackOption(int count);
+
+  /// Opcion de aceleracion plural.
+  ///
+  /// In es, this message translates to:
+  /// **'+{count} sobres'**
+  String addPacksOption(int count);
+
+  /// Etiqueta de coste.
+  ///
+  /// In es, this message translates to:
+  /// **'Coste'**
+  String get cost;
+
+  /// Saldo despues de una operacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Saldo despues: {amount} gachacoin'**
+  String balanceAfter(int amount);
+
+  /// Error de saldo insuficiente.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes suficientes gachacoin.'**
+  String get notEnoughGachacoin;
+
+  /// Mensaje de inventario lleno.
+  ///
+  /// In es, this message translates to:
+  /// **'Maximo de sobres alcanzado.'**
+  String get maxPacksReached;
+
+  /// Movimiento de venta.
+  ///
+  /// In es, this message translates to:
+  /// **'Venta de repetida'**
+  String get duplicateSaleMovement;
+
+  /// Movimiento de aceleracion.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceleracion de sobre'**
+  String get packAccelerationMovement;
+
+  /// Valor unitario de venta.
+  ///
+  /// In es, this message translates to:
+  /// **'Valor unitario: {amount} gachacoin'**
+  String unitSellValue(int amount);
+
+  /// Calculo de venta.
+  ///
+  /// In es, this message translates to:
+  /// **'{quantity} x {value} = {amount} gachacoin'**
+  String saleIncomePreview(int quantity, int value, int amount);
+
+  /// Saldo tras movimiento.
+  ///
+  /// In es, this message translates to:
+  /// **'Saldo: {amount}'**
+  String transactionBalanceAfter(int amount);
 }
 
 class _AppLocalizationsDelegate
