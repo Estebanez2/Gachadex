@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,8 +12,10 @@ import '../../../../core/domain/domain_enums.dart';
 import '../../../../core/files/card_video_player.dart';
 import '../../../../core/files/stored_media_image.dart';
 import '../../../../core/identifiers/entity_id.dart';
+import '../../../../core/widgets/animated_appear.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../rarities/presentation/widgets/rarity_effect_layer.dart';
 import '../../application/pack_providers.dart';
 import '../../domain/entities/pack_opening_details.dart';
 
@@ -102,14 +105,17 @@ class _PackOpeningPageState extends ConsumerState<PackOpeningPage> {
   Future<void> _revealOrNext(PackOpeningDetails details) async {
     final current = details.cards[_index];
     if (current.result.revealed) {
+      unawaited(HapticFeedback.selectionClick());
       setState(() => _index += 1);
       return;
     }
+
     setState(() => _busy = true);
     await ref
         .read(revealOpeningCardProvider)
         .call(openingId: widget.openingId, slotIndex: current.result.slotIndex);
     ref.invalidate(packOpeningDetailsProvider(widget.openingId));
+    unawaited(HapticFeedback.lightImpact());
     if (mounted) {
       setState(() => _busy = false);
     }
@@ -117,6 +123,7 @@ class _PackOpeningPageState extends ConsumerState<PackOpeningPage> {
 
   Future<void> _skip() async {
     setState(() => _busy = true);
+    unawaited(HapticFeedback.mediumImpact());
     await ref.read(completePackOpeningProvider).call(widget.openingId);
     ref.invalidate(packOpeningDetailsProvider(widget.openingId));
     if (mounted) {
@@ -130,6 +137,7 @@ class _PackOpeningPageState extends ConsumerState<PackOpeningPage> {
 
   Future<void> _viewAlbum() async {
     await _markCompleted();
+    unawaited(HapticFeedback.selectionClick());
     if (mounted) {
       context.go(
         AppRoutes.installedCollectionAlbumPath(
@@ -141,6 +149,7 @@ class _PackOpeningPageState extends ConsumerState<PackOpeningPage> {
 
   Future<void> _backToPacks() async {
     await _markCompleted();
+    unawaited(HapticFeedback.selectionClick());
     if (mounted) {
       context.go(
         AppRoutes.installedCollectionPath(widget.installedCollectionId.value),
@@ -169,14 +178,18 @@ class _OpeningCardReveal extends StatelessWidget {
     final l10n = context.l10n;
     final revealed = details.result.revealed;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final cardRadius = BorderRadius.circular(AppConstants.cardRadius);
+    final rarityColor = Color(details.card.rarity.colorValue);
 
     return ListView(
       padding: AppConstants.pagePadding,
       children: [
-        Text(
-          l10n.cardPosition(position, total),
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleMedium,
+        AnimatedAppear(
+          child: Text(
+            l10n.cardPosition(position, total),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ),
         const SizedBox(height: AppConstants.spacingMd),
         AnimatedScale(
@@ -184,53 +197,91 @@ class _OpeningCardReveal extends StatelessWidget {
           duration: reduceMotion
               ? Duration.zero
               : AppConstants.mediumAnimationDuration,
-          child: AspectRatio(
-            aspectRatio: 0.72,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-              child: revealed
-                  ? _RevealedOpeningMedia(details: details)
-                  : ColoredBox(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      child: const Center(
-                        child: Icon(Icons.style_outlined, size: 72),
-                      ),
-                    ),
+          child: AnimatedSwitcher(
+            duration: reduceMotion
+                ? Duration.zero
+                : AppConstants.mediumAnimationDuration,
+            switchInCurve: Curves.easeOutCubic,
+            child: AspectRatio(
+              key: ValueKey(revealed),
+              aspectRatio: 0.72,
+              child: RarityEffectFrame(
+                effectId: revealed ? details.card.rarity.effectId : null,
+                baseColor: rarityColor,
+                borderRadius: cardRadius,
+                animate: revealed,
+                child: ClipRRect(
+                  borderRadius: cardRadius,
+                  child: revealed
+                      ? _RevealedOpeningMedia(details: details)
+                      : DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Theme.of(context).colorScheme.primaryContainer,
+                                Theme.of(
+                                  context,
+                                ).colorScheme.secondaryContainer,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.style_outlined,
+                              size: 72,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                ),
+              ),
             ),
           ),
         ),
         const SizedBox(height: AppConstants.spacingMd),
         if (revealed) ...[
-          Text(
-            details.card.card.name,
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          AnimatedAppear(
+            child: Text(
+              details.card.card.name,
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
           ),
           const SizedBox(height: AppConstants.spacingSm),
-          Center(
-            child: Chip(
-              avatar: Icon(
-                details.result.wasNew
-                    ? Icons.auto_awesome_outlined
-                    : Icons.repeat_outlined,
-              ),
-              label: Text(
-                details.result.wasNew
-                    ? l10n.newCard
-                    : l10n.repeatedCard(details.result.quantityAfter),
+          AnimatedAppear(
+            delay: const Duration(milliseconds: 70),
+            child: Center(
+              child: Chip(
+                avatar: Icon(
+                  details.result.wasNew
+                      ? Icons.auto_awesome_outlined
+                      : Icons.repeat_outlined,
+                ),
+                label: Text(
+                  details.result.wasNew
+                      ? l10n.newCard
+                      : l10n.repeatedCard(details.result.quantityAfter),
+                ),
               ),
             ),
           ),
         ],
         const SizedBox(height: AppConstants.spacingLg),
-        FilledButton.icon(
-          onPressed: busy ? null : onRevealOrNext,
-          icon: Icon(
-            revealed ? Icons.navigate_next : Icons.visibility_outlined,
+        AnimatedAppear(
+          delay: const Duration(milliseconds: 100),
+          child: FilledButton.icon(
+            onPressed: busy ? null : onRevealOrNext,
+            icon: Icon(
+              revealed ? Icons.navigate_next : Icons.visibility_outlined,
+            ),
+            label: Text(revealed ? l10n.next : l10n.revealCard),
           ),
-          label: Text(revealed ? l10n.next : l10n.revealCard),
         ),
       ],
     );
@@ -278,31 +329,45 @@ class _OpeningSummary extends StatelessWidget {
     return ListView(
       padding: AppConstants.pagePadding,
       children: [
-        Text(
-          l10n.summary,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        AnimatedAppear(
+          child: Text(
+            l10n.summary,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
         ),
         const SizedBox(height: AppConstants.spacingSm),
         Text(l10n.openingSummaryCounts(newCount, repeatedCount)),
         const SizedBox(height: AppConstants.spacingMd),
-        for (final card in details.cards)
-          Card(
-            child: ListTile(
-              leading: SizedBox.square(
-                dimension: 48,
-                child: StoredMediaImage(
-                  path:
-                      card.card.thumbnailAsset?.relativePath ??
-                      card.card.mediaAsset.relativePath,
+        for (var index = 0; index < details.cards.length; index++)
+          AnimatedAppear(
+            delay: Duration(milliseconds: index.clamp(0, 4) * 40),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: AppConstants.spacingSm),
+              child: Card(
+                child: ListTile(
+                  leading: SizedBox.square(
+                    dimension: 48,
+                    child: StoredMediaImage(
+                      path:
+                          details
+                              .cards[index]
+                              .card
+                              .thumbnailAsset
+                              ?.relativePath ??
+                          details.cards[index].card.mediaAsset.relativePath,
+                    ),
+                  ),
+                  title: Text(details.cards[index].card.card.name),
+                  subtitle: Text(
+                    details.cards[index].result.wasNew
+                        ? l10n.newCard
+                        : l10n.repeatedCard(
+                            details.cards[index].result.quantityAfter,
+                          ),
+                  ),
                 ),
-              ),
-              title: Text(card.card.card.name),
-              subtitle: Text(
-                card.result.wasNew
-                    ? l10n.newCard
-                    : l10n.repeatedCard(card.result.quantityAfter),
               ),
             ),
           ),

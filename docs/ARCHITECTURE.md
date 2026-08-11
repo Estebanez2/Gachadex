@@ -1,10 +1,11 @@
 # Arquitectura
 
-Fecha: 2026-08-10
+Fecha: 2026-08-11
 
-Este documento describe el estado tecnico tras la Fase 8: borradores,
+Este documento describe el estado tecnico tras la Fase 12: borradores,
 rarezas, cartas con fotografias y videos, configuracion de sobres,
-finalizacion local, inventario con temporizadores, apertura de sobres y album.
+finalizacion local, inventario con temporizadores, apertura de sobres, album,
+economia, importacion/exportacion, notificaciones locales y acabado visual.
 La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`.
 
 ## Principios
@@ -22,6 +23,8 @@ La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`.
 - Finalizar una coleccion crea una coleccion instalada local y separa progreso
   de definicion.
 - La Fase 8 anade videos de carta como archivos privados MP4 y thumbnails WebP.
+- La Fase 12 anade efectos visuales de rareza y animaciones como presentacion
+  pura, respetando `MediaQuery.disableAnimations`.
 
 ## Capas
 
@@ -44,6 +47,8 @@ lib/
     packs/                   Sobres, pools, reglas y aperturas.
     album/                   Cartas obtenidas y progreso.
     economy/                 Historial de gachacoin.
+    import_export/           Paquetes `.gachadex` autosuficientes.
+    settings/                Tema y notificaciones locales.
 ```
 
 Cada feature con logica real separa `domain/` y `data/`. Los repositorios de
@@ -62,7 +67,7 @@ por `ProviderScope` y la cierra con `ref.onDispose`.
 ## Migraciones
 
 `currentDatabaseSchemaVersion` vive en
-`lib/core/database/migrations/schema_versions.dart` y actualmente vale `5`.
+`lib/core/database/migrations/schema_versions.dart` y actualmente vale `6`.
 
 `createMigrationStrategy`:
 
@@ -77,6 +82,8 @@ por `ProviderScope` y la cierra con `ref.onDispose`.
   grupos de probabilidad en reglas `minimumRarity`.
 - Migra de v4 a v5 recreando `pack_inventory` para permitir sobres comprados
   con gachacoin por encima de `maxAccumulated`.
+- Migra de v5 a v6 creando `app_settings` para preferencias locales como
+  notificaciones de sobres.
 - Rechaza upgrades no implementados con un mensaje seguro.
 
 Para anadir una nueva version se debe subir `currentDatabaseSchemaVersion`,
@@ -247,6 +254,28 @@ El album expone:
 - Detalle de carta obtenida con imagen completa, vida, descripcion, plantilla,
   marco, campos comicos, favorito, copias vendibles y valor de venta.
 
+Las entradas obtenidas llevan tambien color y `effectId` de rareza para pintar
+marcos y efectos. Las faltantes mantienen nombre, imagen, rareza visible y
+efecto ocultos para no revelar contenido.
+
+## Acabado visual y movimiento
+
+La Fase 12 centraliza el acabado visual en widgets de presentacion:
+
+- `RarityEffectFrame` traduce `effectId` a `none`, `softGlow`, `sparkle`,
+  `gradient`, `holographic` o `pulse`, con fallback seguro a `none`.
+- Los efectos se pintan con `CustomPainter`; no alteran probabilidades,
+  inventario, progreso ni persistencia.
+- En grids el efecto se usa estatico (`animate: false`) para evitar coste de
+  animacion por celda. En detalle, preview y apertura se permite animacion.
+- `AnimatedAppear` aplica entradas suaves y respeta
+  `MediaQuery.disableAnimationsOf(context)`.
+- La apertura de sobres usa `AnimatedSwitcher`, escala suave, efectos por
+  rareza al revelar y `HapticFeedback` ligero. `Saltar` conserva el mismo flujo
+  de completado.
+- Los videos siguen reproduciendose solo en apertura y detalle; album y
+  resumen usan miniaturas.
+
 ## Economia
 
 La Fase 10 usa `InstalledCollection.coins` como saldo persistido por coleccion,
@@ -360,11 +389,7 @@ Los widgets de Fase 3 se prueban con repositorios en memoria para evitar que los
 streams de Drift dejen temporizadores pendientes dentro de `testWidgets`; la
 persistencia real queda cubierta por tests de repositorio y controlador.
 
-## Limites de la fase
+## Limites actuales
 
-Queda fuera de Fase 8:
-
-- Venta de duplicados.
-- Economia usable.
-- Notificaciones.
-- Importacion/exportacion `.gachadex`.
+Queda fuera de Fase 12 la estabilizacion amplia de lanzamiento, tutorial inicial
+y preparacion iOS final.

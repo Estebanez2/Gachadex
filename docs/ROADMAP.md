@@ -1,6 +1,6 @@
 # Roadmap
 
-Fecha: 2026-08-10
+Fecha: 2026-08-11
 
 Este roadmap ordena el trabajo practico. La fase 0 documental queda separada de
 la implementacion tecnica.
@@ -224,11 +224,14 @@ Depende de: fase 6 y de la estrategia de temporizadores.
 
 ## Fase 12 - Diseno y animaciones
 
+Estado: implementada en la rama `phase/12-visual-polish`.
+
 Objetivo: elevar la experiencia visual con identidad propia.
 
-Incluye disenos de sobres, animacion de apertura, giro/revelado, efectos propios
-por rareza, sonido, vibracion, transiciones, indicadores y modo reducir
-animaciones. No debe copiar Pokemon TCG ni efectos de Altare de forma literal.
+Incluye tokens de movimiento, accesos iniciales pulidos, animacion de apertura,
+revelado con transiciones, efectos propios por rareza, feedback tactil,
+apariciones suaves, indicadores visuales y respeto de reducir animaciones. No
+copia Pokemon TCG ni efectos de Altare de forma literal.
 
 Depende de: fases 6, 7 y 10.
 

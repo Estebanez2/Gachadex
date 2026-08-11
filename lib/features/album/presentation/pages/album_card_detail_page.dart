@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/localization/app_localizations.dart';
@@ -12,6 +13,7 @@ import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../collections/application/installed_collection_providers.dart';
 import '../../../economy/application/economy_providers.dart';
+import '../../../rarities/presentation/widgets/rarity_effect_layer.dart';
 import '../../application/album_providers.dart';
 import '../../domain/entities/album_card_entry.dart';
 
@@ -53,22 +55,29 @@ class AlbumCardDetailPage extends ConsumerWidget {
               children: [
                 AspectRatio(
                   aspectRatio: 0.72,
-                  child: ClipRRect(
+                  child: RarityEffectFrame(
+                    effectId: entry.rarityEffectId,
+                    baseColor: Color(entry.rarityColorValue ?? 0xFF7A8087),
                     borderRadius: BorderRadius.circular(
                       AppConstants.cardRadius,
                     ),
-                    child:
-                        entry.mediaType == MediaType.video &&
-                            entry.thumbnailRelativePath != null
-                        ? CardVideoPlayer(
-                            videoPath: entry.imageRelativePath!,
-                            thumbnailPath: entry.thumbnailRelativePath!,
-                            autoplay: true,
-                          )
-                        : StoredMediaImage(
-                            path: entry.imageRelativePath!,
-                            fit: BoxFit.cover,
-                          ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.cardRadius,
+                      ),
+                      child:
+                          entry.mediaType == MediaType.video &&
+                              entry.thumbnailRelativePath != null
+                          ? CardVideoPlayer(
+                              videoPath: entry.imageRelativePath!,
+                              thumbnailPath: entry.thumbnailRelativePath!,
+                              autoplay: true,
+                            )
+                          : StoredMediaImage(
+                              path: entry.imageRelativePath!,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingMd),
@@ -83,12 +92,15 @@ class AlbumCardDetailPage extends ConsumerWidget {
                     ),
                     IconButton.filledTonal(
                       tooltip: l10n.favorites,
-                      onPressed: () => ref
-                          .read(toggleFavoriteCardProvider)
-                          .call(
-                            installedCollectionId: installedCollectionId,
-                            cardId: entry.cardId,
-                          ),
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        ref
+                            .read(toggleFavoriteCardProvider)
+                            .call(
+                              installedCollectionId: installedCollectionId,
+                              cardId: entry.cardId,
+                            );
+                      },
                       icon: Icon(
                         entry.isFavorite
                             ? Icons.star
@@ -250,6 +262,7 @@ class AlbumCardDetailPage extends ConsumerWidget {
       ref.invalidate(installedCollectionProvider(installedCollectionId));
       ref.invalidate(installedCollectionsProvider);
       if (context.mounted) {
+        HapticFeedback.lightImpact();
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.saleCompleted)));

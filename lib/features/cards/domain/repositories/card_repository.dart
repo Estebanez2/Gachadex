@@ -1,4 +1,5 @@
 import '../../../../core/identifiers/entity_id.dart';
+import '../../../rarities/domain/entities/rarity.dart';
 import '../entities/card.dart';
 import '../entities/card_field_value.dart';
 import '../entities/media_asset.dart';
@@ -6,12 +7,14 @@ import '../entities/media_asset.dart';
 final class ImageCardDetails {
   const ImageCardDetails({
     required this.card,
+    required this.rarity,
     required this.mediaAsset,
     required this.thumbnailAsset,
     required this.fields,
   });
 
   final Card card;
+  final Rarity rarity;
   final MediaAsset mediaAsset;
   final MediaAsset? thumbnailAsset;
   final List<CardFieldValue> fields;

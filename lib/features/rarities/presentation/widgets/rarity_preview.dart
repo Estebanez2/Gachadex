@@ -4,6 +4,7 @@ import '../../../../app/localization/app_localizations.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../domain/catalogs/rarity_visual_catalog.dart';
 import '../../domain/entities/rarity.dart';
+import 'rarity_effect_layer.dart';
 
 class RarityPreview extends StatelessWidget {
   const RarityPreview({super.key, required this.rarity, this.compact = false});
@@ -31,39 +32,26 @@ class RarityPreview extends StatelessWidget {
       _ => textColor.withValues(alpha: 0.78),
     };
 
+    final borderRadius = BorderRadius.circular(radius);
+
     return Semantics(
       label: rarity.name,
-      child: Container(
+      child: ConstrainedBox(
         constraints: compact
             ? const BoxConstraints(minHeight: 68)
             : const BoxConstraints(minHeight: 112),
-        decoration: BoxDecoration(
-          color: baseColor,
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: borderColor, width: borderWidth),
-          boxShadow: _effectShadow(rarity.effectId, baseColor),
-        ),
-        child: Stack(
-          children: [
-            if (rarity.effectId == 'rarity_effect_gradient' ||
-                rarity.effectId == 'rarity_effect_holo')
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(radius),
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.white.withValues(alpha: 0.22),
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.18),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                ),
-              ),
-            Padding(
+        child: RarityEffectFrame(
+          effectId: rarity.effectId,
+          baseColor: baseColor,
+          borderRadius: borderRadius,
+          animate: !compact,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: baseColor,
+              borderRadius: borderRadius,
+              border: Border.all(color: borderColor, width: borderWidth),
+            ),
+            child: Padding(
               padding: const EdgeInsets.all(AppConstants.spacingMd),
               child: Row(
                 children: [
@@ -106,7 +94,7 @@ class RarityPreview extends StatelessWidget {
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -134,32 +122,5 @@ IconData _rarityIcon(String id) {
     'rarity_icon_moon' => Icons.dark_mode_outlined,
     'rarity_icon_sun' => Icons.wb_sunny_outlined,
     _ => Icons.star_outline,
-  };
-}
-
-List<BoxShadow> _effectShadow(String? effectId, Color baseColor) {
-  return switch (effectId) {
-    'rarity_effect_soft_glow' => [
-      BoxShadow(
-        color: baseColor.withValues(alpha: 0.34),
-        blurRadius: 10,
-        spreadRadius: 1,
-      ),
-    ],
-    'rarity_effect_spark' => [
-      BoxShadow(
-        color: Colors.white.withValues(alpha: 0.42),
-        blurRadius: 8,
-        spreadRadius: 0,
-      ),
-    ],
-    'rarity_effect_pulse' => [
-      BoxShadow(
-        color: baseColor.withValues(alpha: 0.45),
-        blurRadius: 14,
-        spreadRadius: 2,
-      ),
-    ],
-    _ => const [],
   };
 }
