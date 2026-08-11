@@ -1135,6 +1135,30 @@
   "@videoRequired": {
     "description": "Error de video obligatorio."
   },
+  "trimVideoTitle": "Recortar video",
+  "@trimVideoTitle": {
+    "description": "Titulo del dialogo para elegir el tramo de video."
+  },
+  "trimVideoDescription": "Elige que 15 segundos se usaran en la carta.",
+  "@trimVideoDescription": {
+    "description": "Descripcion del selector de tramo de video."
+  },
+  "trimVideoRange": "Tramo: {start} - {end}",
+  "@trimVideoRange": {
+    "description": "Rango temporal elegido del video.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "useVideoClip": "Usar tramo",
+  "@useVideoClip": {
+    "description": "Accion para aceptar el tramo de video elegido."
+  },
   "duration": "Duracion: {value}",
   "@duration": {
     "description": "Duracion de un video.",

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/router/app_routes.dart';
@@ -451,7 +452,7 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
     try {
       final video = await ref
           .read(cardVideoProcessorProvider)
-          .pickFromGallery();
+          .pickFromGallery(selectTrim: _selectVideoTrimStart);
       if (video != null && mounted) {
         setState(() {
           _pendingVideo = video;
@@ -469,6 +470,19 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
         setState(() => _processingVideo = false);
       }
     }
+  }
+
+  Future<Duration?> _selectVideoTrimStart(
+    VideoTrimSelectionRequest request,
+  ) async {
+    if (!mounted) {
+      return null;
+    }
+    return showDialog<Duration>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _VideoTrimDialog(request: request),
+    );
   }
 
   Future<void> _save(
@@ -819,9 +833,215 @@ class _MediaPicker extends StatelessWidget {
   }
 
   String _formatDuration(Duration duration) {
-    final seconds = duration.inSeconds;
-    return '0:${seconds.toString().padLeft(2, '0')}';
+    return _formatVideoDuration(duration);
   }
+}
+
+class _VideoTrimDialog extends StatefulWidget {
+  const _VideoTrimDialog({required this.request});
+
+  final VideoTrimSelectionRequest request;
+
+  @override
+  State<_VideoTrimDialog> createState() => _VideoTrimDialogState();
+}
+
+class _VideoTrimDialogState extends State<_VideoTrimDialog> {
+  VideoPlayerController? _controller;
+  Duration _start = Duration.zero;
+  bool _loading = true;
+  Object? _error;
+
+  Duration get _end => _start + widget.request.clipDuration;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_restartSelectedClipIfNeeded);
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final latestStart = widget.request.latestStart;
+    final maxMillis = latestStart.inMilliseconds.toDouble();
+
+    return AlertDialog(
+      title: Text(l10n.trimVideoTitle),
+      content: SizedBox(
+        width: 420,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l10n.trimVideoDescription),
+            const SizedBox(height: AppConstants.spacingMd),
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+                  child: _preview(),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingMd),
+            Text(
+              l10n.trimVideoRange(
+                _formatVideoDuration(_start),
+                _formatVideoDuration(_end),
+              ),
+            ),
+            Slider(
+              value: _start.inMilliseconds
+                  .clamp(0, latestStart.inMilliseconds)
+                  .toDouble(),
+              min: 0,
+              max: maxMillis <= 0 ? 1 : maxMillis,
+              divisions: latestStart.inSeconds <= 0
+                  ? null
+                  : latestStart.inSeconds,
+              label: _formatVideoDuration(_start),
+              onChanged: _loading || _error != null
+                  ? null
+                  : (value) {
+                      setState(() {
+                        _start = Duration(milliseconds: value.round());
+                      });
+                    },
+              onChangeEnd: _loading || _error != null
+                  ? null
+                  : (value) {
+                      _seekToStart(Duration(milliseconds: value.round()));
+                    },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton.icon(
+          onPressed: _loading || _error != null
+              ? null
+              : () => Navigator.of(context).pop(_start),
+          icon: const Icon(Icons.content_cut),
+          label: Text(l10n.useVideoClip),
+        ),
+      ],
+    );
+  }
+
+  Widget _preview() {
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.spacingMd),
+          child: Text(
+            context.l10n.videoPlaybackFailed,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+    final controller = _controller;
+    if (_loading || controller == null || !controller.value.isInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        FittedBox(
+          fit: BoxFit.contain,
+          child: SizedBox(
+            width: controller.value.size.width,
+            height: controller.value.size.height,
+            child: VideoPlayer(controller),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.all(AppConstants.spacingSm),
+            child: FilledButton.tonalIcon(
+              onPressed: () => _seekToStart(_start),
+              icon: const Icon(Icons.replay),
+              label: Text(context.l10n.replay),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _initialize() async {
+    try {
+      final controller = VideoPlayerController.file(
+        File(widget.request.videoPath),
+      );
+      await controller.initialize();
+      await controller.setLooping(true);
+      controller.addListener(_restartSelectedClipIfNeeded);
+      await controller.seekTo(_start);
+      await controller.play();
+      if (!mounted) {
+        await controller.dispose();
+        return;
+      }
+      setState(() {
+        _controller = controller;
+        _loading = false;
+      });
+    } on Object catch (error) {
+      if (mounted) {
+        setState(() {
+          _error = error;
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  void _restartSelectedClipIfNeeded() {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
+    if (controller.value.position >= _end) {
+      controller.seekTo(_start);
+    }
+  }
+
+  Future<void> _seekToStart(Duration start) async {
+    final safeStart = clampCardVideoTrimStart(
+      sourceDuration: widget.request.sourceDuration,
+      requestedStart: start,
+    );
+    setState(() => _start = safeStart);
+    await _controller?.seekTo(safeStart);
+    await _controller?.play();
+  }
+}
+
+String _formatVideoDuration(Duration duration) {
+  final safe = duration.isNegative ? Duration.zero : duration;
+  final minutes = safe.inMinutes;
+  final seconds = safe.inSeconds.remainder(60);
+  return '$minutes:${seconds.toString().padLeft(2, '0')}';
 }
 
 class _ChoiceWrap extends StatelessWidget {

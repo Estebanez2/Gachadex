@@ -1708,6 +1708,30 @@ abstract class AppLocalizations {
   /// **'El video es obligatorio'**
   String get videoRequired;
 
+  /// Titulo del dialogo para elegir el tramo de video.
+  ///
+  /// In es, this message translates to:
+  /// **'Recortar video'**
+  String get trimVideoTitle;
+
+  /// Descripcion del selector de tramo de video.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige que 15 segundos se usaran en la carta.'**
+  String get trimVideoDescription;
+
+  /// Rango temporal elegido del video.
+  ///
+  /// In es, this message translates to:
+  /// **'Tramo: {start} - {end}'**
+  String trimVideoRange(String start, String end);
+
+  /// Accion para aceptar el tramo de video elegido.
+  ///
+  /// In es, this message translates to:
+  /// **'Usar tramo'**
+  String get useVideoClip;
+
   /// Duracion de un video.
   ///
   /// In es, this message translates to:

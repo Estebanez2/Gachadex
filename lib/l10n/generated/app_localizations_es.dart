@@ -868,6 +868,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get videoRequired => 'El video es obligatorio';
 
   @override
+  String get trimVideoTitle => 'Recortar video';
+
+  @override
+  String get trimVideoDescription =>
+      'Elige que 15 segundos se usaran en la carta.';
+
+  @override
+  String trimVideoRange(String start, String end) {
+    return 'Tramo: $start - $end';
+  }
+
+  @override
+  String get useVideoClip => 'Usar tramo';
+
+  @override
   String duration(String value) {
     return 'Duracion: $value';
   }

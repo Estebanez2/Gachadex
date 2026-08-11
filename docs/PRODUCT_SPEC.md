@@ -1016,7 +1016,8 @@ Proceso:
 Configuración inicial:
 
 ```text
-Duración máxima: 15 segundos
+Duración máxima del archivo elegido: 1 minuto
+Duración máxima guardada en carta: 15 segundos
 Resolución máxima: 1280 × 720
 Contenedor: MP4
 Vídeo: H.264

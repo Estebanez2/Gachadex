@@ -6,7 +6,44 @@ import 'package:video_compress/video_compress.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/files/project_media_storage.dart';
 
-const maxCardVideoDuration = Duration(seconds: 15);
+const maxCardVideoClipDuration = Duration(seconds: 15);
+const maxCardVideoSourceDuration = Duration(minutes: 1);
+const maxCardVideoDuration = maxCardVideoClipDuration;
+
+typedef VideoTrimSelector =
+    Future<Duration?> Function(VideoTrimSelectionRequest request);
+
+final class VideoTrimSelectionRequest {
+  const VideoTrimSelectionRequest({
+    required this.videoPath,
+    required this.sourceDuration,
+    required this.clipDuration,
+  });
+
+  final String videoPath;
+  final Duration sourceDuration;
+  final Duration clipDuration;
+
+  Duration get latestStart => sourceDuration - clipDuration;
+}
+
+bool cardVideoNeedsTrim(Duration sourceDuration) {
+  return sourceDuration > maxCardVideoClipDuration;
+}
+
+Duration clampCardVideoTrimStart({
+  required Duration sourceDuration,
+  required Duration requestedStart,
+}) {
+  final latestStart = sourceDuration - maxCardVideoClipDuration;
+  if (requestedStart <= Duration.zero) {
+    return Duration.zero;
+  }
+  if (latestStart <= Duration.zero || requestedStart > latestStart) {
+    return latestStart <= Duration.zero ? Duration.zero : latestStart;
+  }
+  return requestedStart;
+}
 
 final class PendingCardVideo {
   const PendingCardVideo({
@@ -31,7 +68,7 @@ final class PendingCardVideo {
 }
 
 abstract interface class CardVideoProcessor {
-  Future<PendingCardVideo?> pickFromGallery();
+  Future<PendingCardVideo?> pickFromGallery({VideoTrimSelector? selectTrim});
 }
 
 final class PluginCardVideoProcessor implements CardVideoProcessor {
@@ -42,7 +79,9 @@ final class PluginCardVideoProcessor implements CardVideoProcessor {
   final ImagePicker _imagePicker;
 
   @override
-  Future<PendingCardVideo?> pickFromGallery() async {
+  Future<PendingCardVideo?> pickFromGallery({
+    VideoTrimSelector? selectTrim,
+  }) async {
     final picked = await _imagePicker.pickVideo(source: ImageSource.gallery);
     if (picked == null) {
       return null;
@@ -60,9 +99,27 @@ final class PluginCardVideoProcessor implements CardVideoProcessor {
       if (durationMs <= 0) {
         throw const InvalidEntityFailure('El video no tiene duracion valida.');
       }
-      if (durationMs > maxCardVideoDuration.inMilliseconds) {
+      final sourceDuration = Duration(milliseconds: durationMs);
+      if (sourceDuration > maxCardVideoSourceDuration) {
         throw const InvalidEntityFailure(
-          'El video supera la duracion maxima de 15 segundos.',
+          'El video supera la duracion maxima de 1 minuto.',
+        );
+      }
+      Duration? trimStart;
+      if (cardVideoNeedsTrim(sourceDuration)) {
+        final selected = await selectTrim?.call(
+          VideoTrimSelectionRequest(
+            videoPath: sourceTemp.path,
+            sourceDuration: sourceDuration,
+            clipDuration: maxCardVideoClipDuration,
+          ),
+        );
+        if (selected == null) {
+          return null;
+        }
+        trimStart = clampCardVideoTrimStart(
+          sourceDuration: sourceDuration,
+          requestedStart: selected,
         );
       }
 
@@ -70,6 +127,8 @@ final class PluginCardVideoProcessor implements CardVideoProcessor {
         sourceTemp.path,
         quality: VideoQuality.Res1280x720Quality,
         deleteOrigin: false,
+        startTime: trimStart?.inSeconds,
+        duration: trimStart == null ? null : maxCardVideoClipDuration.inSeconds,
         includeAudio: true,
       );
       compressedPath = compressed?.path;

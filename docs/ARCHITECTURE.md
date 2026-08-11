@@ -310,9 +310,10 @@ la pantalla esta abierta.
 
 La Fase 8 amplia el editor de cartas existente para elegir `Foto` o `Video`.
 `CardVideoProcessor` encapsula `image_picker` y `video_compress`: selecciona un
-video de galeria, lee metadatos, rechaza duraciones mayores a 15 segundos,
-comprime a MP4 720p conservando audio cuando existe y genera un thumbnail del
-primer fotograma.
+video de galeria, lee metadatos, acepta videos de origen de hasta 1 minuto,
+permite elegir un tramo de 15 segundos cuando el origen supera ese limite de
+carta, comprime ese tramo a MP4 720p conservando audio cuando existe y genera
+un thumbnail del primer fotograma del resultado.
 
 El modelo no cambia de esquema: `Card.mediaType` pasa a `video`, el
 `MediaAsset` principal guarda `video/mp4`, dimensiones, duracion, tamano y ruta
