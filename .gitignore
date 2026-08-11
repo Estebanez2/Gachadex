@@ -60,6 +60,7 @@ temp/
 tmp/
 .tmp/
 *.friendpack
+*.gachadex
 
 # Local databases and journals
 *.db
