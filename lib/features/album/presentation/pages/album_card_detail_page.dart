@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/domain/domain_enums.dart';
+import '../../../../core/files/card_video_player.dart';
 import '../../../../core/files/stored_media_image.dart';
 import '../../../../core/identifiers/entity_id.dart';
 import '../../../../core/widgets/app_error_view.dart';
@@ -51,10 +53,18 @@ class AlbumCardDetailPage extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(
                       AppConstants.cardRadius,
                     ),
-                    child: StoredMediaImage(
-                      path: entry.imageRelativePath!,
-                      fit: BoxFit.cover,
-                    ),
+                    child:
+                        entry.mediaType == MediaType.video &&
+                            entry.thumbnailRelativePath != null
+                        ? CardVideoPlayer(
+                            videoPath: entry.imageRelativePath!,
+                            thumbnailPath: entry.thumbnailRelativePath!,
+                            autoplay: true,
+                          )
+                        : StoredMediaImage(
+                            path: entry.imageRelativePath!,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingMd),

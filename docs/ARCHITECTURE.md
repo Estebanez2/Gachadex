@@ -2,10 +2,10 @@
 
 Fecha: 2026-08-10
 
-Este documento describe el estado tecnico tras la Fase 7: borradores,
-rarezas, cartas con fotografias, configuracion de sobres, finalizacion local,
-inventario con temporizadores, apertura de sobres y album. La fuente funcional sigue siendo
-`docs/PRODUCT_SPEC.md`.
+Este documento describe el estado tecnico tras la Fase 8: borradores,
+rarezas, cartas con fotografias y videos, configuracion de sobres,
+finalizacion local, inventario con temporizadores, apertura de sobres y album.
+La fuente funcional sigue siendo `docs/PRODUCT_SPEC.md`.
 
 ## Principios
 
@@ -21,6 +21,7 @@ inventario con temporizadores, apertura de sobres y album. La fuente funcional s
   rutas relativas/metadatos en SQLite.
 - Finalizar una coleccion crea una coleccion instalada local y separa progreso
   de definicion.
+- La Fase 8 anade videos de carta como archivos privados MP4 y thumbnails WebP.
 
 ## Capas
 
@@ -239,6 +240,25 @@ El album expone:
 - Detalle de carta obtenida con imagen completa, vida, descripcion, plantilla,
   marco, campos comicos y favorito.
 
+## Videos de carta
+
+La Fase 8 amplia el editor de cartas existente para elegir `Foto` o `Video`.
+`CardVideoProcessor` encapsula `image_picker` y `video_compress`: selecciona un
+video de galeria, lee metadatos, rechaza duraciones mayores a 15 segundos,
+comprime a MP4 720p conservando audio cuando existe y genera un thumbnail del
+primer fotograma.
+
+El modelo no cambia de esquema: `Card.mediaType` pasa a `video`, el
+`MediaAsset` principal guarda `video/mp4`, dimensiones, duracion, tamano y ruta
+relativa al MP4; `thumbnailAssetId` apunta a un WebP usado en grids, resumen,
+portada previa y detalle. La DB sigue guardando solo rutas y metadatos.
+
+`CardVideoPlayer` resuelve rutas relativas desde almacenamiento privado y usa
+`video_player` sobre archivo local. Mantiene un unico controller por instancia,
+pausa al cambiar de pantalla o pasar la app a background, vuelve al thumbnail al
+terminar y ofrece `Repetir`. Los grids nunca crean controllers ni reproducen
+videos.
+
 ## Repositorios
 
 Interfaces de dominio:
@@ -308,9 +328,8 @@ persistencia real queda cubierta por tests de repositorio y controlador.
 
 ## Limites de la fase
 
-Queda fuera de Fase 7:
+Queda fuera de Fase 8:
 
-- Videos.
 - Venta de duplicados.
 - Economia usable.
 - Notificaciones.

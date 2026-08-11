@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/domain/domain_enums.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/files/stored_media_image.dart';
 import '../../../core/identifiers/entity_id.dart';
@@ -572,6 +573,14 @@ class _AlbumCardTile extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
             ),
+            if (entry.mediaType == MediaType.video && entry.isOwned)
+              const Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: EdgeInsets.all(AppConstants.spacingXs),
+                  child: Icon(Icons.play_circle_fill),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.all(AppConstants.spacingSm),
               child: Column(

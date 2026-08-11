@@ -14,6 +14,7 @@ import '../domain/entities/media_asset.dart';
 import '../domain/repositories/card_repository.dart';
 import '../domain/validation/card_validation.dart';
 import 'card_photo_processor.dart';
+import 'card_video_processor.dart';
 
 final class ImageCardInput {
   const ImageCardInput({
@@ -28,6 +29,7 @@ final class ImageCardInput {
     required this.description,
     required this.comicFields,
     required this.photo,
+    required this.video,
   });
 
   final int collectionNumber;
@@ -41,6 +43,9 @@ final class ImageCardInput {
   final String description;
   final List<ComicFieldInput> comicFields;
   final PendingCardPhoto? photo;
+  final PendingCardVideo? video;
+
+  bool get hasMedia => photo != null || video != null;
 }
 
 final class CreateImageCard {
@@ -72,17 +77,19 @@ final class CreateImageCard {
     _validate(input: input, duplicate: duplicate);
 
     final photo = input.photo;
-    if (photo == null) {
-      throw const InvalidEntityFailure('La fotografia es obligatoria.');
+    final video = input.video;
+    if (!input.hasMedia || (photo != null && video != null)) {
+      throw const InvalidEntityFailure(
+        'El contenido de la carta es obligatorio.',
+      );
     }
 
     final cardId = _uuidGenerator.cardId();
     final mediaAssetId = _uuidGenerator.mediaAssetId();
     final thumbnailAssetId = _uuidGenerator.mediaAssetId();
-    final imagePath = _storage.cardImagePath(
-      projectId: projectId,
-      assetId: mediaAssetId,
-    );
+    final mediaPath = video == null
+        ? _storage.cardImagePath(projectId: projectId, assetId: mediaAssetId)
+        : _storage.cardVideoPath(projectId: projectId, assetId: mediaAssetId);
     final thumbnailPath = _storage.cardThumbnailPath(
       projectId: projectId,
       assetId: thumbnailAssetId,
@@ -92,12 +99,12 @@ final class CreateImageCard {
 
     try {
       await _storage.copyFile(
-        sourcePath: photo.imagePath,
-        destination: imagePath,
+        sourcePath: video?.videoPath ?? photo!.imagePath,
+        destination: mediaPath,
       );
-      copiedPaths.add(imagePath);
+      copiedPaths.add(mediaPath);
       await _storage.copyFile(
-        sourcePath: photo.thumbnailPath,
+        sourcePath: video?.thumbnailPath ?? photo!.thumbnailPath,
         destination: thumbnailPath,
       );
       copiedPaths.add(thumbnailPath);
@@ -112,7 +119,7 @@ final class CreateImageCard {
           health: input.health,
           rarityId: input.rarityId,
           mediaAssetId: mediaAssetId,
-          mediaType: MediaType.image,
+          mediaType: video == null ? MediaType.image : MediaType.video,
           thumbnailAssetId: thumbnailAssetId,
           templateId: input.templateId,
           frameId: input.frameId,
@@ -127,16 +134,28 @@ final class CreateImageCard {
             id: mediaAssetId,
             collectionId: collectionId,
             ownerId: cardId.value,
-            relativePath: imagePath,
-            fileSize: photo.imageFileSize,
+            mediaType: video == null ? MediaType.image : MediaType.video,
+            relativePath: mediaPath,
+            thumbnailRelativePath: video == null ? null : thumbnailPath,
+            mimeType: video == null ? 'image/webp' : 'video/mp4',
+            width: video?.width,
+            height: video?.height,
+            durationMs: video?.duration.inMilliseconds,
+            fileSize: video?.videoFileSize ?? photo!.imageFileSize,
             createdAtUtc: now,
           ),
           _asset(
             id: thumbnailAssetId,
             collectionId: collectionId,
             ownerId: cardId.value,
+            mediaType: MediaType.image,
             relativePath: thumbnailPath,
-            fileSize: photo.thumbnailFileSize,
+            thumbnailRelativePath: null,
+            mimeType: 'image/webp',
+            width: null,
+            height: null,
+            durationMs: null,
+            fileSize: video?.thumbnailFileSize ?? photo!.thumbnailFileSize,
             createdAtUtc: now,
           ),
         ],
@@ -151,7 +170,7 @@ final class CreateImageCard {
       }
       rethrow;
     } finally {
-      await _deleteTemps(photo);
+      await _deleteTemps(input);
     }
   }
 
@@ -159,7 +178,13 @@ final class CreateImageCard {
     required MediaAssetId id,
     required CollectionId collectionId,
     required String ownerId,
+    required MediaType mediaType,
     required RelativeMediaPath relativePath,
+    required RelativeMediaPath? thumbnailRelativePath,
+    required String mimeType,
+    required int? width,
+    required int? height,
+    required int? durationMs,
     required int fileSize,
     required DateTime createdAtUtc,
   }) {
@@ -168,13 +193,13 @@ final class CreateImageCard {
       collectionId: collectionId,
       ownerType: MediaOwnerType.card,
       ownerId: ownerId,
-      mediaType: MediaType.image,
+      mediaType: mediaType,
       relativePath: relativePath,
-      thumbnailRelativePath: null,
-      mimeType: 'image/webp',
-      width: null,
-      height: null,
-      durationMs: null,
+      thumbnailRelativePath: thumbnailRelativePath,
+      mimeType: mimeType,
+      width: width,
+      height: height,
+      durationMs: durationMs,
       fileSize: fileSize,
       sha256: null,
       createdAtUtc: createdAtUtc,
@@ -199,7 +224,7 @@ final class CreateImageCard {
       throw const DuplicateEntityFailure('Ese numero ya esta utilizado.');
     }
     final validation = CardValidation.validate(
-      hasPhoto: input.photo != null,
+      hasPhoto: input.hasMedia && !(input.photo != null && input.video != null),
       name: input.name,
       health: input.health,
       collectionNumber: input.collectionNumber,
@@ -215,8 +240,11 @@ final class CreateImageCard {
     }
   }
 
-  Future<void> _deleteTemps(PendingCardPhoto photo) async {
-    for (final path in photo.tempPaths) {
+  Future<void> _deleteTemps(ImageCardInput input) async {
+    for (final path in [
+      ...?input.photo?.tempPaths,
+      ...?input.video?.tempPaths,
+    ]) {
       await _storage.deleteAbsolute(path);
     }
   }
@@ -260,39 +288,48 @@ final class UpdateImageCard {
     _validate(input: input, duplicate: duplicate, hasExistingPhoto: true);
 
     final photo = input.photo;
+    final video = input.video;
+    if (photo != null && video != null) {
+      throw const InvalidEntityFailure('Elige foto o video, no ambos.');
+    }
     final copiedPaths = <RelativeMediaPath>[];
     final obsoletePaths = <RelativeMediaPath>[
-      if (photo != null) current.mediaAsset.relativePath,
-      if (photo != null && current.thumbnailAsset != null)
+      if (input.hasMedia) current.mediaAsset.relativePath,
+      if (input.hasMedia && current.thumbnailAsset != null)
         current.thumbnailAsset!.relativePath,
     ];
 
-    final mediaAssetId = photo == null
+    final mediaAssetId = !input.hasMedia
         ? current.card.mediaAssetId
         : _uuidGenerator.mediaAssetId();
-    final thumbnailAssetId = photo == null
+    final thumbnailAssetId = !input.hasMedia
         ? current.card.thumbnailAssetId
         : _uuidGenerator.mediaAssetId();
     final now = _clock.nowUtc();
 
     try {
       final mediaAssets = <MediaAsset>[];
-      if (photo != null && thumbnailAssetId != null) {
-        final imagePath = _storage.cardImagePath(
-          projectId: projectId,
-          assetId: mediaAssetId,
-        );
+      if (input.hasMedia && thumbnailAssetId != null) {
+        final mediaPath = video == null
+            ? _storage.cardImagePath(
+                projectId: projectId,
+                assetId: mediaAssetId,
+              )
+            : _storage.cardVideoPath(
+                projectId: projectId,
+                assetId: mediaAssetId,
+              );
         final thumbnailPath = _storage.cardThumbnailPath(
           projectId: projectId,
           assetId: thumbnailAssetId,
         );
         await _storage.copyFile(
-          sourcePath: photo.imagePath,
-          destination: imagePath,
+          sourcePath: video?.videoPath ?? photo!.imagePath,
+          destination: mediaPath,
         );
-        copiedPaths.add(imagePath);
+        copiedPaths.add(mediaPath);
         await _storage.copyFile(
-          sourcePath: photo.thumbnailPath,
+          sourcePath: video?.thumbnailPath ?? photo!.thumbnailPath,
           destination: thumbnailPath,
         );
         copiedPaths.add(thumbnailPath);
@@ -302,8 +339,14 @@ final class UpdateImageCard {
               id: mediaAssetId,
               collectionId: current.card.collectionId,
               ownerId: cardId.value,
-              relativePath: imagePath,
-              fileSize: photo.imageFileSize,
+              mediaType: video == null ? MediaType.image : MediaType.video,
+              relativePath: mediaPath,
+              thumbnailRelativePath: video == null ? null : thumbnailPath,
+              mimeType: video == null ? 'image/webp' : 'video/mp4',
+              width: video?.width,
+              height: video?.height,
+              durationMs: video?.duration.inMilliseconds,
+              fileSize: video?.videoFileSize ?? photo!.imageFileSize,
               createdAtUtc: now,
             ),
           )
@@ -312,8 +355,14 @@ final class UpdateImageCard {
               id: thumbnailAssetId,
               collectionId: current.card.collectionId,
               ownerId: cardId.value,
+              mediaType: MediaType.image,
               relativePath: thumbnailPath,
-              fileSize: photo.thumbnailFileSize,
+              thumbnailRelativePath: null,
+              mimeType: 'image/webp',
+              width: null,
+              height: null,
+              durationMs: null,
+              fileSize: video?.thumbnailFileSize ?? photo!.thumbnailFileSize,
               createdAtUtc: now,
             ),
           );
@@ -336,7 +385,9 @@ final class UpdateImageCard {
             health: input.health,
             rarityId: input.rarityId,
             mediaAssetId: mediaAssetId,
-            mediaType: MediaType.image,
+            mediaType: input.hasMedia
+                ? (video == null ? MediaType.image : MediaType.video)
+                : current.card.mediaType,
             thumbnailAssetId: thumbnailAssetId,
             templateId: input.templateId,
             frameId: input.frameId,
@@ -361,8 +412,8 @@ final class UpdateImageCard {
       }
       rethrow;
     } finally {
-      if (photo != null) {
-        await _deleteTemps(photo);
+      if (input.hasMedia) {
+        await _deleteTemps(input);
       }
     }
   }
@@ -371,7 +422,13 @@ final class UpdateImageCard {
     required MediaAssetId id,
     required CollectionId collectionId,
     required String ownerId,
+    required MediaType mediaType,
     required RelativeMediaPath relativePath,
+    required RelativeMediaPath? thumbnailRelativePath,
+    required String mimeType,
+    required int? width,
+    required int? height,
+    required int? durationMs,
     required int fileSize,
     required DateTime createdAtUtc,
   }) {
@@ -380,13 +437,13 @@ final class UpdateImageCard {
       collectionId: collectionId,
       ownerType: MediaOwnerType.card,
       ownerId: ownerId,
-      mediaType: MediaType.image,
+      mediaType: mediaType,
       relativePath: relativePath,
-      thumbnailRelativePath: null,
-      mimeType: 'image/webp',
-      width: null,
-      height: null,
-      durationMs: null,
+      thumbnailRelativePath: thumbnailRelativePath,
+      mimeType: mimeType,
+      width: width,
+      height: height,
+      durationMs: durationMs,
       fileSize: fileSize,
       sha256: null,
       createdAtUtc: createdAtUtc,
@@ -415,7 +472,9 @@ final class UpdateImageCard {
       throw const DuplicateEntityFailure('Ese numero ya esta utilizado.');
     }
     final validation = CardValidation.validate(
-      hasPhoto: hasExistingPhoto || input.photo != null,
+      hasPhoto:
+          hasExistingPhoto ||
+          (input.hasMedia && !(input.photo != null && input.video != null)),
       name: input.name,
       health: input.health,
       collectionNumber: input.collectionNumber,
@@ -431,8 +490,11 @@ final class UpdateImageCard {
     }
   }
 
-  Future<void> _deleteTemps(PendingCardPhoto photo) async {
-    for (final path in photo.tempPaths) {
+  Future<void> _deleteTemps(ImageCardInput input) async {
+    for (final path in [
+      ...?input.photo?.tempPaths,
+      ...?input.video?.tempPaths,
+    ]) {
       await _storage.deleteAbsolute(path);
     }
   }

@@ -12,6 +12,11 @@ abstract interface class ProjectMediaStorage {
     required MediaAssetId assetId,
   });
 
+  RelativeMediaPath cardVideoPath({
+    required CollectionProjectId projectId,
+    required MediaAssetId assetId,
+  });
+
   RelativeMediaPath cardThumbnailPath({
     required CollectionProjectId projectId,
     required MediaAssetId assetId,
@@ -47,6 +52,16 @@ final class LocalProjectMediaStorage implements ProjectMediaStorage {
   }) {
     return RelativeMediaPath(
       'projects/${projectId.value}/cards/images/${assetId.value}.webp',
+    );
+  }
+
+  @override
+  RelativeMediaPath cardVideoPath({
+    required CollectionProjectId projectId,
+    required MediaAssetId assetId,
+  }) {
+    return RelativeMediaPath(
+      'projects/${projectId.value}/cards/videos/${assetId.value}.mp4',
     );
   }
 

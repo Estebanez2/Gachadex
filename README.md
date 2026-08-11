@@ -7,15 +7,16 @@ dinero real.
 
 ## Estado actual
 
-Fase 7: borradores, rarezas, cartas con fotografias, configuracion de sobres,
-finalizacion local, temporizadores, apertura de sobres y album.
+Fase 8: borradores, rarezas, cartas con fotografias y videos, configuracion de
+sobres, finalizacion local, temporizadores, apertura de sobres y album.
 
 Incluye la base tecnica de Fase 1, el dominio y persistencia local de Fase 2,
 schema version 4, biblioteca de borradores, creacion atomica de borradores,
 editor con autosave, portada provisional generada en Flutter y CRUD/reordenacion
 de rarezas. La seccion Cartas permite seleccionar una foto de galeria,
-recortarla, guardarla como WebP privado con miniatura, completar datos, ver
-preview, editar y eliminar. La seccion Sobres permite crear varios tipos de
+recortarla, guardarla como WebP privado con miniatura, o seleccionar un video
+de hasta 15 segundos, procesarlo como MP4 con audio y thumbnail, completar
+datos, ver preview, editar y eliminar. La seccion Sobres permite crear varios tipos de
 sobre, elegir principal, configurar cartas elegibles, reglas por posicion,
 pesos por rareza y simular aperturas sin modificar progreso. La seccion
 Revision valida la coleccion, la finaliza de forma local, instala la copia
@@ -26,7 +27,7 @@ la apertura, recuperar aperturas pendientes y consultar album con obtenidas,
 faltantes, repetidas, cantidades, favoritas, filtros por rareza/tipo de medio y
 orden.
 
-No incluye todavia videos, venta de duplicados, economia usable, notificaciones,
+No incluye todavia venta de duplicados, economia usable, notificaciones,
 importacion ni exportacion.
 
 ## Requisitos
@@ -94,7 +95,7 @@ Selecciona un dispositivo Android concreto:
 flutter run -d <device-id>
 ```
 
-Flujo manual de Fase 7:
+Flujo manual de Fase 8:
 
 1. Abrir la pestana `Crear`.
 2. Crear una coleccion nueva.
@@ -138,6 +139,14 @@ Flujo manual de Fase 7:
     `Primera obtencion`.
 29. Cerrar la app a mitad de una apertura y volver a abrir la coleccion:
     debe aparecer `Continuar apertura` sin consumir otro sobre.
+30. Crear o editar otra carta, elegir `Video`, seleccionar un video de menos de
+    15 segundos y verificar thumbnail, duracion y preview.
+31. Guardar, cerrar y reabrir; comprobar que el video y su thumbnail persisten.
+32. Finalizar una coleccion con esa carta, abrir sobres hasta obtenerla y
+    confirmar que al revelar se reproduce con sonido, vuelve al thumbnail y
+    permite `Repetir`.
+33. Entrar al album: el grid debe mostrar solo thumbnail con icono de video; el
+    detalle debe reproducir el video y detenerse al salir.
 
 ## Analisis y pruebas
 
