@@ -10,6 +10,7 @@ import '../../../../core/files/stored_media_image.dart';
 import '../../../../core/identifiers/entity_id.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../collections/application/installed_collection_providers.dart';
 import '../../../economy/application/economy_providers.dart';
 import '../../application/album_providers.dart';
 import '../../domain/entities/album_card_entry.dart';
@@ -246,6 +247,8 @@ class AlbumCardDetailPage extends ConsumerWidget {
         albumCardProvider((id: installedCollectionId, cardId: cardId)),
       );
       ref.invalidate(albumStatsProvider(installedCollectionId));
+      ref.invalidate(installedCollectionProvider(installedCollectionId));
+      ref.invalidate(installedCollectionsProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
