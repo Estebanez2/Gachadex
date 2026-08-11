@@ -8,6 +8,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/domain/domain_enums.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/identifiers/entity_id.dart';
+import '../../../core/notifications/application/pack_notification_scheduler.dart';
 import '../../../core/identifiers/uuid_generator.dart';
 import '../../../core/time/clock.dart';
 
@@ -253,25 +254,28 @@ final class AcceleratePackRecharge {
     required UuidGenerator uuidGenerator,
     required Clock clock,
     AccelerationCalculator calculator = const AccelerationCalculator(),
+    PackNotificationScheduler? notificationScheduler,
   }) : _database = database,
        _uuidGenerator = uuidGenerator,
        _clock = clock,
-       _calculator = calculator;
+       _calculator = calculator,
+       _notificationScheduler = notificationScheduler;
 
   final AppDatabase _database;
   final UuidGenerator _uuidGenerator;
   final Clock _clock;
   final AccelerationCalculator _calculator;
+  final PackNotificationScheduler? _notificationScheduler;
 
   Future<AcceleratePackRechargeResult> call({
     required InstalledCollectionId installedCollectionId,
     required PackTypeId packTypeId,
     required int cycles,
-  }) {
+  }) async {
     if (cycles <= 0) {
       throw const InvalidEntityFailure('Cantidad invalida.');
     }
-    return _database.transaction(() async {
+    final result = await _database.transaction(() async {
       final installed =
           await (_database.select(
                 _database.installedCollections,
@@ -373,5 +377,10 @@ final class AcceleratePackRecharge {
         availableCount: option.resultingAvailableCount,
       );
     });
+    await _notificationScheduler?.tryReschedulePack(
+      installedCollectionId: installedCollectionId,
+      packTypeId: packTypeId,
+    );
+    return result;
   }
 }

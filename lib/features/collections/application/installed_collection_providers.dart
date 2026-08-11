@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/database_providers.dart';
 import '../../../core/identifiers/entity_id.dart';
+import '../../../core/notifications/application/notification_providers.dart';
 import '../../packs/domain/entities/pack_inventory.dart';
 import '../domain/entities/installed_collection.dart';
+import 'installed_collection_use_cases.dart';
 
 final installedCollectionsProvider =
     StreamProvider.autoDispose<List<InstalledCollection>>((ref) {
@@ -21,3 +23,12 @@ final packInventoryProvider = StreamProvider.autoDispose
           .watch(packInventoryRepositoryProvider)
           .watchByInstalledCollection(id);
     });
+
+final deleteInstalledCollectionProvider = Provider<DeleteInstalledCollection>((
+  ref,
+) {
+  return DeleteInstalledCollection(
+    repository: ref.watch(installedCollectionRepositoryProvider),
+    notificationScheduler: ref.watch(packNotificationSchedulerProvider),
+  );
+});

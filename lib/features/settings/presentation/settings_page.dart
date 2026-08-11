@@ -5,6 +5,8 @@ import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/app_theme_mode.dart';
 import '../../../app/theme/theme_controller.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/notifications/application/notification_providers.dart';
+import '../../../features/packs/application/pack_notification_coordinator_provider.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -13,6 +15,7 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final themeMode = ref.watch(themeControllerProvider);
+    final notificationsEnabled = ref.watch(packNotificationsEnabledProvider);
     final theme = Theme.of(context);
 
     return Align(
@@ -64,6 +67,57 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppConstants.spacingLg),
+              const Divider(),
+              notificationsEnabled.when(
+                loading: () => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.notifications_outlined),
+                  title: Text(l10n.packNotifications),
+                  subtitle: const LinearProgressIndicator(),
+                ),
+                error: (_, _) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.notifications_off_outlined),
+                  title: Text(l10n.packNotifications),
+                  subtitle: Text(l10n.packNotificationsError),
+                ),
+                data: (enabled) => Column(
+                  children: [
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      secondary: Icon(
+                        enabled
+                            ? Icons.notifications_active_outlined
+                            : Icons.notifications_off_outlined,
+                      ),
+                      title: Text(l10n.packNotifications),
+                      subtitle: Text(
+                        enabled
+                            ? l10n.packNotificationsEnabledDescription
+                            : l10n.packNotificationsDisabledDescription,
+                      ),
+                      value: enabled,
+                      onChanged: (value) {
+                        ref
+                            .read(notificationCoordinatorProvider)
+                            .setPackNotificationsEnabled(value);
+                      },
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          ref
+                              .read(notificationCoordinatorProvider)
+                              .openNotificationSettings();
+                        },
+                        icon: const Icon(Icons.settings_outlined),
+                        label: Text(l10n.openNotificationSettings),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const Divider(),
               ListTile(
                 contentPadding: EdgeInsets.zero,

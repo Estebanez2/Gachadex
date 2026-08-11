@@ -14,6 +14,7 @@ import '../../../core/time/clock.dart';
 import '../../cards/domain/repositories/card_repository.dart';
 import '../../collections/domain/repositories/installed_collection_repository.dart';
 import '../../rarities/domain/repositories/rarity_repository.dart';
+import '../../../core/notifications/application/pack_notification_scheduler.dart';
 import '../domain/entities/pack_configuration.dart';
 import '../domain/entities/pack_opening_details.dart';
 import '../domain/repositories/pack_opening_repository.dart';
@@ -36,6 +37,7 @@ final class OpenPack {
     required Clock clock,
     PackGenerator generator = const PackGenerator(),
     PackRechargeCalculator rechargeCalculator = const PackRechargeCalculator(),
+    PackNotificationScheduler? notificationScheduler,
     Random? random,
   }) : _database = database,
        _installedCollectionRepository = installedCollectionRepository,
@@ -48,6 +50,7 @@ final class OpenPack {
        _clock = clock,
        _generator = generator,
        _rechargeCalculator = rechargeCalculator,
+       _notificationScheduler = notificationScheduler,
        _random = random ?? Random();
 
   final AppDatabase _database;
@@ -61,6 +64,7 @@ final class OpenPack {
   final Clock _clock;
   final PackGenerator _generator;
   final PackRechargeCalculator _rechargeCalculator;
+  final PackNotificationScheduler? _notificationScheduler;
   final Random _random;
 
   Future<PackOpeningDetails> call({
@@ -244,6 +248,11 @@ final class OpenPack {
             );
       }
     });
+
+    await _notificationScheduler?.tryReschedulePack(
+      installedCollectionId: installedCollectionId,
+      packTypeId: packTypeId,
+    );
 
     return _packOpeningRepository.getById(openingId);
   }

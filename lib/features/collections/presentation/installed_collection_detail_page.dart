@@ -20,6 +20,7 @@ import '../../economy/application/economy_providers.dart';
 import '../../economy/application/economy_use_cases.dart';
 import '../../economy/domain/entities/economy_transaction_entry.dart';
 import '../../import_export/application/gachadex_import_export_providers.dart';
+import '../../packs/application/pack_notification_coordinator_provider.dart';
 import '../../packs/application/pack_providers.dart';
 import '../../packs/domain/entities/pack_inventory.dart';
 import '../../packs/domain/entities/pack_type.dart';
@@ -55,8 +56,8 @@ class _InstalledCollectionDetailPageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(
         ref
-            .read(packRechargeServiceProvider)
-            .refreshCollection(widget.installedCollectionId),
+            .read(notificationCoordinatorProvider)
+            .refreshCollectionAndReschedule(widget.installedCollectionId),
       );
     });
   }

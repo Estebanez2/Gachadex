@@ -44,7 +44,16 @@ MigrationStrategy createMigrationStrategy(GeneratedDatabase database) {
       if (from <= 4 && to >= 5) {
         await _migratePackInventoryAllowsOverflow(database);
       }
-      if (from > 5 || to > currentDatabaseSchemaVersion) {
+      if (from <= 5 && to >= 6) {
+        await database.customStatement('''
+CREATE TABLE app_settings (
+  key TEXT NOT NULL PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at_utc INTEGER NOT NULL
+)
+''');
+      }
+      if (from > 6 || to > currentDatabaseSchemaVersion) {
         throw AppException(
           code: 'migration_not_implemented',
           safeMessage: 'No se puede actualizar la base de datos todavia.',

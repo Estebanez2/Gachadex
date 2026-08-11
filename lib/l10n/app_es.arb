@@ -104,6 +104,26 @@
   "@themeSessionOnly": {
     "description": "Nota sobre la persistencia futura del tema."
   },
+  "packNotifications": "Notificaciones de sobres",
+  "@packNotifications": {
+    "description": "Titulo del ajuste de notificaciones de sobres."
+  },
+  "packNotificationsEnabledDescription": "Te avisaremos cuando un sobre vuelva a estar disponible.",
+  "@packNotificationsEnabledDescription": {
+    "description": "Descripcion del ajuste cuando las notificaciones estan activadas."
+  },
+  "packNotificationsDisabledDescription": "No se programaran avisos de recarga de sobres.",
+  "@packNotificationsDisabledDescription": {
+    "description": "Descripcion del ajuste cuando las notificaciones estan desactivadas."
+  },
+  "packNotificationsError": "No se pudo leer la preferencia de notificaciones.",
+  "@packNotificationsError": {
+    "description": "Mensaje seguro cuando falla el ajuste de notificaciones."
+  },
+  "openNotificationSettings": "Abrir ajustes de notificaciones",
+  "@openNotificationSettings": {
+    "description": "Boton para abrir los ajustes del sistema de notificaciones."
+  },
   "createDisabledAction": "Crear colección",
   "@createDisabledAction": {
     "description": "Boton deshabilitado de creacion futura."

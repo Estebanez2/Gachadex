@@ -52,9 +52,10 @@ void main() {
             'pack_openings',
             'pack_opening_cards',
             'coin_transactions',
+            'app_settings',
           ]),
         );
-        expect(database.schemaVersion, 5);
+        expect(database.schemaVersion, 6);
 
         final foreignKeys = await database
             .customSelect('PRAGMA foreign_keys')
@@ -395,11 +396,18 @@ CREATE TABLE pack_inventory (
             .map((row) => row.read<String>('sql'))
             .getSingle();
 
-        expect(database.schemaVersion, 5);
+        expect(database.schemaVersion, 6);
         expect(
           schemaSql,
           isNot(contains('available_count <= max_accumulated')),
         );
+        final settingsTable = await database
+            .customSelect(
+              "SELECT name FROM sqlite_master WHERE type = 'table' "
+              "AND name = 'app_settings'",
+            )
+            .getSingleOrNull();
+        expect(settingsTable == null, isFalse);
       } finally {
         await database.close();
       }

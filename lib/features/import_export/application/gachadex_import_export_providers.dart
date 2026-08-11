@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/database/database_providers.dart';
 import '../../../core/files/file_providers.dart';
+import '../../../core/notifications/application/notification_providers.dart';
 import '../data/gachadex_package_service.dart';
 import '../domain/gachadex_package_constants.dart';
 import '../domain/gachadex_package_failure.dart';
@@ -16,6 +17,7 @@ final gachadexPackageServiceProvider = Provider<GachadexPackageService>((ref) {
     mediaStorage: ref.watch(projectMediaStorageProvider),
     uuidGenerator: ref.watch(uuidGeneratorProvider),
     clock: ref.watch(clockProvider),
+    notificationScheduler: ref.watch(packNotificationSchedulerProvider),
   );
 });
 

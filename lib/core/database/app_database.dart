@@ -537,6 +537,16 @@ class CoinTransactions extends Table {
   List<String> get customConstraints => ['CHECK (balance_after >= 0)'];
 }
 
+@DataClassName('AppSettingRow')
+class AppSettings extends Table {
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+  DateTimeColumn get updatedAtUtc => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {key};
+}
+
 @DriftDatabase(
   tables: [
     CollectionProjects,
@@ -555,6 +565,7 @@ class CoinTransactions extends Table {
     PackOpenings,
     PackOpeningCards,
     CoinTransactions,
+    AppSettings,
   ],
   daos: [
     CollectionProjectsDao,

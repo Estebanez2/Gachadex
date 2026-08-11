@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/database_providers.dart';
 import '../../../core/identifiers/entity_id.dart';
+import '../../../core/notifications/application/notification_providers.dart';
 import '../data/repositories/drift_economy_repository.dart';
 import '../domain/entities/economy_transaction_entry.dart';
 import 'economy_use_cases.dart';
@@ -33,5 +34,6 @@ final acceleratePackRechargeProvider = Provider<AcceleratePackRecharge>((ref) {
     uuidGenerator: ref.watch(uuidGeneratorProvider),
     clock: ref.watch(clockProvider),
     calculator: ref.watch(accelerationCalculatorProvider),
+    notificationScheduler: ref.watch(packNotificationSchedulerProvider),
   );
 });

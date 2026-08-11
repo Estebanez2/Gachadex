@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/database_providers.dart';
 import '../../../core/files/file_providers.dart';
 import '../../../core/identifiers/entity_id.dart';
+import '../../../core/notifications/application/notification_providers.dart';
 import 'collection_draft_use_cases.dart';
 import 'finalize_collection_use_cases.dart';
 
@@ -57,5 +58,6 @@ final finalizeCollectionProvider = Provider<FinalizeCollection>((ref) {
     validator: validator,
     uuidGenerator: ref.watch(uuidGeneratorProvider),
     clock: ref.watch(clockProvider),
+    notificationScheduler: ref.watch(packNotificationSchedulerProvider),
   );
 });

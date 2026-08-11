@@ -12,7 +12,9 @@ import 'package:path_provider/path_provider.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/domain/domain_enums.dart';
 import '../../../core/files/project_media_storage.dart';
+import '../../../core/identifiers/entity_id.dart';
 import '../../../core/identifiers/uuid_generator.dart';
+import '../../../core/notifications/application/pack_notification_scheduler.dart';
 import '../../../core/time/clock.dart';
 import '../../../core/value_objects/relative_media_path.dart';
 import '../domain/gachadex_package_constants.dart';
@@ -54,11 +56,13 @@ final class GachadexPackageService {
     required ProjectMediaStorage mediaStorage,
     required UuidGenerator uuidGenerator,
     required Clock clock,
+    PackNotificationScheduler? notificationScheduler,
     Directory? tempDirectory,
   }) : _database = database,
        _mediaStorage = mediaStorage,
        _uuidGenerator = uuidGenerator,
        _clock = clock,
+       _notificationScheduler = notificationScheduler,
        _tempDirectory = tempDirectory;
 
   static const _manifestPath = 'manifest.json';
@@ -72,6 +76,7 @@ final class GachadexPackageService {
   final ProjectMediaStorage _mediaStorage;
   final UuidGenerator _uuidGenerator;
   final Clock _clock;
+  final PackNotificationScheduler? _notificationScheduler;
   final Directory? _tempDirectory;
 
   Future<File> exportInstalledCollection(String installedCollectionId) async {
@@ -332,6 +337,9 @@ final class GachadexPackageService {
       rethrow;
     }
 
+    await _notificationScheduler?.tryRescheduleCollection(
+      InstalledCollectionId(installedCollectionId),
+    );
     return GachadexImportResult(installedCollectionId: installedCollectionId);
   }
 
