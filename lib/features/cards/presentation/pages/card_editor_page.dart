@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/domain/domain_enums.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/files/stored_media_image.dart';
 import '../../../../core/identifiers/entity_id.dart';
@@ -17,6 +18,7 @@ import '../../../rarities/presentation/widgets/rarity_preview.dart';
 import '../../application/card_photo_processor.dart';
 import '../../application/card_providers.dart';
 import '../../application/card_use_cases.dart';
+import '../../application/card_video_processor.dart';
 import '../../domain/catalogs/card_template_catalog.dart';
 import '../../domain/repositories/card_repository.dart';
 import '../../domain/validation/card_validation.dart';
@@ -45,9 +47,12 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
   int _primaryColor = CardTemplateCatalog.defaultPrimaryColor;
   int _secondaryColor = CardTemplateCatalog.defaultSecondaryColor;
   PendingCardPhoto? _pendingPhoto;
+  PendingCardVideo? _pendingVideo;
+  MediaType _mediaType = MediaType.image;
   bool _initialized = false;
   bool _dirty = false;
   bool _processingPhoto = false;
+  bool _processingVideo = false;
   bool _saving = false;
   bool _submitted = false;
   Object? _error;
@@ -76,7 +81,7 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
         : ref.watch(imageCardDetailsProvider(widget.cardId!));
 
     final l10n = context.l10n;
-    final canPop = !_dirty || _saving || _processingPhoto;
+    final canPop = !_dirty || _saving || _processingPhoto || _processingVideo;
 
     return PopScope(
       canPop: canPop,
@@ -90,7 +95,9 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
           title: Text(_isEditing ? l10n.editCard : l10n.addCard),
           leading: IconButton(
             tooltip: l10n.backToDraft,
-            onPressed: _saving || _processingPhoto ? null : _confirmLeave,
+            onPressed: _saving || _processingPhoto || _processingVideo
+                ? null
+                : _confirmLeave,
             icon: const Icon(Icons.arrow_back),
           ),
         ),
@@ -128,7 +135,10 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
     final health = int.tryParse(_healthController.text.trim());
     final number = int.tryParse(_numberController.text.trim());
     final validation = CardValidation.validate(
-      hasPhoto: _pendingPhoto != null || details != null,
+      hasPhoto:
+          _pendingPhoto != null ||
+          _pendingVideo != null ||
+          (details != null && details.card.mediaType == _mediaType),
       name: _nameController.text,
       health: health,
       collectionNumber: number,
@@ -139,7 +149,11 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
       description: _descriptionController.text,
       comicFields: _comicInputs(),
     );
-    final canSave = validation.canSave && !_saving && !_processingPhoto;
+    final canSave =
+        validation.canSave &&
+        !_saving &&
+        !_processingPhoto &&
+        !_processingVideo;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,13 +168,41 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
           ),
           const SizedBox(height: AppConstants.spacingMd),
         ],
-        _SectionTitle(l10n.photo),
-        _PhotoPicker(
+        _SectionTitle(l10n.cardContent),
+        SegmentedButton<MediaType>(
+          segments: [
+            ButtonSegment(
+              value: MediaType.image,
+              icon: const Icon(Icons.photo_outlined),
+              label: Text(l10n.photo),
+            ),
+            ButtonSegment(
+              value: MediaType.video,
+              icon: const Icon(Icons.play_circle_outline),
+              label: Text(l10n.video),
+            ),
+          ],
+          selected: {_mediaType},
+          onSelectionChanged: (values) {
+            setState(() {
+              _mediaType = values.single;
+              _pendingPhoto = null;
+              _pendingVideo = null;
+              _dirty = true;
+            });
+          },
+        ),
+        const SizedBox(height: AppConstants.spacingMd),
+        _MediaPicker(
+          mediaType: _mediaType,
           pendingPhoto: _pendingPhoto,
+          pendingVideo: _pendingVideo,
           existing: details,
-          processing: _processingPhoto,
+          processingPhoto: _processingPhoto,
+          processingVideo: _processingVideo,
           submitted: _submitted,
           onPick: () => _pickPhoto(),
+          onPickVideo: () => _pickVideo(),
         ),
         const SizedBox(height: AppConstants.spacingLg),
         _SectionTitle(l10n.mainData),
@@ -306,6 +348,7 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
         Center(
           child: _CardPreview(
             pendingPhoto: _pendingPhoto,
+            pendingVideo: _pendingVideo,
             existing: details,
             rarity: _rarityFor(draft.rarities),
             templateId: _templateId,
@@ -358,6 +401,7 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
     _frameId = details.card.frameId;
     _primaryColor = details.card.primaryColor;
     _secondaryColor = details.card.secondaryColor;
+    _mediaType = details.card.mediaType;
     _comicFields
       ..clear()
       ..addAll(
@@ -398,6 +442,34 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
     }
   }
 
+  Future<void> _pickVideo() async {
+    setState(() {
+      _processingVideo = true;
+      _error = null;
+    });
+    try {
+      final video = await ref
+          .read(cardVideoProcessorProvider)
+          .pickFromGallery();
+      if (video != null && mounted) {
+        setState(() {
+          _pendingVideo = video;
+          _pendingPhoto = null;
+          _mediaType = MediaType.video;
+          _dirty = true;
+        });
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        setState(() => _error = error);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _processingVideo = false);
+      }
+    }
+  }
+
   Future<void> _save(
     CollectionDraftEditorState draft,
     ImageCardDetails? details,
@@ -434,6 +506,7 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
         description: _descriptionController.text,
         comicFields: _comicInputs(),
         photo: _pendingPhoto,
+        video: _pendingVideo,
       );
       if (details == null) {
         await ref
@@ -616,25 +689,38 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _PhotoPicker extends StatelessWidget {
-  const _PhotoPicker({
+class _MediaPicker extends StatelessWidget {
+  const _MediaPicker({
+    required this.mediaType,
     required this.pendingPhoto,
+    required this.pendingVideo,
     required this.existing,
-    required this.processing,
+    required this.processingPhoto,
+    required this.processingVideo,
     required this.submitted,
     required this.onPick,
+    required this.onPickVideo,
   });
 
+  final MediaType mediaType;
   final PendingCardPhoto? pendingPhoto;
+  final PendingCardVideo? pendingVideo;
   final ImageCardDetails? existing;
-  final bool processing;
+  final bool processingPhoto;
+  final bool processingVideo;
   final bool submitted;
   final VoidCallback onPick;
+  final VoidCallback onPickVideo;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final hasPhoto = pendingPhoto != null || existing != null;
+    final existingMatches =
+        existing != null && existing!.card.mediaType == mediaType;
+    final hasMedia =
+        pendingPhoto != null || pendingVideo != null || existingMatches;
+    final processing = processingPhoto || processingVideo;
+    final isVideo = mediaType == MediaType.video;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -650,40 +736,90 @@ class _PhotoPicker extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-              child: pendingPhoto != null
-                  ? Image.file(File(pendingPhoto!.imagePath), fit: BoxFit.cover)
-                  : existing == null
-                  ? Center(child: Icon(Icons.photo_library_outlined, size: 48))
-                  : StoredMediaImage(path: existing!.mediaAsset.relativePath),
+              child: _preview(context, existingMatches),
             ),
           ),
         ),
         const SizedBox(height: AppConstants.spacingSm),
         FilledButton.icon(
-          onPressed: processing ? null : onPick,
+          onPressed: processing
+              ? null
+              : isVideo
+              ? onPickVideo
+              : onPick,
           icon: processing
               ? const SizedBox.square(
                   dimension: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.photo_library_outlined),
+              : Icon(
+                  isVideo
+                      ? Icons.video_library_outlined
+                      : Icons.photo_library_outlined,
+                ),
           label: Text(
             processing
-                ? l10n.processingImage
-                : hasPhoto
-                ? l10n.changePhoto
-                : l10n.selectPhoto,
+                ? (isVideo ? l10n.processingVideo : l10n.processingImage)
+                : hasMedia
+                ? (isVideo ? l10n.changeVideo : l10n.changePhoto)
+                : (isVideo ? l10n.selectVideo : l10n.selectPhoto),
           ),
         ),
-        if (submitted && !hasPhoto) ...[
+        if (isVideo && pendingVideo != null) ...[
+          const SizedBox(height: AppConstants.spacingXs),
+          Text(l10n.duration(_formatDuration(pendingVideo!.duration))),
+        ],
+        if (submitted && !hasMedia) ...[
           const SizedBox(height: AppConstants.spacingXs),
           Text(
-            l10n.photoRequired,
+            isVideo ? l10n.videoRequired : l10n.photoRequired,
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ],
       ],
     );
+  }
+
+  Widget _preview(BuildContext context, bool existingMatches) {
+    if (pendingPhoto != null) {
+      return Image.file(File(pendingPhoto!.imagePath), fit: BoxFit.cover);
+    }
+    if (pendingVideo != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.file(File(pendingVideo!.thumbnailPath), fit: BoxFit.cover),
+          const Center(child: Icon(Icons.play_circle_outline, size: 56)),
+        ],
+      );
+    }
+    if (!existingMatches) {
+      return Center(
+        child: Icon(
+          mediaType == MediaType.video
+              ? Icons.video_library_outlined
+              : Icons.photo_library_outlined,
+          size: 48,
+        ),
+      );
+    }
+    final existingDetails = existing!;
+    if (existingDetails.card.mediaType == MediaType.video &&
+        existingDetails.thumbnailAsset != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          StoredMediaImage(path: existingDetails.thumbnailAsset!.relativePath),
+          const Center(child: Icon(Icons.play_circle_outline, size: 56)),
+        ],
+      );
+    }
+    return StoredMediaImage(path: existingDetails.mediaAsset.relativePath);
+  }
+
+  String _formatDuration(Duration duration) {
+    final seconds = duration.inSeconds;
+    return '0:${seconds.toString().padLeft(2, '0')}';
   }
 }
 
@@ -867,6 +1003,7 @@ class _ComicFieldEditorState extends State<_ComicFieldEditor> {
 class _CardPreview extends StatelessWidget {
   const _CardPreview({
     required this.pendingPhoto,
+    required this.pendingVideo,
     required this.existing,
     required this.rarity,
     required this.templateId,
@@ -881,6 +1018,7 @@ class _CardPreview extends StatelessWidget {
   });
 
   final PendingCardPhoto? pendingPhoto;
+  final PendingCardVideo? pendingVideo;
   final ImageCardDetails? existing;
   final Rarity? rarity;
   final String templateId;
@@ -951,19 +1089,7 @@ class _CardPreview extends StatelessWidget {
                     ),
                     child: ColoredBox(
                       color: Colors.white.withValues(alpha: 0.16),
-                      child: pendingPhoto != null
-                          ? Image.file(
-                              File(pendingPhoto!.imagePath),
-                              fit: BoxFit.cover,
-                            )
-                          : existing == null
-                          ? const Icon(
-                              Icons.photo_outlined,
-                              color: Colors.white,
-                            )
-                          : StoredMediaImage(
-                              path: existing!.mediaAsset.relativePath,
-                            ),
+                      child: _previewMedia(),
                     ),
                   ),
                 ),
@@ -1029,5 +1155,39 @@ class _CardPreview extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _previewMedia() {
+    if (pendingPhoto != null) {
+      return Image.file(File(pendingPhoto!.imagePath), fit: BoxFit.cover);
+    }
+    if (pendingVideo != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.file(File(pendingVideo!.thumbnailPath), fit: BoxFit.cover),
+          const Center(
+            child: Icon(Icons.play_circle_outline, color: Colors.white),
+          ),
+        ],
+      );
+    }
+    final details = existing;
+    if (details == null) {
+      return const Icon(Icons.photo_outlined, color: Colors.white);
+    }
+    if (details.card.mediaType == MediaType.video &&
+        details.thumbnailAsset != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          StoredMediaImage(path: details.thumbnailAsset!.relativePath),
+          const Center(
+            child: Icon(Icons.play_circle_outline, color: Colors.white),
+          ),
+        ],
+      );
+    }
+    return StoredMediaImage(path: details.mediaAsset.relativePath);
   }
 }

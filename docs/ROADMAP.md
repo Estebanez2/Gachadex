@@ -181,11 +181,16 @@ Depende de: fase 6.
 
 ## Fase 8 - Videos
 
-Objetivo: soportar cartas con video de forma completa.
+Estado: implementada en la rama `phase/08-video-cards`.
 
-Incluye seleccion de videos, lectura de duracion y dimensiones, recorte temporal,
-normalizacion MP4 H.264/AAC, conservacion de sonido, primer fotograma,
-miniaturas y reproduccion controlada.
+Incluye seleccion de videos desde galeria, lectura de duracion y dimensiones,
+rechazo de videos de mas de 15 segundos, normalizacion MP4 720p con audio,
+thumbnail WebP del primer fotograma, rutas relativas, guardado/edicion/borrado
+seguro, reproduccion en apertura y detalle de album, replay, pausa de ciclo de
+vida y uso exclusivo de thumbnails en grids.
+
+No incluye importacion/exportacion `.friendpack`, monedas, venta de duplicados,
+aceleracion, notificaciones ni efectos visuales finales.
 
 Depende de: fase 7.
 

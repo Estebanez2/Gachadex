@@ -3,13 +3,16 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gachadex/core/database/app_database.dart';
+import 'package:gachadex/core/domain/domain_enums.dart';
 import 'package:gachadex/core/errors/app_failure.dart';
 import 'package:gachadex/core/files/project_media_storage.dart';
 import 'package:gachadex/core/identifiers/entity_id.dart';
 import 'package:gachadex/core/identifiers/uuid_generator.dart';
 import 'package:gachadex/core/time/fake_clock.dart';
+import 'package:gachadex/core/value_objects/relative_media_path.dart';
 import 'package:gachadex/features/cards/application/card_photo_processor.dart';
 import 'package:gachadex/features/cards/application/card_use_cases.dart';
+import 'package:gachadex/features/cards/application/card_video_processor.dart';
 import 'package:gachadex/features/cards/data/repositories/drift_card_repository.dart';
 import 'package:gachadex/features/cards/domain/catalogs/card_template_catalog.dart';
 import 'package:gachadex/features/cards/domain/validation/card_validation.dart';
@@ -280,12 +283,86 @@ void main() {
         );
       },
     );
+
+    test('creates a video card and can replace it with a photo', () async {
+      final createdDraft = await projectRepository.createDraft(name: 'Videos');
+      final rarityId = RarityId(testUuid(6001));
+      await _insertRarity(
+        database,
+        collectionId: createdDraft.project.collectionId,
+        contentVersionId: createdDraft.contentVersion.id,
+        rarityId: rarityId,
+      );
+      final video = _writePendingVideo(tempDir, 'clip');
+      final created =
+          await CreateImageCard(
+            cardRepository,
+            projectRepository,
+            storage,
+            FixedUuidGenerator([
+              testUuid(6101),
+              testUuid(6102),
+              testUuid(6103),
+              testUuid(6104),
+            ]),
+            clock,
+          ).call(
+            projectId: createdDraft.project.id,
+            collectionId: createdDraft.project.collectionId,
+            contentVersionId: createdDraft.contentVersion.id,
+            input: _input(rarityId: rarityId, photo: null, video: video),
+          );
+
+      expect(created.card.mediaType, MediaType.video);
+      expect(created.mediaAsset.mimeType, 'video/mp4');
+      expect(created.mediaAsset.durationMs, 12000);
+      expect(created.mediaAsset.relativePath.value, endsWith('.mp4'));
+      expect(created.thumbnailAsset?.relativePath.value, endsWith('.webp'));
+      expect(
+        created.mediaAsset.thumbnailRelativePath,
+        isA<RelativeMediaPath>(),
+      );
+      expect(await storage.exists(created.mediaAsset.relativePath), isTrue);
+      expect(
+        await storage.exists(created.thumbnailAsset!.relativePath),
+        isTrue,
+      );
+
+      final replacementPhoto = _writePendingPhoto(tempDir, 'video-to-photo');
+      final updated =
+          await UpdateImageCard(
+            cardRepository,
+            projectRepository,
+            storage,
+            FixedUuidGenerator([
+              testUuid(6201),
+              testUuid(6202),
+              testUuid(6203),
+            ]),
+            clock,
+          ).call(
+            projectId: createdDraft.project.id,
+            cardId: created.card.id,
+            input: _input(rarityId: rarityId, photo: replacementPhoto),
+          );
+
+      expect(updated.card.id, created.card.id);
+      expect(updated.card.mediaType, MediaType.image);
+      expect(updated.mediaAsset.mimeType, 'image/webp');
+      expect(await storage.exists(created.mediaAsset.relativePath), isFalse);
+      expect(
+        await storage.exists(created.thumbnailAsset!.relativePath),
+        isFalse,
+      );
+      expect(await storage.exists(updated.mediaAsset.relativePath), isTrue);
+    });
   });
 }
 
 ImageCardInput _input({
   required RarityId rarityId,
   required PendingCardPhoto? photo,
+  PendingCardVideo? video,
   int collectionNumber = 1,
   String name = 'Carta valida',
 }) {
@@ -303,6 +380,25 @@ ImageCardInput _input({
       ComicFieldInput(type: CardFieldType.nickname, value: 'Capitan'),
     ],
     photo: photo,
+    video: video,
+  );
+}
+
+PendingCardVideo _writePendingVideo(Directory directory, String name) {
+  final video = File('${directory.path}${Platform.pathSeparator}$name.mp4');
+  final thumb = File(
+    '${directory.path}${Platform.pathSeparator}$name-thumb.webp',
+  );
+  video.writeAsBytesSync([0, 0, 0, 24, 102, 116, 121, 112, 109, 112, 52, 50]);
+  thumb.writeAsBytesSync([1, 2, 3]);
+  return PendingCardVideo(
+    videoPath: video.path,
+    thumbnailPath: thumb.path,
+    videoFileSize: video.lengthSync(),
+    thumbnailFileSize: thumb.lengthSync(),
+    width: 1280,
+    height: 720,
+    duration: const Duration(seconds: 12),
   );
 }
 

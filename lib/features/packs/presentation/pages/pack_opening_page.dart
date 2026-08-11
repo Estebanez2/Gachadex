@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/domain/domain_enums.dart';
+import '../../../../core/files/card_video_player.dart';
 import '../../../../core/files/stored_media_image.dart';
 import '../../../../core/identifiers/entity_id.dart';
 import '../../../../core/widgets/app_error_view.dart';
@@ -187,7 +189,7 @@ class _OpeningCardReveal extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppConstants.cardRadius),
               child: revealed
-                  ? StoredMediaImage(path: details.card.mediaAsset.relativePath)
+                  ? _RevealedOpeningMedia(details: details)
                   : ColoredBox(
                       color: Theme.of(context).colorScheme.primaryContainer,
                       child: const Center(
@@ -232,6 +234,25 @@ class _OpeningCardReveal extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _RevealedOpeningMedia extends StatelessWidget {
+  const _RevealedOpeningMedia({required this.details});
+
+  final PackOpeningCardDetails details;
+
+  @override
+  Widget build(BuildContext context) {
+    if (details.card.card.mediaType == MediaType.video &&
+        details.card.thumbnailAsset != null) {
+      return CardVideoPlayer(
+        videoPath: details.card.mediaAsset.relativePath,
+        thumbnailPath: details.card.thumbnailAsset!.relativePath,
+        autoplay: true,
+      );
+    }
+    return StoredMediaImage(path: details.card.mediaAsset.relativePath);
   }
 }
 

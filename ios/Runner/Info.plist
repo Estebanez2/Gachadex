@@ -27,7 +27,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Gachadex necesita acceder a tu fototeca para elegir fotografias de tus cartas.</string>
+	<string>Gachadex necesita acceder a tu fototeca para elegir fotografias y videos de tus cartas.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -1,8 +1,8 @@
 # Dependencias
 
-Fecha: 2026-08-06
+Fecha: 2026-08-10
 
-Este documento registra las dependencias directas del proyecto tras la Fase 4.
+Este documento registra las dependencias directas del proyecto tras la Fase 8.
 
 ## Dependencias directas actuales
 
@@ -18,6 +18,8 @@ Este documento registra las dependencias directas del proyecto tras la Fase 4.
 | `image_picker` | `^1.2.3`, resuelto 1.2.3 | Produccion | Selector de imagenes de galeria | Apache-2.0/BSD-3-Clause | Android e iOS | Elegir fotografia para cartas sin permisos amplios de almacenamiento | Fase 4 | En Android/iOS los archivos elegidos son temporales y se copian a almacenamiento privado |
 | `image_cropper` | `^12.2.1`, resuelto 12.2.1 | Produccion | Recorte nativo de fotografias | BSD-3-Clause | Android e iOS | Ajustar la foto a la proporcion fija de las plantillas | Fase 4 | Requiere declarar `UCropActivity` en Android |
 | `flutter_image_compress` | `^2.5.1`, resuelto 2.5.1 | Produccion | Compresion/conversion WebP | MIT | Android e iOS | Crear imagen principal WebP y miniatura WebP | Fase 4 | El soporte WebP depende de implementaciones nativas; mantener pruebas manuales en Android/iOS |
+| `video_player` | `^2.13.0`, resuelto 2.13.0 | Produccion | Reproduccion de video local | BSD-3-Clause | Android e iOS | Reproducir MP4 de cartas en apertura y album sin controllers en grids | Fase 8 | Soporte de codec depende de ExoPlayer/AVPlayer; usar MP4 H.264/AAC |
+| `video_compress` | `^3.1.4`, resuelto 3.1.4 | Produccion | Metadatos, compresion MP4 y thumbnail de video | MIT | Android e iOS | Normalizar videos cortos sin anadir FFmpeg completo y generar primer fotograma | Fase 8 | Plugin nativo no oficial; probar en Android/iOS y vigilar mantenimiento |
 | `drift` | `^2.34.3`, resuelto 2.34.3 | Produccion | ORM/SQL tipado sobre SQLite | MIT | Android e iOS | Esquema local, DAOs, streams y transacciones | Fase 2 | Requiere codigo generado actualizado |
 | `drift_flutter` | `^0.3.1`, resuelto 0.3.1 | Produccion | Conexion Flutter para Drift | MIT | Android e iOS | Base privada con `path_provider` e isolate de SQLite | Fase 2 | Usa dependencias nativas transitivas de SQLite |
 | `path_provider` | `^2.1.6`, resuelto 2.1.6 | Produccion | Directorios privados de app | BSD-3-Clause | Android e iOS | Ubicar `gachadex.sqlite` sin permisos de almacenamiento publico | Fase 2 | Diferencias de rutas por plataforma |
@@ -36,8 +38,8 @@ Este documento registra las dependencias directas del proyecto tras la Fase 4.
   no se anadio directa porque Drift actual la resuelve.
 - `sqlcipher_flutter_libs` 0.7.0+eol llega transitoriamente por el arbol de
   SQLite; Gachadex no cifra la base en la version actual.
-- `cross_file`, `flutter_plugin_android_lifecycle` y `http` llegan por los
-  plugins de imagen.
+- `cross_file`, `flutter_plugin_android_lifecycle`, `html`, `csslib` y `http`
+  llegan por los plugins de imagen/video.
 
 Las transitivas estan fijadas en `pubspec.lock`. Pasaran a directas solo si el
 codigo del proyecto las importa explicitamente.
@@ -55,12 +57,19 @@ codigo del proyecto las importa explicitamente.
 - `uuid` 4.6.0: paquete mantenido, licencia MIT, genera UUID v4.
 - `image_picker` 1.2.3: plugin publicado por `flutter.dev`, mantenido y
   compatible con Android/iOS. En Android usa el Photo Picker moderno cuando
-  esta disponible; en iOS requiere `NSPhotoLibraryUsageDescription`.
+  esta disponible; en iOS requiere `NSPhotoLibraryUsageDescription`. Tambien se
+  usa para seleccionar videos desde galeria.
 - `image_cropper` 12.2.1: plugin mantenido para Android/iOS/Web basado en
   recorte nativo. En Android se declaro `UCropActivity`; iOS no requiere
   configuracion adicional propia del plugin.
 - `flutter_image_compress` 2.5.1: plugin mantenido para compresion nativa y
   salida WebP en Android/iOS. Se usa solo para imagenes, no para video.
+- `video_player` 2.13.0: plugin oficial de `flutter.dev`, licencia
+  BSD-3-Clause, publicado recientemente y compatible con Android/iOS. Se usa
+  solo con archivos locales, por lo que no requiere permiso de Internet.
+- `video_compress` 3.1.4: plugin MIT con soporte Android/iOS para metadatos,
+  compresion MP4 y thumbnail. Se eligio frente a FFmpeg completo por menor peso
+  y licencia permisiva; el riesgo principal es su mantenimiento menos oficial.
 - `build_runner` y `drift_dev`: versiones fijadas por compatibilidad real con
   Flutter 3.44.8, `flutter_test`, `meta` y `analyzer`.
 
@@ -68,8 +77,8 @@ codigo del proyecto las importa explicitamente.
 
 No incorporar todavia:
 
-- `video_player`, plugins de camara personalizada, galeria avanzada, archivos
-  generales o video.
+- Plugins de camara personalizada, galeria avanzada, archivos generales o
+  editor de video avanzado.
 - `flutter_local_notifications`.
 - `share_plus`, `file_selector`, `archive`.
 - Firebase, Supabase o cualquier servicio online.
@@ -82,6 +91,8 @@ No incorporar todavia:
 - https://pub.dev/packages/image_picker
 - https://pub.dev/packages/image_cropper
 - https://pub.dev/packages/flutter_image_compress
+- https://pub.dev/packages/video_player
+- https://pub.dev/packages/video_compress
 - https://pub.dev/packages/drift
 - https://pub.dev/packages/drift_flutter
 - https://pub.dev/packages/path_provider

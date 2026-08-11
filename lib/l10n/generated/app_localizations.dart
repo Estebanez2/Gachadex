@@ -1636,6 +1636,60 @@ abstract class AppLocalizations {
   /// **'Video'**
   String get video;
 
+  /// Seccion de seleccion de foto o video.
+  ///
+  /// In es, this message translates to:
+  /// **'Contenido de la carta'**
+  String get cardContent;
+
+  /// Accion para seleccionar un video.
+  ///
+  /// In es, this message translates to:
+  /// **'Seleccionar video'**
+  String get selectVideo;
+
+  /// Accion para reemplazar un video.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar video'**
+  String get changeVideo;
+
+  /// Estado mientras se procesa un video.
+  ///
+  /// In es, this message translates to:
+  /// **'Procesando video'**
+  String get processingVideo;
+
+  /// Error de video obligatorio.
+  ///
+  /// In es, this message translates to:
+  /// **'El video es obligatorio'**
+  String get videoRequired;
+
+  /// Duracion de un video.
+  ///
+  /// In es, this message translates to:
+  /// **'Duracion: {value}'**
+  String duration(String value);
+
+  /// Accion para pausar video.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausar'**
+  String get pause;
+
+  /// Accion para repetir video.
+  ///
+  /// In es, this message translates to:
+  /// **'Repetir'**
+  String get replay;
+
+  /// Error seguro de reproduccion de video.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha podido reproducir el video.'**
+  String get videoPlaybackFailed;
+
   /// Orden por primera obtencion.
   ///
   /// In es, this message translates to:

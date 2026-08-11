@@ -825,6 +825,35 @@ class AppLocalizationsEs extends AppLocalizations {
   String get video => 'Video';
 
   @override
+  String get cardContent => 'Contenido de la carta';
+
+  @override
+  String get selectVideo => 'Seleccionar video';
+
+  @override
+  String get changeVideo => 'Cambiar video';
+
+  @override
+  String get processingVideo => 'Procesando video';
+
+  @override
+  String get videoRequired => 'El video es obligatorio';
+
+  @override
+  String duration(String value) {
+    return 'Duracion: $value';
+  }
+
+  @override
+  String get pause => 'Pausar';
+
+  @override
+  String get replay => 'Repetir';
+
+  @override
+  String get videoPlaybackFailed => 'No se ha podido reproducir el video.';
+
+  @override
   String get firstObtainedSort => 'Primera obtencion';
 
   @override

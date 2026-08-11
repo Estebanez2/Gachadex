@@ -1077,6 +1077,47 @@
   "@video": {
     "description": "Tipo de medio video."
   },
+  "cardContent": "Contenido de la carta",
+  "@cardContent": {
+    "description": "Seccion de seleccion de foto o video."
+  },
+  "selectVideo": "Seleccionar video",
+  "@selectVideo": {
+    "description": "Accion para seleccionar un video."
+  },
+  "changeVideo": "Cambiar video",
+  "@changeVideo": {
+    "description": "Accion para reemplazar un video."
+  },
+  "processingVideo": "Procesando video",
+  "@processingVideo": {
+    "description": "Estado mientras se procesa un video."
+  },
+  "videoRequired": "El video es obligatorio",
+  "@videoRequired": {
+    "description": "Error de video obligatorio."
+  },
+  "duration": "Duracion: {value}",
+  "@duration": {
+    "description": "Duracion de un video.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "pause": "Pausar",
+  "@pause": {
+    "description": "Accion para pausar video."
+  },
+  "replay": "Repetir",
+  "@replay": {
+    "description": "Accion para repetir video."
+  },
+  "videoPlaybackFailed": "No se ha podido reproducir el video.",
+  "@videoPlaybackFailed": {
+    "description": "Error seguro de reproduccion de video."
+  },
   "firstObtainedSort": "Primera obtencion",
   "@firstObtainedSort": {
     "description": "Orden por primera obtencion."
