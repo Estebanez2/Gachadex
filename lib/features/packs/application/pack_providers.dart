@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/database_providers.dart';
 import '../../../core/identifiers/entity_id.dart';
+import '../../../core/notifications/application/notification_providers.dart';
 import '../domain/entities/pack_configuration.dart';
 import '../domain/entities/pack_opening_details.dart';
 import '../domain/repositories/pack_type_repository.dart';
@@ -78,6 +79,7 @@ final openPackProvider = Provider<OpenPack>((ref) {
     rechargeService: ref.watch(packRechargeServiceProvider),
     uuidGenerator: ref.watch(uuidGeneratorProvider),
     clock: ref.watch(clockProvider),
+    notificationScheduler: ref.watch(packNotificationSchedulerProvider),
   );
 });
 

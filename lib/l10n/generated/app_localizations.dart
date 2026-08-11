@@ -250,6 +250,36 @@ abstract class AppLocalizations {
   /// **'La preferencia de tema se mantiene durante la sesión. La persistencia llegará cuando exista infraestructura local.'**
   String get themeSessionOnly;
 
+  /// Titulo del ajuste de notificaciones de sobres.
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones de sobres'**
+  String get packNotifications;
+
+  /// Descripcion del ajuste cuando las notificaciones estan activadas.
+  ///
+  /// In es, this message translates to:
+  /// **'Te avisaremos cuando un sobre vuelva a estar disponible.'**
+  String get packNotificationsEnabledDescription;
+
+  /// Descripcion del ajuste cuando las notificaciones estan desactivadas.
+  ///
+  /// In es, this message translates to:
+  /// **'No se programaran avisos de recarga de sobres.'**
+  String get packNotificationsDisabledDescription;
+
+  /// Mensaje seguro cuando falla el ajuste de notificaciones.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo leer la preferencia de notificaciones.'**
+  String get packNotificationsError;
+
+  /// Boton para abrir los ajustes del sistema de notificaciones.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir ajustes de notificaciones'**
+  String get openNotificationSettings;
+
   /// Boton deshabilitado de creacion futura.
   ///
   /// In es, this message translates to:

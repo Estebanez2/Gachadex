@@ -1,8 +1,8 @@
 # Dependencias
 
-Fecha: 2026-08-10
+Fecha: 2026-08-11
 
-Este documento registra las dependencias directas del proyecto tras la Fase 9.
+Este documento registra las dependencias directas del proyecto tras la Fase 11.
 
 ## Dependencias directas actuales
 
@@ -12,6 +12,7 @@ Este documento registra las dependencias directas del proyecto tras la Fase 9.
 | Dart SDK | 3.12.2 stable | SDK | Lenguaje y herramientas | BSD-3-Clause | Android e iOS via Flutter | Incluido con Flutter | Base | Seguir restricciones del SDK Flutter |
 | `flutter` | SDK | Produccion | Widgets, Material 3 y runtime Flutter | BSD-3-Clause | Android e iOS | Dependencia principal | Base | Ninguno especifico |
 | `flutter_localizations` | SDK | Produccion | Delegates oficiales de localizacion | BSD-3-Clause | Android e iOS | Material/Cupertino/Widgets en espanol | Fase 1 | Pin de `intl` impuesto por SDK |
+| `flutter_local_notifications` | `^22.2.0`, resuelto 22.3.0 | Produccion | Notificaciones locales programadas | BSD-3-Clause | Android e iOS | Avisar cuando un sobre vuelve a estar disponible sin servidor | Fase 11 | Android requiere permisos/receivers y algunos fabricantes limitan alarmas en segundo plano; iOS conserva hasta 64 pendientes |
 | `flutter_riverpod` | `^3.4.2`, resuelto 3.4.2 | Produccion | Estado e inyeccion | MIT | Android e iOS | Providers de router, tema, base y repositorios | Fase 1 | Cambios de API mayores en futuras versiones |
 | `go_router` | `^17.4.0`, resuelto 17.4.0 | Produccion | Navegacion declarativa | BSD-3-Clause | Android e iOS | Rutas centralizadas y shell de tabs | Fase 1 | Paquete feature-complete; vigilar cambios de estabilidad |
 | `intl` | `^0.20.2`, resuelto 0.20.2 | Produccion | Soporte de gen-l10n | BSD-3-Clause | Android e iOS | Codigo generado por Flutter importa `intl` | Fase 1 | 0.20.3 existe, pero Flutter 3.44.8 fija 0.20.2 |
@@ -22,6 +23,7 @@ Este documento registra las dependencias directas del proyecto tras la Fase 9.
 | `video_compress` | `^3.1.4`, resuelto 3.1.4 | Produccion | Metadatos, compresion MP4 y thumbnail de video | MIT | Android e iOS | Normalizar videos cortos sin anadir FFmpeg completo y generar primer fotograma | Fase 8 | Plugin nativo no oficial; probar en Android/iOS y vigilar mantenimiento |
 | `archive` | `^4.0.9`, resuelto 4.0.9 | Produccion | Crear y leer contenedores ZIP `.gachadex` | MIT | Android e iOS | Exportar/importar colecciones offline con archivos JSON y multimedia | Fase 9 | Validar rutas, tamanos y hashes antes de extraer |
 | `crypto` | `^3.0.7`, resuelto 3.0.7 | Produccion | SHA-256 | BSD-3-Clause | Android e iOS | Verificar integridad de metadatos y activos del paquete `.gachadex` | Fase 9 | Hashes detectan corrupcion, no prueban autoria |
+| `timezone` | `^0.11.1`, resuelto 0.11.1 | Produccion | Fechas programadas con zona horaria para notificaciones | BSD-3-Clause | Android e iOS | `zonedSchedule` del plugin requiere instantes timezone-aware | Fase 11 | La app programa en UTC para evitar ambiguedades locales |
 | `file_selector` | `^1.1.0`, resuelto 1.1.0 | Produccion | Selector nativo de archivos | BSD-3-Clause | Android e iOS | Elegir paquetes `.gachadex` recibidos sin servidor ni Internet | Fase 9 | Los filtros nativos varian por plataforma; se valida tambien la extension en codigo |
 | `share_plus` | `^13.3.0`, resuelto 13.3.0 | Produccion | Comparticion nativa | BSD-3-Clause | Android e iOS | Abrir el menu del sistema para compartir el paquete exportado | Fase 9 | El resultado de compartir depende de cada sistema y app destino |
 | `drift` | `^2.34.3`, resuelto 2.34.3 | Produccion | ORM/SQL tipado sobre SQLite | MIT | Android e iOS | Esquema local, DAOs, streams y transacciones | Fase 2 | Requiere codigo generado actualizado |
@@ -49,6 +51,8 @@ Este documento registra las dependencias directas del proyecto tras la Fase 9.
 - `file_selector_android`, `file_selector_ios`, `file_selector_web`,
   `share_plus_platform_interface`, `url_launcher_*`, `posix` y `win32` llegan
   por la seleccion de archivos, la comparticion y el empaquetado ZIP.
+- `flutter_local_notifications_*`, `dbus`, `xml` y `petitparser` llegan por
+  el plugin de notificaciones locales y sus implementaciones por plataforma.
 
 Las transitivas estan fijadas en `pubspec.lock`. Pasaran a directas solo si el
 codigo del proyecto las importa explicitamente.
@@ -89,6 +93,11 @@ codigo del proyecto las importa explicitamente.
   `file_picker` porque `file_picker` resolvio a 3.0.4 con el grafo actual.
 - `share_plus` 13.3.0: plugin mantenido por Flutter Community, licencia
   BSD-3-Clause, usa las hojas nativas de compartir en Android e iOS.
+- `flutter_local_notifications` 22.3.0: plugin BSD-3-Clause mantenido para
+  notificaciones locales en Android/iOS. Se usa con `zonedSchedule`, permisos
+  nativos y alarmas inexactas para evitar permisos de alarma exacta.
+- `timezone` 0.11.1: paquete BSD-3-Clause mantenido con base IANA; necesario
+  para programar con la API zoned del plugin. Gachadex usa UTC para los avisos.
 - `build_runner` y `drift_dev`: versiones fijadas por compatibilidad real con
   Flutter 3.44.8, `flutter_test`, `meta` y `analyzer`.
 - `sqlite3` 3.5.1: paquete MIT mantenido por el autor de Drift, compatible con
@@ -101,7 +110,6 @@ No incorporar todavia:
 
 - Plugins de camara personalizada, galeria avanzada, archivos generales o
   editor de video avanzado.
-- `flutter_local_notifications`.
 - Firebase, Supabase o cualquier servicio online.
 
 ## Fuentes revisadas
@@ -118,6 +126,8 @@ No incorporar todavia:
 - https://pub.dev/packages/crypto
 - https://pub.dev/packages/file_selector
 - https://pub.dev/packages/share_plus
+- https://pub.dev/packages/flutter_local_notifications
+- https://pub.dev/packages/timezone
 - https://pub.dev/packages/drift
 - https://pub.dev/packages/drift_flutter
 - https://pub.dev/packages/path_provider

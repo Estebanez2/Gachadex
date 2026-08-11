@@ -92,6 +92,24 @@ class AppLocalizationsEs extends AppLocalizations {
       'La preferencia de tema se mantiene durante la sesión. La persistencia llegará cuando exista infraestructura local.';
 
   @override
+  String get packNotifications => 'Notificaciones de sobres';
+
+  @override
+  String get packNotificationsEnabledDescription =>
+      'Te avisaremos cuando un sobre vuelva a estar disponible.';
+
+  @override
+  String get packNotificationsDisabledDescription =>
+      'No se programaran avisos de recarga de sobres.';
+
+  @override
+  String get packNotificationsError =>
+      'No se pudo leer la preferencia de notificaciones.';
+
+  @override
+  String get openNotificationSettings => 'Abrir ajustes de notificaciones';
+
+  @override
   String get createDisabledAction => 'Crear colección';
 
   @override

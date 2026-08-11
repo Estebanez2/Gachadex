@@ -7,6 +7,7 @@ import '../../../core/domain/domain_enums.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/files/project_media_storage.dart';
 import '../../../core/identifiers/entity_id.dart';
+import '../../../core/notifications/application/pack_notification_scheduler.dart';
 import '../../../core/identifiers/uuid_generator.dart';
 import '../../../core/time/clock.dart';
 import '../../cards/domain/repositories/card_repository.dart';
@@ -205,6 +206,7 @@ final class FinalizeCollection {
     required ValidateCollectionForFinalization validator,
     required UuidGenerator uuidGenerator,
     required Clock clock,
+    PackNotificationScheduler? notificationScheduler,
   }) : _database = database,
        _projectRepository = projectRepository,
        _installedCollectionRepository = installedCollectionRepository,
@@ -212,7 +214,8 @@ final class FinalizeCollection {
        _packTypeRepository = packTypeRepository,
        _validator = validator,
        _uuidGenerator = uuidGenerator,
-       _clock = clock;
+       _clock = clock,
+       _notificationScheduler = notificationScheduler;
 
   final AppDatabase _database;
   final CollectionProjectRepository _projectRepository;
@@ -222,6 +225,7 @@ final class FinalizeCollection {
   final ValidateCollectionForFinalization _validator;
   final UuidGenerator _uuidGenerator;
   final Clock _clock;
+  final PackNotificationScheduler? _notificationScheduler;
 
   Future<InstalledCollection> call(CollectionProjectId projectId) async {
     final project = await _projectRepository.getById(projectId);
@@ -237,6 +241,7 @@ final class FinalizeCollection {
           contentVersionId: contentVersionId,
         );
     if (existing != null) {
+      await _notificationScheduler?.tryRescheduleCollection(existing.id);
       return existing;
     }
     if (!project.isDraft) {
@@ -329,11 +334,13 @@ final class FinalizeCollection {
       }
     });
 
-    return _installedCollectionRepository
+    final saved = await _installedCollectionRepository
         .getByCollectionVersion(
           collectionId: project.collectionId,
           contentVersionId: contentVersionId,
         )
         .then((value) => value ?? installed);
+    await _notificationScheduler?.tryRescheduleCollection(saved.id);
+    return saved;
   }
 }

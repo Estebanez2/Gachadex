@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/constants/app_constants.dart';
-import '../features/packs/application/pack_providers.dart';
+import '../core/notifications/application/notification_providers.dart';
+import '../core/notifications/domain/pack_notification_payload.dart';
+import '../features/packs/application/pack_notification_coordinator_provider.dart';
 import 'localization/app_localizations.dart';
 import 'router/app_router.dart';
+import 'router/app_routes.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_controller.dart';
 
@@ -19,16 +22,23 @@ class GachadexApp extends ConsumerStatefulWidget {
 
 class _GachadexAppState extends ConsumerState<GachadexApp>
     with WidgetsBindingObserver {
+  StreamSubscription<PackNotificationPayload>? _notificationTapSubscription;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _notificationTapSubscription = ref
+        .read(localNotificationServiceProvider)
+        .selections
+        .listen(_openCollectionFromNotification);
     WidgetsBinding.instance.addPostFrameCallback((_) => _refreshPacks());
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    unawaited(_notificationTapSubscription?.cancel());
     super.dispose();
   }
 
@@ -40,7 +50,19 @@ class _GachadexAppState extends ConsumerState<GachadexApp>
   }
 
   void _refreshPacks() {
-    unawaited(ref.read(packRechargeServiceProvider).refreshAllCollections());
+    unawaited(
+      ref.read(notificationCoordinatorProvider).initializeAndRefreshAll(),
+    );
+  }
+
+  void _openCollectionFromNotification(PackNotificationPayload payload) {
+    ref
+        .read(appRouterProvider)
+        .go(
+          AppRoutes.installedCollectionPath(
+            payload.installedCollectionId.value,
+          ),
+        );
   }
 
   @override
