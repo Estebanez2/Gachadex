@@ -53,6 +53,8 @@ final class AlbumCardEntry {
     required this.health,
     required this.rarityName,
     required this.rarityOrder,
+    required this.rarityColorValue,
+    required this.rarityEffectId,
     required this.sellValue,
     required this.mediaType,
     required this.thumbnailRelativePath,
@@ -73,6 +75,8 @@ final class AlbumCardEntry {
   final int? health;
   final String? rarityName;
   final int rarityOrder;
+  final int? rarityColorValue;
+  final String? rarityEffectId;
   final int? sellValue;
   final MediaType mediaType;
   final RelativeMediaPath? thumbnailRelativePath;

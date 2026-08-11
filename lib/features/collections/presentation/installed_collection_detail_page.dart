@@ -11,6 +11,7 @@ import '../../../core/domain/domain_enums.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/files/stored_media_image.dart';
 import '../../../core/identifiers/entity_id.dart';
+import '../../../core/widgets/animated_appear.dart';
 import '../../../core/widgets/app_empty_view.dart';
 import '../../../core/widgets/app_error_view.dart';
 import '../../../core/widgets/app_loading_view.dart';
@@ -24,6 +25,7 @@ import '../../packs/application/pack_notification_coordinator_provider.dart';
 import '../../packs/application/pack_providers.dart';
 import '../../packs/domain/entities/pack_inventory.dart';
 import '../../packs/domain/entities/pack_type.dart';
+import '../../rarities/presentation/widgets/rarity_effect_layer.dart';
 import '../application/installed_collection_providers.dart';
 
 final _packTypeProvider = FutureProvider.autoDispose
@@ -591,7 +593,10 @@ class _MovementsTab extends ConsumerWidget {
           separatorBuilder: (_, _) =>
               const SizedBox(height: AppConstants.spacingSm),
           itemBuilder: (context, index) {
-            return _MovementTile(entry: transactions[index]);
+            return AnimatedAppear(
+              delay: Duration(milliseconds: index.clamp(0, 4) * 35),
+              child: _MovementTile(entry: transactions[index]),
+            );
           },
         );
       },
@@ -793,15 +798,18 @@ class _AlbumTab extends ConsumerWidget {
               crossAxisSpacing: AppConstants.spacingMd,
             ),
             itemBuilder: (context, index) {
-              return _AlbumCardTile(
-                entry: cards[index],
-                installedCollectionId: installedCollectionId,
-                onToggleFavorite: () => ref
-                    .read(toggleFavoriteCardProvider)
-                    .call(
-                      installedCollectionId: installedCollectionId,
-                      cardId: cards[index].cardId,
-                    ),
+              return AnimatedAppear(
+                delay: Duration(milliseconds: index.clamp(0, 5) * 30),
+                child: _AlbumCardTile(
+                  entry: cards[index],
+                  installedCollectionId: installedCollectionId,
+                  onToggleFavorite: () => ref
+                      .read(toggleFavoriteCardProvider)
+                      .call(
+                        installedCollectionId: installedCollectionId,
+                        cardId: cards[index].cardId,
+                      ),
+                ),
               );
             },
           ),
@@ -864,6 +872,9 @@ class _AlbumCardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final title = entry.isOwned ? entry.name! : l10n.undiscovered;
+    final rarityColor = entry.rarityColorValue == null
+        ? Theme.of(context).colorScheme.outlineVariant
+        : Color(entry.rarityColorValue!);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -880,17 +891,24 @@ class _AlbumCardTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: entry.thumbnailRelativePath == null
-                  ? ColoredBox(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      child: const Icon(Icons.lock_outline, size: 44),
-                    )
-                  : StoredMediaImage(
-                      path: entry.thumbnailRelativePath!,
-                      fit: BoxFit.cover,
-                    ),
+              child: RarityEffectFrame(
+                effectId: entry.rarityEffectId,
+                baseColor: rarityColor,
+                borderRadius: BorderRadius.zero,
+                animate: false,
+                clip: false,
+                child: entry.thumbnailRelativePath == null
+                    ? ColoredBox(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
+                        child: const Icon(Icons.lock_outline, size: 44),
+                      )
+                    : StoredMediaImage(
+                        path: entry.thumbnailRelativePath!,
+                        fit: BoxFit.cover,
+                      ),
+              ),
             ),
             if (entry.mediaType == MediaType.video && entry.isOwned)
               const Align(

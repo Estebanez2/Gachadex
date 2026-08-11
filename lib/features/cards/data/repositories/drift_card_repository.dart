@@ -9,6 +9,7 @@ import '../../domain/repositories/card_repository.dart';
 import '../mappers/card_mapper.dart';
 import '../mappers/card_field_value_mapper.dart';
 import '../mappers/media_asset_mapper.dart';
+import '../../../rarities/data/mappers/rarity_mapper.dart';
 
 final class DriftCardRepository implements CardRepository {
   DriftCardRepository({required this.database});
@@ -194,6 +195,15 @@ final class DriftCardRepository implements CardRepository {
   }
 
   Future<ImageCardDetails> _detailsForCard(domain.Card card) async {
+    final rarityRow =
+        await (database.select(database.rarities)
+              ..where((table) => table.id.equals(card.rarityId.value)))
+            .getSingleOrNull();
+    if (rarityRow == null) {
+      throw const ReferentialIntegrityFailure(
+        'La carta no tiene rareza valida.',
+      );
+    }
     final mediaRow =
         await (database.select(database.mediaAssets)
               ..where((table) => table.id.equals(card.mediaAssetId.value)))
@@ -217,6 +227,7 @@ final class DriftCardRepository implements CardRepository {
 
     return ImageCardDetails(
       card: card,
+      rarity: rarityRow.toDomain(),
       mediaAsset: mediaRow.toDomain(),
       thumbnailAsset: thumbnailRow?.toDomain(),
       fields: fieldRows.map((row) => row.toDomain()).toList(),

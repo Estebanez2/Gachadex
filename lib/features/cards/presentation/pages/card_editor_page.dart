@@ -15,6 +15,7 @@ import '../../../../core/identifiers/entity_id.dart';
 import '../../../collection_creator/presentation/controllers/collection_draft_controller.dart';
 import '../../../rarities/domain/entities/rarity.dart';
 import '../../../rarities/presentation/widgets/rarity_preview.dart';
+import '../../../rarities/presentation/widgets/rarity_effect_layer.dart';
 import '../../application/card_photo_processor.dart';
 import '../../application/card_providers.dart';
 import '../../application/card_use_cases.dart';
@@ -1043,113 +1044,120 @@ class _CardPreview extends StatelessWidget {
       constraints: const BoxConstraints(maxWidth: 320),
       child: AspectRatio(
         aspectRatio: template.aspectRatio,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Color(primaryColor),
-            borderRadius: BorderRadius.circular(radius),
-            border: Border.all(
-              color: rarityColor,
-              width: frameId == 'badge' ? 5 : 3,
+        child: RarityEffectFrame(
+          effectId: rarity?.effectId,
+          baseColor: rarityColor,
+          borderRadius: BorderRadius.circular(radius),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Color(primaryColor),
+              borderRadius: BorderRadius.circular(radius),
+              border: Border.all(
+                color: rarityColor,
+                width: frameId == 'badge' ? 5 : 3,
+              ),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        name.trim().isEmpty ? context.l10n.name : name.trim(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                            ),
-                      ),
-                    ),
-                    Text(
-                      '${health ?? 0} HP',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  flex: templateId == 'impact' ? 7 : 6,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.cardRadius,
-                    ),
-                    child: ColoredBox(
-                      color: Colors.white.withValues(alpha: 0.16),
-                      child: _previewMedia(),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Color(secondaryColor),
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.cardRadius,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 5,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          rarity == null
-                              ? Icons.auto_awesome_outlined
-                              : rarityIconForId(rarity!.iconId),
-                          color: Colors.black87,
-                          size: 16,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name.trim().isEmpty ? context.l10n.name : name.trim(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                              ),
                         ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            rarity?.name ?? context.l10n.rarity,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '${health ?? 0} HP',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    flex: templateId == 'impact' ? 7 : 6,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.cardRadius,
+                      ),
+                      child: ColoredBox(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        child: _previewMedia(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Color(secondaryColor),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.cardRadius,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 5,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            rarity == null
+                                ? Icons.auto_awesome_outlined
+                                : rarityIconForId(rarity!.iconId),
+                            color: Colors.black87,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              rarity?.name ?? context.l10n.rarity,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '#${collectionNumber ?? 0}',
                             style: const TextStyle(fontWeight: FontWeight.w800),
                           ),
-                        ),
-                        Text(
-                          '#${collectionNumber ?? 0}',
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                if (description.trim().isNotEmpty) ...[
+                  if (description.trim().isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      description.trim(),
+                      maxLines: templateId == 'minimal' ? 2 : 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
                   const SizedBox(height: 6),
-                  Text(
-                    description.trim(),
-                    maxLines: templateId == 'minimal' ? 2 : 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
+                  for (final field in fields.take(template.maxComicFields))
+                    Text(
+                      '${CardTemplateCatalog.labelForField(field.type)}: ${field.value.trim()}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white, fontSize: 11),
+                    ),
                 ],
-                const SizedBox(height: 6),
-                for (final field in fields.take(template.maxComicFields))
-                  Text(
-                    '${CardTemplateCatalog.labelForField(field.type)}: ${field.value.trim()}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white, fontSize: 11),
-                  ),
-              ],
+              ),
             ),
           ),
         ),

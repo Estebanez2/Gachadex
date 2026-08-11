@@ -7,9 +7,10 @@ dinero real.
 
 ## Estado actual
 
-Fase 10: borradores, rarezas, cartas con fotografias y videos, configuracion de
+Fase 12: borradores, rarezas, cartas con fotografias y videos, configuracion de
 sobres, finalizacion local, temporizadores, apertura de sobres, album,
-importacion/exportacion `.gachadex` y economia con gachacoin.
+importacion/exportacion `.gachadex`, economia con gachacoin, notificaciones
+locales y acabado visual.
 
 Incluye la base tecnica de Fase 1, el dominio y persistencia local de Fase 2,
 schema version 5, biblioteca de borradores, creacion atomica de borradores,
@@ -32,8 +33,11 @@ gachacoin queda separado por coleccion, genera historial y puede usarse para
 comprar uno o varios sobres incluso por encima del maximo acumulable; la recarga
 automatica se pausa hasta volver a estar por debajo de ese maximo.
 
-No incluye todavia notificaciones, efectos visuales finales ni estabilizacion
-general.
+La experiencia visual incluye efectos propios por rareza, animaciones de
+revelado, apariciones suaves, feedback tactil y respeto de reducir animaciones.
+No incluye todavia estabilizacion general de lanzamiento.
+
+No se han anadido dependencias nuevas para el acabado visual de Fase 12.
 
 ## Probar venta y aceleracion
 
