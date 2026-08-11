@@ -66,7 +66,11 @@ final class OpenPack {
   Future<PackOpeningDetails> call({
     required InstalledCollectionId installedCollectionId,
     required PackTypeId packTypeId,
+    int packCount = 1,
   }) async {
+    if (packCount <= 0 || packCount > 10) {
+      throw const InvalidEntityFailure('Cantidad de sobres invalida.');
+    }
     await _rechargeService.refreshCollection(installedCollectionId);
     final existing = await _packOpeningRepository.getActive(
       installedCollectionId,
@@ -108,14 +112,15 @@ final class OpenPack {
         'La configuracion del sobre no es valida.',
       );
     }
-    final generated = _generator.generate(
-      PackGenerationContext(
-        configuration: config,
-        eligibleCards: cards,
-        rarities: rarities,
-      ),
-      _random,
+    final generationContext = PackGenerationContext(
+      configuration: config,
+      eligibleCards: cards,
+      rarities: rarities,
     );
+    final generated = [
+      for (var packIndex = 0; packIndex < packCount; packIndex++)
+        ..._generator.generate(generationContext, _random),
+    ];
 
     final openingId = _uuidGenerator.packOpeningId();
     final now = _clock.nowUtc();
@@ -135,11 +140,11 @@ final class OpenPack {
                     table.packTypeId.equals(packTypeId.value),
               ))
               .getSingleOrNull();
-      if (inventory == null || inventory.availableCount <= 0) {
+      if (inventory == null || inventory.availableCount < packCount) {
         throw const InvalidEntityFailure('No tienes sobres disponibles.');
       }
 
-      final newAvailableCount = inventory.availableCount - 1;
+      final newAvailableCount = inventory.availableCount - packCount;
       final nextRechargeAtUtc = _rechargeCalculator.nextAfterConsumed(
         previousAvailableCount: inventory.availableCount,
         newAvailableCount: newAvailableCount,

@@ -4,12 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/domain/domain_enums.dart';
+import '../../../../core/errors/app_failure.dart';
 import '../../../../core/files/card_video_player.dart';
 import '../../../../core/files/stored_media_image.dart';
 import '../../../../core/identifiers/entity_id.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../economy/application/economy_providers.dart';
 import '../../application/album_providers.dart';
+import '../../domain/entities/album_card_entry.dart';
 
 class AlbumCardDetailPage extends ConsumerWidget {
   const AlbumCardDetailPage({
@@ -106,6 +109,28 @@ class AlbumCardDetailPage extends ConsumerWidget {
                 if (entry.frameId != null)
                   Text('${l10n.frame}: ${entry.frameId}'),
                 Text('${l10n.copies}: ${entry.quantity}'),
+                if (entry.sellableCopies > 0) ...[
+                  const SizedBox(height: AppConstants.spacingMd),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.toll_outlined),
+                      title: Text(l10n.sellDuplicates),
+                      subtitle: Text(
+                        '${l10n.sellableCopies(entry.sellableCopies)}\n'
+                        '${l10n.unitSellValue(entry.sellValue ?? 0)}',
+                      ),
+                      trailing: FilledButton.icon(
+                        onPressed: () => _showSellDialog(
+                          context: context,
+                          ref: ref,
+                          entry: entry,
+                        ),
+                        icon: const Icon(Icons.sell_outlined),
+                        label: Text(l10n.sellDuplicates),
+                      ),
+                    ),
+                  ),
+                ],
                 if (entry.firstObtainedAtUtc != null)
                   Text(
                     l10n.firstObtained(
@@ -136,5 +161,108 @@ class AlbumCardDetailPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _showSellDialog({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AlbumCardEntry entry,
+  }) async {
+    final l10n = context.l10n;
+    final sellValue = entry.sellValue ?? 0;
+    var quantity = 1;
+    final confirmedQuantity = await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final income = quantity * sellValue;
+            return AlertDialog(
+              title: Text(l10n.confirmSale),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${l10n.copies}: ${entry.quantity}'),
+                  Text(l10n.sellableCopies(entry.sellableCopies)),
+                  Text(l10n.unitSellValue(sellValue)),
+                  const SizedBox(height: AppConstants.spacingMd),
+                  Text(l10n.quantityToSell),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: quantity <= 1
+                            ? null
+                            : () => setDialogState(() => quantity -= 1),
+                        icon: const Icon(Icons.remove_circle_outline),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            quantity.toString(),
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: quantity >= entry.sellableCopies
+                            ? null
+                            : () => setDialogState(() => quantity += 1),
+                        icon: const Icon(Icons.add_circle_outline),
+                      ),
+                    ],
+                  ),
+                  Text(l10n.saleIncomePreview(quantity, sellValue, income)),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(l10n.cancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(quantity),
+                  child: Text(l10n.confirmSale),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    if (confirmedQuantity == null) {
+      return;
+    }
+
+    try {
+      await ref
+          .read(sellDuplicateCardsProvider)
+          .call(
+            installedCollectionId: installedCollectionId,
+            cardId: entry.cardId,
+            quantityToSell: confirmedQuantity,
+          );
+      ref.invalidate(
+        albumCardProvider((id: installedCollectionId, cardId: cardId)),
+      );
+      ref.invalidate(albumStatsProvider(installedCollectionId));
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.saleCompleted)));
+      }
+    } on AppFailure catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.safeMessage)));
+      }
+    } on Object {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.saveError)));
+      }
+    }
   }
 }

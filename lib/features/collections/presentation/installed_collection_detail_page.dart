@@ -16,6 +16,9 @@ import '../../../core/widgets/app_error_view.dart';
 import '../../../core/widgets/app_loading_view.dart';
 import '../../album/application/album_providers.dart';
 import '../../album/domain/entities/album_card_entry.dart';
+import '../../economy/application/economy_providers.dart';
+import '../../economy/application/economy_use_cases.dart';
+import '../../economy/domain/entities/economy_transaction_entry.dart';
 import '../../import_export/application/gachadex_import_export_providers.dart';
 import '../../packs/application/pack_providers.dart';
 import '../../packs/domain/entities/pack_inventory.dart';
@@ -66,7 +69,7 @@ class _InstalledCollectionDetailPageState
     );
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       initialIndex: widget.initialTabIndex,
       child: Scaffold(
         appBar: AppBar(
@@ -99,6 +102,10 @@ class _InstalledCollectionDetailPageState
                 text: l10n.packs,
               ),
               Tab(icon: const Icon(Icons.grid_view_outlined), text: l10n.album),
+              Tab(
+                icon: const Icon(Icons.receipt_long_outlined),
+                text: l10n.movements,
+              ),
             ],
           ),
         ),
@@ -113,6 +120,9 @@ class _InstalledCollectionDetailPageState
               children: [
                 _PacksTab(installedCollectionId: widget.installedCollectionId),
                 _AlbumTab(installedCollectionId: widget.installedCollectionId),
+                _MovementsTab(
+                  installedCollectionId: widget.installedCollectionId,
+                ),
               ],
             ),
           ),
@@ -164,6 +174,9 @@ class _PacksTab extends ConsumerWidget {
     final inventoryAsync = ref.watch(
       packInventoryProvider(installedCollectionId),
     );
+    final collectionAsync = ref.watch(
+      installedCollectionProvider(installedCollectionId),
+    );
     final activeAsync = ref.watch(
       activePackOpeningProvider(installedCollectionId),
     );
@@ -211,6 +224,23 @@ class _PacksTab extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppConstants.spacingMd),
               ],
+              collectionAsync.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (collection) => Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.toll_outlined),
+                    title: Text(l10n.gachacoinBalance(collection.coins)),
+                    trailing: TextButton.icon(
+                      onPressed: () =>
+                          DefaultTabController.of(context).animateTo(2),
+                      icon: const Icon(Icons.receipt_long_outlined),
+                      label: Text(l10n.movements),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingMd),
               Text(
                 l10n.packInventory,
                 style: Theme.of(
@@ -223,6 +253,10 @@ class _PacksTab extends ConsumerWidget {
                   inventory: inventory,
                   hasActiveOpening: activeOpening != null,
                   installedCollectionId: installedCollectionId,
+                  balance: collectionAsync.maybeWhen(
+                    data: (collection) => collection.coins,
+                    orElse: () => 0,
+                  ),
                 ),
             ],
           );
@@ -237,11 +271,13 @@ class _PackInventoryCard extends ConsumerStatefulWidget {
     required this.inventory,
     required this.hasActiveOpening,
     required this.installedCollectionId,
+    required this.balance,
   });
 
   final PackInventory inventory;
   final bool hasActiveOpening;
   final InstalledCollectionId installedCollectionId;
+  final int balance;
 
   @override
   ConsumerState<_PackInventoryCard> createState() => _PackInventoryCardState();
@@ -249,6 +285,26 @@ class _PackInventoryCard extends ConsumerStatefulWidget {
 
 class _PackInventoryCardState extends ConsumerState<_PackInventoryCard> {
   bool _opening = false;
+  bool _accelerating = false;
+  late DateTime _nowUtc;
+  Timer? _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _nowUtc = DateTime.now().toUtc();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        setState(() => _nowUtc = DateTime.now().toUtc());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -265,11 +321,22 @@ class _PackInventoryCardState extends ConsumerState<_PackInventoryCard> {
           data: (pack) {
             final available = widget.inventory.availableCount;
             final remaining = widget.inventory.nextRechargeAtUtc.difference(
-              DateTime.now().toUtc(),
+              _nowUtc,
             );
             final canRecharge = available < widget.inventory.maxAccumulated;
             final canOpen =
                 available > 0 && !widget.hasActiveOpening && !_opening;
+            final plan = ref
+                .watch(accelerationCalculatorProvider)
+                .plan(
+                  availableCount: available,
+                  maxAccumulated: widget.inventory.maxAccumulated,
+                  rechargeSeconds: pack.rechargeSeconds,
+                  coinsPerFullRecharge: pack.coinsPerFullRecharge,
+                  nextRechargeAtUtc: widget.inventory.nextRechargeAtUtc,
+                  nowUtc: _nowUtc,
+                  balance: widget.balance,
+                );
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,21 +364,54 @@ class _PackInventoryCardState extends ConsumerState<_PackInventoryCard> {
                 Text(
                   canRecharge
                       ? l10n.nextPackIn(_formatRemaining(remaining))
-                      : l10n.packRechargeFull,
+                      : l10n.packRechargePaused(
+                          widget.inventory.maxAccumulated,
+                        ),
                 ),
                 const SizedBox(height: AppConstants.spacingMd),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: FilledButton.icon(
-                    onPressed: canOpen ? () => _open(pack.id) : null,
-                    icon: _opening
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.inventory_2_outlined),
-                    label: Text(l10n.openPack),
-                  ),
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: AppConstants.spacingSm,
+                  runSpacing: AppConstants.spacingSm,
+                  children: [
+                    if (!plan.isFull)
+                      OutlinedButton.icon(
+                        onPressed: _accelerating
+                            ? null
+                            : () => _showAccelerationSheet(pack.id, plan),
+                        icon: _accelerating
+                            ? const SizedBox.square(
+                                dimension: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.flash_on_outlined),
+                        label: Text(l10n.speedUp),
+                      ),
+                    if (available >= 5)
+                      OutlinedButton.icon(
+                        onPressed: canOpen ? () => _open(pack.id, 5) : null,
+                        icon: const Icon(Icons.filter_5_outlined),
+                        label: Text(l10n.openPackBatch(5)),
+                      ),
+                    if (available >= 10)
+                      OutlinedButton.icon(
+                        onPressed: canOpen ? () => _open(pack.id, 10) : null,
+                        icon: const Icon(Icons.filter_9_plus_outlined),
+                        label: Text(l10n.openPackBatch(10)),
+                      ),
+                    FilledButton.icon(
+                      onPressed: canOpen ? () => _open(pack.id, 1) : null,
+                      icon: _opening
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.inventory_2_outlined),
+                      label: Text(l10n.openPack),
+                    ),
+                  ],
                 ),
               ],
             );
@@ -321,7 +421,92 @@ class _PackInventoryCardState extends ConsumerState<_PackInventoryCard> {
     );
   }
 
-  Future<void> _open(PackTypeId packTypeId) async {
+  Future<void> _showAccelerationSheet(
+    PackTypeId packTypeId,
+    AccelerationPlan plan,
+  ) async {
+    final l10n = context.l10n;
+    final option = await showModalBottomSheet<AccelerationOption>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: AppConstants.pagePadding,
+          children: [
+            Text(
+              l10n.completeTimer,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: AppConstants.spacingSm),
+            Text(l10n.gachacoinBalance(plan.balance)),
+            const SizedBox(height: AppConstants.spacingMd),
+            for (final option in plan.options)
+              ListTile(
+                enabled: option.canAfford,
+                leading: const Icon(Icons.add_circle_outline),
+                title: Text(
+                  option.cycles == 1
+                      ? l10n.addPackOption(option.cycles)
+                      : l10n.addPacksOption(option.cycles),
+                ),
+                subtitle: Text(
+                  '${l10n.cost}: ${option.cost} ${l10n.gachacoin}\n'
+                  '${l10n.balanceAfter(option.balanceAfter)}',
+                ),
+                onTap: option.canAfford
+                    ? () => Navigator.of(context).pop(option)
+                    : null,
+              ),
+          ],
+        ),
+      ),
+    );
+    if (option == null) {
+      return;
+    }
+    await _accelerate(packTypeId, option.cycles);
+  }
+
+  Future<void> _accelerate(PackTypeId packTypeId, int cycles) async {
+    final l10n = context.l10n;
+    setState(() => _accelerating = true);
+    try {
+      await ref
+          .read(acceleratePackRechargeProvider)
+          .call(
+            installedCollectionId: widget.installedCollectionId,
+            packTypeId: packTypeId,
+            cycles: cycles,
+          );
+      if (mounted) {
+        ref.invalidate(
+          installedCollectionProvider(widget.installedCollectionId),
+        );
+        ref.invalidate(packInventoryProvider(widget.installedCollectionId));
+      }
+    } on AppFailure catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.safeMessage)));
+      }
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.saveError)));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _accelerating = false);
+      }
+    }
+  }
+
+  Future<void> _open(PackTypeId packTypeId, int packCount) async {
     final l10n = context.l10n;
     setState(() => _opening = true);
     try {
@@ -330,6 +515,7 @@ class _PackInventoryCardState extends ConsumerState<_PackInventoryCard> {
           .call(
             installedCollectionId: widget.installedCollectionId,
             packTypeId: packTypeId,
+            packCount: packCount,
           );
       if (mounted) {
         context.go(
@@ -370,6 +556,86 @@ class _PackInventoryCardState extends ConsumerState<_PackInventoryCard> {
       return '${minutes}m ${seconds}s';
     }
     return '${seconds}s';
+  }
+}
+
+class _MovementsTab extends ConsumerWidget {
+  const _MovementsTab({required this.installedCollectionId});
+
+  final InstalledCollectionId installedCollectionId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final transactionsAsync = ref.watch(
+      economyTransactionsProvider(installedCollectionId),
+    );
+    return transactionsAsync.when(
+      loading: () => const AppLoadingView(),
+      error: (_, _) => AppErrorView(
+        title: l10n.screenErrorTitle,
+        description: l10n.saveError,
+      ),
+      data: (transactions) {
+        if (transactions.isEmpty) {
+          return AppEmptyView(
+            icon: Icons.receipt_long_outlined,
+            title: l10n.movements,
+            description: l10n.collectionsEmptyDescription,
+          );
+        }
+        return ListView.separated(
+          padding: AppConstants.pagePadding,
+          itemCount: transactions.length,
+          separatorBuilder: (_, _) =>
+              const SizedBox(height: AppConstants.spacingSm),
+          itemBuilder: (context, index) {
+            return _MovementTile(entry: transactions[index]);
+          },
+        );
+      },
+    );
+  }
+}
+
+class _MovementTile extends StatelessWidget {
+  const _MovementTile({required this.entry});
+
+  final EconomyTransactionEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final title = switch (entry.transactionType) {
+      CoinTransactionType.sellDuplicate => l10n.duplicateSaleMovement,
+      CoinTransactionType.accelerateTimer => l10n.packAccelerationMovement,
+      CoinTransactionType.migration => l10n.movements,
+      CoinTransactionType.manualAdjustment => l10n.movements,
+    };
+    final related = entry.relatedCardName ?? entry.relatedPackTypeName;
+    return Card(
+      child: ListTile(
+        leading: Icon(
+          entry.amount >= 0 ? Icons.add_circle_outline : Icons.bolt_outlined,
+        ),
+        title: Text(title),
+        subtitle: Text(
+          [
+            ?related,
+            MaterialLocalizations.of(
+              context,
+            ).formatShortDate(entry.createdAtUtc.toLocal()),
+            l10n.transactionBalanceAfter(entry.balanceAfter),
+          ].join('\n'),
+        ),
+        trailing: Text(
+          '${entry.amount >= 0 ? '+' : ''}${entry.amount}',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+        ),
+      ),
+    );
   }
 }
 
@@ -649,7 +915,7 @@ class _AlbumCardTile extends StatelessWidget {
                       Expanded(
                         child: Text(
                           entry.isOwned
-                              ? '${entry.rarityName} · x${entry.quantity}'
+                              ? _albumSubtitle(context, entry)
                               : l10n.missing,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -674,5 +940,15 @@ class _AlbumCardTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _albumSubtitle(BuildContext context, AlbumCardEntry entry) {
+    final l10n = context.l10n;
+    final base = '${entry.rarityName} · x${entry.quantity}';
+    if (!entry.isRepeated) {
+      return base;
+    }
+    final possibleIncome = entry.sellableCopies * (entry.sellValue ?? 0);
+    return '$base · ${entry.sellableCopies} ${l10n.sellDuplicates.toLowerCase()} · +$possibleIncome';
   }
 }

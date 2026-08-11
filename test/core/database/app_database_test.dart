@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gachadex/core/database/app_database.dart';
 import 'package:gachadex/core/domain/domain_enums.dart';
 import 'package:gachadex/features/cards/data/mappers/card_mapper.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 import '../../helpers/database_seed.dart';
 import '../../helpers/database_test_utils.dart';
@@ -53,7 +54,7 @@ void main() {
             'coin_transactions',
           ]),
         );
-        expect(database.schemaVersion, 4);
+        expect(database.schemaVersion, 5);
 
         final foreignKeys = await database
             .customSelect('PRAGMA foreign_keys')
@@ -184,20 +185,23 @@ void main() {
           throwsA(isA<Object>()),
         );
 
-        await expectLater(
-          database
-              .into(database.packInventory)
-              .insert(
-                PackInventoryCompanion(
-                  installedCollectionId: Value(installedCollectionId),
-                  packTypeId: Value(definition.packTypeId),
-                  availableCount: const Value(4),
-                  maxAccumulated: const Value(3),
-                  nextRechargeAtUtc: Value(testNowUtc(2)),
-                  lastCalculatedAtUtc: Value(testNowUtc(2)),
-                ),
+        await database
+            .into(database.packInventory)
+            .insert(
+              PackInventoryCompanion(
+                installedCollectionId: Value(installedCollectionId),
+                packTypeId: Value(definition.packTypeId),
+                availableCount: const Value(4),
+                maxAccumulated: const Value(3),
+                nextRechargeAtUtc: Value(testNowUtc(2)),
+                lastCalculatedAtUtc: Value(testNowUtc(2)),
               ),
-          throwsA(isA<Object>()),
+            );
+        expect(
+          (await database.select(database.packInventory).get())
+              .single
+              .availableCount,
+          4,
         );
       },
     );
@@ -345,6 +349,59 @@ void main() {
         );
       } finally {
         await secondDatabase.close();
+      }
+    } finally {
+      if (tempDir.existsSync()) {
+        tempDir.deleteSync(recursive: true);
+      }
+    }
+  });
+
+  test('migrates v4 pack inventory to allow purchased overstock', () async {
+    final tempDir = await Directory.systemTemp.createTemp(
+      'gachadex_migration_v5_',
+    );
+    final file = File('${tempDir.path}${Platform.pathSeparator}test.sqlite');
+
+    try {
+      final sqlite = sqlite3.sqlite3.open(file.path);
+      try {
+        sqlite.execute('''
+CREATE TABLE pack_inventory (
+  installed_collection_id TEXT NOT NULL,
+  pack_type_id TEXT NOT NULL,
+  available_count INTEGER NOT NULL,
+  max_accumulated INTEGER NOT NULL,
+  next_recharge_at_utc INTEGER NOT NULL,
+  last_calculated_at_utc INTEGER NOT NULL,
+  PRIMARY KEY(installed_collection_id, pack_type_id),
+  CHECK (available_count >= 0),
+  CHECK (max_accumulated > 0),
+  CHECK (available_count <= max_accumulated)
+)
+''');
+        sqlite.execute('PRAGMA user_version = 4');
+      } finally {
+        sqlite.close();
+      }
+
+      final database = createFileDatabase(file);
+      try {
+        final schemaSql = await database
+            .customSelect(
+              "SELECT sql FROM sqlite_master WHERE type = 'table' "
+              "AND name = 'pack_inventory'",
+            )
+            .map((row) => row.read<String>('sql'))
+            .getSingle();
+
+        expect(database.schemaVersion, 5);
+        expect(
+          schemaSql,
+          isNot(contains('available_count <= max_accumulated')),
+        );
+      } finally {
+        await database.close();
       }
     } finally {
       if (tempDir.existsSync()) {

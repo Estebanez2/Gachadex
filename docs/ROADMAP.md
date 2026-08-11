@@ -22,7 +22,7 @@ errores base, internacionalizacion en espanol, pantallas placeholder y pruebas
 de arranque, navegacion, tema, localizacion y accesibilidad basica.
 
 No incluye persistencia, modelos de producto, multimedia, temporizadores,
-monedas, notificaciones, importacion ni exportacion.
+gachacoin, notificaciones, importacion ni exportacion.
 
 ## Fase 2 - Modelo de dominio y persistencia local
 
@@ -106,7 +106,7 @@ No incluye:
 
 - Videos.
 - Sobres, pools, probabilidades ni apertura.
-- Album jugable, temporizadores, monedas, notificaciones, importacion ni
+- Album jugable, temporizadores, gachacoin, notificaciones, importacion ni
   exportacion.
 
 Depende de: fase 3.
@@ -129,7 +129,7 @@ Incluye:
 - Tests de motor, validacion, repositorio y persistencia.
 
 No incluye finalizacion, coleccion instalada, entrega de sobres, temporizadores
-activos, apertura visual, album jugable, monedas funcionales, videos,
+activos, apertura visual, album jugable, gachacoin funcional, videos,
 notificaciones, importacion ni exportacion.
 
 Depende de: fase 4.
@@ -189,7 +189,7 @@ thumbnail WebP del primer fotograma, rutas relativas, guardado/edicion/borrado
 seguro, reproduccion en apertura y detalle de album, replay, pausa de ciclo de
 vida y uso exclusivo de thumbnails en grids.
 
-No incluye importacion/exportacion `.gachadex`, monedas, venta de duplicados,
+No incluye importacion/exportacion `.gachadex`, gachacoin, venta de duplicados,
 aceleracion, notificaciones ni efectos visuales finales.
 
 Depende de: fase 7.
@@ -208,7 +208,7 @@ Depende de: fases 7 y 8.
 
 Objetivo: cerrar el ciclo de duplicados.
 
-Incluye venta parcial, valores por rareza, monedas por coleccion, historial,
+Incluye venta parcial, valores por rareza, gachacoin por coleccion, historial,
 aceleracion de temporizadores y validaciones de saldo.
 
 Depende de: fase 6.

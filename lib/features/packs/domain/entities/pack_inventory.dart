@@ -24,15 +24,7 @@ final class PackInventory {
        lastCalculatedAtUtc = DomainValidation.requireUtc(
          lastCalculatedAtUtc,
          'lastCalculatedAtUtc',
-       ) {
-    if (availableCount > maxAccumulated) {
-      throw ArgumentError.value(
-        availableCount,
-        'availableCount',
-        'Must not exceed maxAccumulated.',
-      );
-    }
-  }
+       );
 
   final InstalledCollectionId installedCollectionId;
   final PackTypeId packTypeId;

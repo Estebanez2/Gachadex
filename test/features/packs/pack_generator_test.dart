@@ -250,6 +250,39 @@ void main() {
       expect(result.generatedCount, 0);
       expect(result.nextRechargeAtUtc, DateTime.utc(2026, 8, 5, 14));
     });
+
+    test('preserves overstock and resumes timer only below maximum', () {
+      final calculator = const PackRechargeCalculator();
+      final result = calculator.calculate(
+        availableCount: 5,
+        maxAccumulated: 3,
+        rechargeSeconds: 3600,
+        nextRechargeAtUtc: DateTime.utc(2026, 8, 5, 10),
+        currentTimeUtc: DateTime.utc(2026, 8, 5, 13),
+      );
+      final stillPaused = calculator.nextAfterConsumed(
+        previousAvailableCount: 5,
+        newAvailableCount: 4,
+        maxAccumulated: 3,
+        rechargeSeconds: 3600,
+        currentNextRechargeAtUtc: DateTime.utc(2026, 8, 5, 10),
+        currentTimeUtc: DateTime.utc(2026, 8, 5, 13),
+      );
+      final resumed = calculator.nextAfterConsumed(
+        previousAvailableCount: 3,
+        newAvailableCount: 2,
+        maxAccumulated: 3,
+        rechargeSeconds: 3600,
+        currentNextRechargeAtUtc: DateTime.utc(2026, 8, 5, 10),
+        currentTimeUtc: DateTime.utc(2026, 8, 5, 13),
+      );
+
+      expect(result.availableCount, 5);
+      expect(result.generatedCount, 0);
+      expect(result.reachedMaximum, isTrue);
+      expect(stillPaused, DateTime.utc(2026, 8, 5, 10));
+      expect(resumed, DateTime.utc(2026, 8, 5, 14));
+    });
   });
 }
 

@@ -127,6 +127,49 @@ void main() {
       expect(installed.distinctOwnedCount, 1);
     });
 
+    test('opens five packs in a single saved opening', () async {
+      await (database.update(database.packInventory)..where(
+            (table) =>
+                table.installedCollectionId.equals(
+                  installedCollectionId.value,
+                ) &
+                table.packTypeId.equals(definition.packTypeId),
+          ))
+          .write(const PackInventoryCompanion(availableCount: Value(5)));
+      final useCase = openPack(FixedUuidGenerator([testUuid(3919)]));
+
+      final opening = await useCase.call(
+        installedCollectionId: installedCollectionId,
+        packTypeId: PackTypeId(definition.packTypeId),
+        packCount: 5,
+      );
+      final inventory = await database.playerProgressDao.getPackInventory(
+        installedCollectionId.value,
+      );
+      final owned = await database.playerProgressDao.getOwnedCards(
+        installedCollectionId.value,
+      );
+      final installed = await installedRepository.getById(
+        installedCollectionId,
+      );
+
+      expect(opening.cards, hasLength(15));
+      expect(opening.cards.first.result.wasNew, isTrue);
+      expect(
+        opening.cards.skip(1).every((card) => !card.result.wasNew),
+        isTrue,
+      );
+      expect(opening.cards.last.result.quantityAfter, 15);
+      expect(inventory.single.availableCount, 0);
+      expect(
+        fromDatabaseUtc(inventory.single.nextRechargeAtUtc),
+        clock.nowUtc().add(const Duration(hours: 1)),
+      );
+      expect(owned.single.quantity, 15);
+      expect(installed.distinctOwnedCount, 1);
+      expect(await database.select(database.packOpenings).get(), hasLength(1));
+    });
+
     test('fails without inventory and rolls back progress', () async {
       await (database.update(database.packInventory)..where(
             (table) =>

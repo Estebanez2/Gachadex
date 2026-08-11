@@ -782,10 +782,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get packRechargeFull => 'Acumulacion completa';
 
   @override
+  String packRechargePaused(int max) {
+    return 'Recarga pausada hasta bajar de $max sobres';
+  }
+
+  @override
   String get openPackComingSoon => 'Abrir sobre proximamente';
 
   @override
   String get openPack => 'Abrir sobre';
+
+  @override
+  String openPackBatch(int count) {
+    return 'Abrir x$count';
+  }
 
   @override
   String get pendingOpening => 'Apertura pendiente';
@@ -946,7 +956,7 @@ class AppLocalizationsEs extends AppLocalizations {
     int videoCount,
     int packTypeCount,
   ) {
-    return '$name\nCartas: $cardCount\nVideos: $videoCount\nSobres: $packTypeCount\n\nSolo se importara la definicion de la coleccion. El progreso, monedas y album empezaran desde cero.';
+    return '$name\nCartas: $cardCount\nVideos: $videoCount\nSobres: $packTypeCount\n\nSolo se importara la definicion de la coleccion. El progreso, gachacoin y album empezaran desde cero.';
   }
 
   @override
@@ -963,4 +973,88 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get exportError => 'No se pudo exportar la coleccion.';
+
+  @override
+  String get gachacoin => 'gachacoin';
+
+  @override
+  String gachacoinBalance(int amount) {
+    return '$amount gachacoin';
+  }
+
+  @override
+  String get movements => 'Movimientos';
+
+  @override
+  String get sellDuplicates => 'Vender repetidas';
+
+  @override
+  String sellableCopies(int count) {
+    return 'Copias vendibles: $count';
+  }
+
+  @override
+  String get quantityToSell => 'Cantidad a vender';
+
+  @override
+  String youWillReceive(int amount) {
+    return 'Recibiras $amount gachacoin';
+  }
+
+  @override
+  String get confirmSale => 'Confirmar venta';
+
+  @override
+  String get saleCompleted => 'Venta realizada.';
+
+  @override
+  String get speedUp => 'Acelerar';
+
+  @override
+  String get completeTimer => 'Completar temporizador';
+
+  @override
+  String addPackOption(int count) {
+    return '+$count sobre';
+  }
+
+  @override
+  String addPacksOption(int count) {
+    return '+$count sobres';
+  }
+
+  @override
+  String get cost => 'Coste';
+
+  @override
+  String balanceAfter(int amount) {
+    return 'Saldo despues: $amount gachacoin';
+  }
+
+  @override
+  String get notEnoughGachacoin => 'No tienes suficientes gachacoin.';
+
+  @override
+  String get maxPacksReached => 'Maximo de sobres alcanzado.';
+
+  @override
+  String get duplicateSaleMovement => 'Venta de repetida';
+
+  @override
+  String get packAccelerationMovement => 'Aceleracion de sobre';
+
+  @override
+  String unitSellValue(int amount) {
+    return 'Valor unitario: $amount gachacoin';
+  }
+
+  @override
+  String saleIncomePreview(int quantity, int value, int amount) {
+    return '$quantity x $value = $amount gachacoin';
+  }
+
+  @override
+  String transactionBalanceAfter(int amount) {
+    return 'Saldo: $amount';
+  }
 }

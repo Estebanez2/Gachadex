@@ -53,6 +53,7 @@ final class AlbumCardEntry {
     required this.health,
     required this.rarityName,
     required this.rarityOrder,
+    required this.sellValue,
     required this.mediaType,
     required this.thumbnailRelativePath,
     required this.imageRelativePath,
@@ -72,6 +73,7 @@ final class AlbumCardEntry {
   final int? health;
   final String? rarityName;
   final int rarityOrder;
+  final int? sellValue;
   final MediaType mediaType;
   final RelativeMediaPath? thumbnailRelativePath;
   final RelativeMediaPath? imageRelativePath;
@@ -85,6 +87,7 @@ final class AlbumCardEntry {
 
   bool get isOwned => quantity > 0;
   bool get isRepeated => quantity > 1;
+  int get sellableCopies => quantity > 1 ? quantity - 1 : 0;
 }
 
 final class AlbumCardFieldEntry {

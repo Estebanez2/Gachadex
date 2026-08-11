@@ -35,10 +35,10 @@ final class PackRechargeCalculator {
     }
     final now = currentTimeUtc.toUtc();
     final next = nextRechargeAtUtc.toUtc();
-    final clampedAvailable = availableCount.clamp(0, maxAccumulated);
-    if (clampedAvailable >= maxAccumulated) {
+    final safeAvailable = availableCount < 0 ? 0 : availableCount;
+    if (safeAvailable >= maxAccumulated) {
       return PackRechargeResult(
-        availableCount: maxAccumulated,
+        availableCount: safeAvailable,
         nextRechargeAtUtc: next,
         generatedCount: 0,
         reachedMaximum: true,
@@ -46,7 +46,7 @@ final class PackRechargeCalculator {
     }
     if (now.isBefore(next)) {
       return PackRechargeResult(
-        availableCount: clampedAvailable,
+        availableCount: safeAvailable,
         nextRechargeAtUtc: next,
         generatedCount: 0,
         reachedMaximum: false,
@@ -55,7 +55,7 @@ final class PackRechargeCalculator {
 
     final interval = Duration(seconds: rechargeSeconds);
     var generated = 0;
-    var newAvailable = clampedAvailable;
+    var newAvailable = safeAvailable;
     var newNext = next;
     while (!now.isBefore(newNext) && newAvailable < maxAccumulated) {
       generated += 1;

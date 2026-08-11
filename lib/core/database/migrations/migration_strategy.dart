@@ -41,7 +41,10 @@ MigrationStrategy createMigrationStrategy(GeneratedDatabase database) {
       if (from <= 3 && to >= 4) {
         await _migratePackConfigurationSchema(database);
       }
-      if (from > 4 || to > currentDatabaseSchemaVersion) {
+      if (from <= 4 && to >= 5) {
+        await _migratePackInventoryAllowsOverflow(database);
+      }
+      if (from > 5 || to > currentDatabaseSchemaVersion) {
         throw AppException(
           code: 'migration_not_implemented',
           safeMessage: 'No se puede actualizar la base de datos todavia.',
@@ -55,6 +58,50 @@ MigrationStrategy createMigrationStrategy(GeneratedDatabase database) {
         'created=${details.wasCreated}.',
       );
     },
+  );
+}
+
+Future<void> _migratePackInventoryAllowsOverflow(
+  GeneratedDatabase database,
+) async {
+  await database.customStatement(
+    'ALTER TABLE pack_inventory RENAME TO pack_inventory_old',
+  );
+  await database.customStatement('''
+CREATE TABLE pack_inventory (
+  installed_collection_id TEXT NOT NULL REFERENCES installed_collections(id) ON DELETE CASCADE,
+  pack_type_id TEXT NOT NULL REFERENCES pack_types(id) ON DELETE RESTRICT,
+  available_count INTEGER NOT NULL,
+  max_accumulated INTEGER NOT NULL,
+  next_recharge_at_utc INTEGER NOT NULL,
+  last_calculated_at_utc INTEGER NOT NULL,
+  PRIMARY KEY(installed_collection_id, pack_type_id),
+  CHECK (available_count >= 0),
+  CHECK (max_accumulated > 0)
+)
+''');
+  await database.customStatement('''
+INSERT INTO pack_inventory (
+  installed_collection_id,
+  pack_type_id,
+  available_count,
+  max_accumulated,
+  next_recharge_at_utc,
+  last_calculated_at_utc
+)
+SELECT
+  installed_collection_id,
+  pack_type_id,
+  available_count,
+  max_accumulated,
+  next_recharge_at_utc,
+  last_calculated_at_utc
+FROM pack_inventory_old
+''');
+  await database.customStatement('DROP TABLE pack_inventory_old');
+  await database.customStatement(
+    'CREATE INDEX idx_pack_inventory_installed_collection_id '
+    'ON pack_inventory(installed_collection_id)',
   );
 }
 
