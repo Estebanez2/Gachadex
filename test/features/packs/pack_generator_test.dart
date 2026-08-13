@@ -132,6 +132,44 @@ void main() {
       expect(higher.single.rarityId, fixture.rare.id);
     });
 
+    test('uses base rarity probabilities when slot has no custom weights', () {
+      final fixture = _Fixture();
+      final groupId = ProbabilityGroupId(_uuid(96));
+      final result = const PackGenerator().generate(
+        fixture.context(
+          rules: [fixture.distributionRule(slotIndex: 0, groupId: groupId)],
+        ),
+        _SequenceRandom([70, 0]),
+      );
+
+      expect(result.single.rarityId, fixture.rare.id);
+    });
+
+    test('does not select zero percent rarities from base probabilities', () {
+      final fixture = _Fixture(commonProbability: 100, rareProbability: 0);
+      final groupId = ProbabilityGroupId(_uuid(97));
+      final result = const PackGenerator().generate(
+        fixture.context(
+          rules: [fixture.distributionRule(slotIndex: 0, groupId: groupId)],
+        ),
+        _SequenceRandom([99, 0]),
+      );
+
+      expect(result.single.rarityId, fixture.common.id);
+    });
+
+    test('fixed rarity still ignores base probability', () {
+      final fixture = _Fixture(commonProbability: 100, rareProbability: 0);
+      final result = const PackGenerator().generate(
+        fixture.context(
+          rules: [fixture.fixedRule(slotIndex: 0, rarityId: fixture.rare.id)],
+        ),
+        _SequenceRandom([0]),
+      );
+
+      expect(result.single.rarityId, fixture.rare.id);
+    });
+
     test('errors without cards and never returns cards outside the pool', () {
       final fixture = _Fixture();
       final groupId = ProbabilityGroupId(_uuid(93));
@@ -176,7 +214,7 @@ void main() {
 
   group('PackValidation', () {
     test('rejects main max below three, empty pool and empty weights', () {
-      final fixture = _Fixture();
+      final fixture = _Fixture(commonProbability: 0, rareProbability: 0);
       final groupId = ProbabilityGroupId(_uuid(94));
       final context = fixture.context(
         poolIds: {},
@@ -287,13 +325,24 @@ void main() {
 }
 
 final class _Fixture {
-  _Fixture({this.cardCount = 1});
+  _Fixture({
+    this.cardCount = 1,
+    this.commonProbability = 60,
+    this.rareProbability = 40,
+  });
 
   final int cardCount;
+  final int commonProbability;
+  final int rareProbability;
   final collectionId = CollectionId(_uuid(1));
   final versionId = ContentVersionId(_uuid(2));
-  late final common = _rarity(RarityId(_uuid(10)), 'Normal', 0);
-  late final rare = _rarity(RarityId(_uuid(11)), 'Rara', 1);
+  late final common = _rarity(
+    RarityId(_uuid(10)),
+    'Normal',
+    0,
+    commonProbability,
+  );
+  late final rare = _rarity(RarityId(_uuid(11)), 'Rara', 1, rareProbability);
   late final commonCard = _card(CardId(_uuid(20)), common.id, 1);
   late final rareCard = _card(CardId(_uuid(21)), rare.id, 2);
 
@@ -382,7 +431,12 @@ final class _Fixture {
     );
   }
 
-  Rarity _rarity(RarityId id, String name, int orderIndex) {
+  Rarity _rarity(
+    RarityId id,
+    String name,
+    int orderIndex,
+    int probabilityWeight,
+  ) {
     return Rarity(
       id: id,
       collectionId: collectionId,
@@ -394,6 +448,7 @@ final class _Fixture {
       frameId: 'clean',
       effectId: null,
       sellValue: 10,
+      probabilityWeight: probabilityWeight,
       isEnabled: true,
     );
   }

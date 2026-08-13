@@ -27,6 +27,7 @@ Future<void> main() async {
       frameId: 'clean',
       effectId: null,
       sellValue: 5,
+      probabilityWeight: 60,
     ),
     _rarity(
       id: '11111111-1111-4111-8111-111111111202',
@@ -39,6 +40,7 @@ Future<void> main() async {
       frameId: 'bold',
       effectId: 'softGlow',
       sellValue: 15,
+      probabilityWeight: 30,
     ),
     _rarity(
       id: '11111111-1111-4111-8111-111111111203',
@@ -51,6 +53,7 @@ Future<void> main() async {
       frameId: 'double',
       effectId: 'holographic',
       sellValue: 40,
+      probabilityWeight: 10,
     ),
   ];
 
@@ -353,6 +356,7 @@ Map<String, Object?> _rarity({
   required String frameId,
   required String? effectId,
   required int sellValue,
+  required int probabilityWeight,
 }) {
   return {
     'id': id,
@@ -365,6 +369,7 @@ Map<String, Object?> _rarity({
     'frameId': frameId,
     'effectId': effectId,
     'sellValue': sellValue,
+    'probabilityWeight': probabilityWeight,
     'isEnabled': true,
   };
 }

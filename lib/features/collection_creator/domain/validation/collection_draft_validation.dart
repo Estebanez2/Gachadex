@@ -79,6 +79,8 @@ abstract final class CollectionDraftValidation {
     required String name,
     required DraftCoverStyle coverStyle,
     required int rarityCount,
+    required int rarityProbabilityTotal,
+    required bool hasPositiveRarityProbability,
     required int cardCount,
     required int packCount,
     required CollectionDraftInfoErrors infoErrors,
@@ -89,7 +91,11 @@ abstract final class CollectionDraftValidation {
         coverStyle: coverStyle,
         infoErrors: infoErrors,
       ),
-      rarities: _rarityCompletion(rarityCount),
+      rarities: _rarityCompletion(
+        rarityCount: rarityCount,
+        rarityProbabilityTotal: rarityProbabilityTotal,
+        hasPositiveRarityProbability: hasPositiveRarityProbability,
+      ),
       cards: _cardCompletion(cardCount),
       packs: _packCompletion(packCount),
     );
@@ -119,9 +125,17 @@ abstract final class CollectionDraftValidation {
     return DraftSectionCompletion.completeForThisPhase;
   }
 
-  static DraftSectionCompletion _rarityCompletion(int rarityCount) {
+  static DraftSectionCompletion _rarityCompletion({
+    required int rarityCount,
+    required int rarityProbabilityTotal,
+    required bool hasPositiveRarityProbability,
+  }) {
     if (rarityCount <= 0) {
       return DraftSectionCompletion.notStarted;
+    }
+
+    if (rarityProbabilityTotal != 100 || !hasPositiveRarityProbability) {
+      return DraftSectionCompletion.incomplete;
     }
 
     return DraftSectionCompletion.completeForThisPhase;

@@ -13,6 +13,7 @@ final class Rarity {
     required String frameId,
     required String? effectId,
     required int sellValue,
+    required int probabilityWeight,
     required this.isEnabled,
   }) : name = DomainValidation.requireTrimmedNotEmpty(name, 'name'),
        orderIndex = DomainValidation.requireNonNegative(
@@ -22,7 +23,8 @@ final class Rarity {
        iconId = DomainValidation.requireTrimmedNotEmpty(iconId, 'iconId'),
        frameId = DomainValidation.requireTrimmedNotEmpty(frameId, 'frameId'),
        effectId = DomainValidation.optionalTrimmed(effectId),
-       sellValue = DomainValidation.requireNonNegative(sellValue, 'sellValue');
+       sellValue = DomainValidation.requireNonNegative(sellValue, 'sellValue'),
+       probabilityWeight = _validateProbabilityWeight(probabilityWeight);
 
   final RarityId id;
   final CollectionId collectionId;
@@ -34,6 +36,7 @@ final class Rarity {
   final String frameId;
   final String? effectId;
   final int sellValue;
+  final int probabilityWeight;
   final bool isEnabled;
 
   Rarity copyWith({
@@ -44,6 +47,7 @@ final class Rarity {
     String? frameId,
     String? effectId,
     int? sellValue,
+    int? probabilityWeight,
     bool? isEnabled,
   }) {
     return Rarity(
@@ -57,7 +61,15 @@ final class Rarity {
       frameId: frameId ?? this.frameId,
       effectId: effectId ?? this.effectId,
       sellValue: sellValue ?? this.sellValue,
+      probabilityWeight: probabilityWeight ?? this.probabilityWeight,
       isEnabled: isEnabled ?? this.isEnabled,
     );
+  }
+
+  static int _validateProbabilityWeight(int value) {
+    if (value < 0 || value > 100) {
+      throw ArgumentError.value(value, 'probabilityWeight');
+    }
+    return value;
   }
 }

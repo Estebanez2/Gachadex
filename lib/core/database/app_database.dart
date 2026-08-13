@@ -149,6 +149,7 @@ class Rarities extends Table {
   TextColumn get frameId => text()();
   TextColumn get effectId => text().nullable()();
   IntColumn get sellValue => integer()();
+  IntColumn get probabilityWeight => integer().withDefault(const Constant(0))();
   BoolColumn get isEnabled => boolean()();
 
   @override
@@ -164,6 +165,8 @@ class Rarities extends Table {
   List<String> get customConstraints => [
     'CHECK (order_index >= 0)',
     'CHECK (sell_value >= 0)',
+    'CHECK (probability_weight >= 0)',
+    'CHECK (probability_weight <= 100)',
   ];
 }
 

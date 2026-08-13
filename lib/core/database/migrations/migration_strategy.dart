@@ -53,7 +53,15 @@ CREATE TABLE app_settings (
 )
 ''');
       }
-      if (from > 6 || to > currentDatabaseSchemaVersion) {
+      if (from <= 6 && to >= 7) {
+        if (await _tableExists(database, 'rarities')) {
+          await database.customStatement(
+            'ALTER TABLE rarities ADD COLUMN probability_weight '
+            'INTEGER NOT NULL DEFAULT 0',
+          );
+        }
+      }
+      if (from > 7 || to > currentDatabaseSchemaVersion) {
         throw AppException(
           code: 'migration_not_implemented',
           safeMessage: 'No se puede actualizar la base de datos todavia.',
@@ -68,6 +76,16 @@ CREATE TABLE app_settings (
       );
     },
   );
+}
+
+Future<bool> _tableExists(GeneratedDatabase database, String tableName) async {
+  final row = await database
+      .customSelect(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+        variables: [Variable<String>(tableName)],
+      )
+      .getSingleOrNull();
+  return row != null;
 }
 
 Future<void> _migratePackInventoryAllowsOverflow(

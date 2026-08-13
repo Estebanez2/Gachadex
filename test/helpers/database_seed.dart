@@ -68,6 +68,7 @@ Future<SeededDefinition> seedDefinition(
           frameId: const Value('clean'),
           effectId: const Value(null),
           sellValue: const Value(10),
+          probabilityWeight: const Value(100),
           isEnabled: const Value(true),
         ),
       );

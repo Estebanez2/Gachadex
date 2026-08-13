@@ -587,6 +587,7 @@ class _RaritiesSection extends ConsumerWidget {
         description: l10n.projectNotFound,
       );
     }
+    final probabilityTotal = _rarityProbabilityTotal(state.rarities);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -623,7 +624,9 @@ class _RaritiesSection extends ConsumerWidget {
               label: Text(l10n.addRarity),
             ),
           )
-        else
+        else ...[
+          _RarityProbabilitySummary(total: probabilityTotal),
+          const SizedBox(height: AppConstants.spacingMd),
           ReorderableListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -648,6 +651,7 @@ class _RaritiesSection extends ConsumerWidget {
               );
             },
           ),
+        ],
       ],
     );
   }
@@ -1327,6 +1331,63 @@ class _RarityListItem extends StatelessWidget {
   }
 }
 
+class _RarityProbabilitySummary extends StatelessWidget {
+  const _RarityProbabilitySummary({required this.total});
+
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isComplete = total == 100;
+    final statusText = total < 100
+        ? context.l10n.rarityProbabilityMissing(100 - total)
+        : total > 100
+        ? context.l10n.rarityProbabilityExcess(total - 100)
+        : context.l10n.rarityProbabilityComplete;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: isComplete
+            ? colorScheme.primaryContainer
+            : colorScheme.errorContainer,
+        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.spacingMd),
+        child: Row(
+          children: [
+            Icon(
+              isComplete ? Icons.check_circle_outline : Icons.error_outline,
+              color: isComplete
+                  ? colorScheme.onPrimaryContainer
+                  : colorScheme.onErrorContainer,
+            ),
+            const SizedBox(width: AppConstants.spacingSm),
+            Expanded(
+              child: Text(
+                '${context.l10n.rarityProbabilityTotal(total)}. $statusText',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: isComplete
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.onErrorContainer,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+int _rarityProbabilityTotal(List<Rarity> rarities) {
+  return rarities
+      .where((rarity) => rarity.isEnabled)
+      .fold(0, (sum, rarity) => sum + rarity.probabilityWeight);
+}
+
 class _OptionTitle extends StatelessWidget {
   const _OptionTitle({required this.label});
 
@@ -1619,6 +1680,7 @@ class _RarityFormSheet extends ConsumerStatefulWidget {
 class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
   late final TextEditingController _nameController;
   late final TextEditingController _sellValueController;
+  late final TextEditingController _probabilityController;
   late int _colorValue;
   late String _iconId;
   late String _frameId;
@@ -1640,11 +1702,15 @@ class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
             effectId:
                 widget.rarity!.effectId ?? RarityVisualCatalog.defaultEffectId,
             sellValue: widget.rarity!.sellValue,
+            probabilityWeight: widget.rarity!.probabilityWeight,
             isEnabled: widget.rarity!.isEnabled,
           );
     _nameController = TextEditingController(text: input.name);
     _sellValueController = TextEditingController(
       text: input.sellValue.toString(),
+    );
+    _probabilityController = TextEditingController(
+      text: input.probabilityWeight.toString(),
     );
     _colorValue = input.colorValue;
     _iconId = input.iconId;
@@ -1657,6 +1723,7 @@ class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
   void dispose() {
     _nameController.dispose();
     _sellValueController.dispose();
+    _probabilityController.dispose();
     super.dispose();
   }
 
@@ -1665,6 +1732,7 @@ class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
     final l10n = context.l10n;
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
     final sellValue = int.tryParse(_sellValueController.text.trim());
+    final probabilityWeight = int.tryParse(_probabilityController.text.trim());
     final input = RarityInput(
       name: _nameController.text,
       colorValue: _colorValue,
@@ -1672,6 +1740,7 @@ class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
       frameId: _frameId,
       effectId: _effectId,
       sellValue: sellValue ?? -1,
+      probabilityWeight: probabilityWeight ?? -1,
       isEnabled: _isEnabled,
     );
     final duplicate = _hasDuplicateName(input.name);
@@ -1683,6 +1752,7 @@ class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
       frameId: input.frameId,
       effectId: input.effectId,
       sellValue: input.sellValue,
+      probabilityWeight: input.probabilityWeight,
     );
     final showErrors = _submitted;
 
@@ -1736,12 +1806,27 @@ class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
                 ),
                 onChanged: (_) => setState(() {}),
               ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(_isEnabled ? l10n.enabled : l10n.disabled),
-                value: _isEnabled,
-                onChanged: (value) => setState(() => _isEnabled = value),
+              const SizedBox(height: AppConstants.spacingMd),
+              TextFormField(
+                controller: _probabilityController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: l10n.appearanceProbability,
+                  suffixText: '%',
+                  errorText:
+                      showErrors &&
+                          (validation.issues.contains(
+                                RarityValidationIssue.negativeProbabilityWeight,
+                              ) ||
+                              validation.issues.contains(
+                                RarityValidationIssue.probabilityWeightTooHigh,
+                              ))
+                      ? l10n.probabilityWeightInvalid
+                      : null,
+                ),
+                onChanged: (_) => setState(() {}),
               ),
+              const SizedBox(height: AppConstants.spacingMd),
               _OptionTitle(label: l10n.color),
               Wrap(
                 spacing: AppConstants.spacingSm,
@@ -1757,49 +1842,6 @@ class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
                       onSelected: (_) {
                         setState(() => _colorValue = option.colorValue);
                       },
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppConstants.spacingMd),
-              _OptionTitle(label: l10n.icon),
-              Wrap(
-                spacing: AppConstants.spacingSm,
-                runSpacing: AppConstants.spacingSm,
-                children: [
-                  for (final option in RarityVisualCatalog.icons)
-                    ChoiceChip(
-                      avatar: Icon(rarityIconForId(option.id), size: 18),
-                      label: Text(rarityIconLabel(l10n, option.id)),
-                      selected: _iconId == option.id,
-                      onSelected: (_) => setState(() => _iconId = option.id),
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppConstants.spacingMd),
-              _OptionTitle(label: l10n.frame),
-              Wrap(
-                spacing: AppConstants.spacingSm,
-                runSpacing: AppConstants.spacingSm,
-                children: [
-                  for (final option in RarityVisualCatalog.frames)
-                    ChoiceChip(
-                      label: Text(rarityFrameLabel(l10n, option.id)),
-                      selected: _frameId == option.id,
-                      onSelected: (_) => setState(() => _frameId = option.id),
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppConstants.spacingMd),
-              _OptionTitle(label: l10n.effect),
-              Wrap(
-                spacing: AppConstants.spacingSm,
-                runSpacing: AppConstants.spacingSm,
-                children: [
-                  for (final option in RarityVisualCatalog.effects)
-                    ChoiceChip(
-                      label: Text(rarityEffectLabel(l10n, option.id)),
-                      selected: _effectId == option.id,
-                      onSelected: (_) => setState(() => _effectId = option.id),
                     ),
                 ],
               ),
@@ -1878,6 +1920,9 @@ class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
   Rarity _previewRarity(AppLocalizations l10n, RarityInput input) {
     final name = input.name.trim().isEmpty ? l10n.name : input.name;
     final sellValue = input.sellValue < 0 ? 0 : input.sellValue;
+    final probabilityWeight = input.probabilityWeight < 0
+        ? 0
+        : input.probabilityWeight;
     final contentVersionId = widget.state.project.currentContentVersionId;
 
     return Rarity(
@@ -1893,6 +1938,7 @@ class _RarityFormSheetState extends ConsumerState<_RarityFormSheet> {
       frameId: input.frameId,
       effectId: input.effectId,
       sellValue: sellValue,
+      probabilityWeight: probabilityWeight,
       isEnabled: input.isEnabled,
     );
   }

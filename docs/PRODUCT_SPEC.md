@@ -491,6 +491,7 @@ icon_id
 frame_id
 effect_id
 sell_value
+probability_weight
 is_enabled
 ```
 
@@ -498,11 +499,15 @@ is_enabled
 
 * El nombre es personalizado.
 * El color se elige de una lista.
-* El icono se elige de una galería incluida en la aplicación.
-* El marco se elige de una galería.
-* El efecto visual se elige de una lista.
+* Icono, marco y efecto visual existen como metadatos internos con valores por
+  defecto y compatibilidad con datos antiguos, pero no se muestran en el flujo
+  simple de creacion/edicion de rarezas.
 * El valor de venta se configura por rareza.
+* La probabilidad base de aparicion se configura por rareza con un entero de 0
+  a 100.
 * Debe existir al menos una rareza.
+* Para completar/finalizar una coleccion, las probabilidades de rarezas activas
+  deben sumar exactamente 100 y al menos una debe ser mayor que 0.
 * Una rareza usada por una carta no puede eliminarse sin reasignar antes esa carta.
 
 ## 10.4. Carta

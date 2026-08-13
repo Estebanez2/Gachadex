@@ -17,6 +17,7 @@ extension RarityRowMapper on RarityRow {
       frameId: frameId,
       effectId: effectId,
       sellValue: sellValue,
+      probabilityWeight: probabilityWeight,
       isEnabled: isEnabled,
     );
   }
@@ -35,6 +36,7 @@ extension RarityDomainMapper on Rarity {
       frameId: Value(frameId),
       effectId: Value(effectId),
       sellValue: Value(sellValue),
+      probabilityWeight: Value(probabilityWeight),
       isEnabled: Value(isEnabled),
     );
   }

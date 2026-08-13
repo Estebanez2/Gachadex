@@ -262,6 +262,45 @@
   "@sellValue": {
     "description": "Campo de valor de venta por rareza."
   },
+  "appearanceProbability": "Probabilidad de aparicion",
+  "@appearanceProbability": {
+    "description": "Campo de probabilidad base de aparicion por rareza."
+  },
+  "probabilityWeightInvalid": "Introduce un valor entre 0 y 100",
+  "@probabilityWeightInvalid": {
+    "description": "Error de probabilidad de rareza fuera de rango."
+  },
+  "rarityProbabilityTotal": "Probabilidad total: {total} %",
+  "@rarityProbabilityTotal": {
+    "description": "Resumen de probabilidad total de rarezas.",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rarityProbabilityMissing": "Falta {missing} %",
+  "@rarityProbabilityMissing": {
+    "description": "Cantidad de probabilidad que falta hasta 100.",
+    "placeholders": {
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "rarityProbabilityExcess": "Sobran {excess} %",
+  "@rarityProbabilityExcess": {
+    "description": "Cantidad de probabilidad que supera 100.",
+    "placeholders": {
+      "excess": {
+        "type": "int"
+      }
+    }
+  },
+  "rarityProbabilityComplete": "Distribucion lista",
+  "@rarityProbabilityComplete": {
+    "description": "Estado de probabilidad completa en rarezas."
+  },
   "color": "Color",
   "@color": {
     "description": "Etiqueta de selector de color."
@@ -973,6 +1012,10 @@
   "probabilityNeedsWeight": "Cada distribucion necesita algun peso positivo",
   "@probabilityNeedsWeight": {
     "description": "Error de distribucion sin pesos positivos."
+  },
+  "collectionRarityProbabilities": "Usa las probabilidades de la coleccion",
+  "@collectionRarityProbabilities": {
+    "description": "Texto de reglas de sobre que reutilizan probabilidades base de rareza."
   },
   "packNameRequired": "Escribe un nombre para el sobre",
   "@packNameRequired": {

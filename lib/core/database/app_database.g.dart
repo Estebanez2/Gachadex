@@ -4542,6 +4542,18 @@ class $RaritiesTable extends Rarities
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _probabilityWeightMeta = const VerificationMeta(
+    'probabilityWeight',
+  );
+  @override
+  late final GeneratedColumn<int> probabilityWeight = GeneratedColumn<int>(
+    'probability_weight',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _isEnabledMeta = const VerificationMeta(
     'isEnabled',
   );
@@ -4568,6 +4580,7 @@ class $RaritiesTable extends Rarities
     frameId,
     effectId,
     sellValue,
+    probabilityWeight,
     isEnabled,
   ];
   @override
@@ -4663,6 +4676,15 @@ class $RaritiesTable extends Rarities
     } else if (isInserting) {
       context.missing(_sellValueMeta);
     }
+    if (data.containsKey('probability_weight')) {
+      context.handle(
+        _probabilityWeightMeta,
+        probabilityWeight.isAcceptableOrUnknown(
+          data['probability_weight']!,
+          _probabilityWeightMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_enabled')) {
       context.handle(
         _isEnabledMeta,
@@ -4725,6 +4747,10 @@ class $RaritiesTable extends Rarities
         DriftSqlType.int,
         data['${effectivePrefix}sell_value'],
       )!,
+      probabilityWeight: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}probability_weight'],
+      )!,
       isEnabled: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_enabled'],
@@ -4749,6 +4775,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
   final String frameId;
   final String? effectId;
   final int sellValue;
+  final int probabilityWeight;
   final bool isEnabled;
   const RarityRow({
     required this.id,
@@ -4761,6 +4788,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
     required this.frameId,
     this.effectId,
     required this.sellValue,
+    required this.probabilityWeight,
     required this.isEnabled,
   });
   @override
@@ -4778,6 +4806,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
       map['effect_id'] = Variable<String>(effectId);
     }
     map['sell_value'] = Variable<int>(sellValue);
+    map['probability_weight'] = Variable<int>(probabilityWeight);
     map['is_enabled'] = Variable<bool>(isEnabled);
     return map;
   }
@@ -4796,6 +4825,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
           ? const Value.absent()
           : Value(effectId),
       sellValue: Value(sellValue),
+      probabilityWeight: Value(probabilityWeight),
       isEnabled: Value(isEnabled),
     );
   }
@@ -4816,6 +4846,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
       frameId: serializer.fromJson<String>(json['frameId']),
       effectId: serializer.fromJson<String?>(json['effectId']),
       sellValue: serializer.fromJson<int>(json['sellValue']),
+      probabilityWeight: serializer.fromJson<int>(json['probabilityWeight']),
       isEnabled: serializer.fromJson<bool>(json['isEnabled']),
     );
   }
@@ -4833,6 +4864,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
       'frameId': serializer.toJson<String>(frameId),
       'effectId': serializer.toJson<String?>(effectId),
       'sellValue': serializer.toJson<int>(sellValue),
+      'probabilityWeight': serializer.toJson<int>(probabilityWeight),
       'isEnabled': serializer.toJson<bool>(isEnabled),
     };
   }
@@ -4848,6 +4880,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
     String? frameId,
     Value<String?> effectId = const Value.absent(),
     int? sellValue,
+    int? probabilityWeight,
     bool? isEnabled,
   }) => RarityRow(
     id: id ?? this.id,
@@ -4860,6 +4893,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
     frameId: frameId ?? this.frameId,
     effectId: effectId.present ? effectId.value : this.effectId,
     sellValue: sellValue ?? this.sellValue,
+    probabilityWeight: probabilityWeight ?? this.probabilityWeight,
     isEnabled: isEnabled ?? this.isEnabled,
   );
   RarityRow copyWithCompanion(RaritiesCompanion data) {
@@ -4882,6 +4916,9 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
       frameId: data.frameId.present ? data.frameId.value : this.frameId,
       effectId: data.effectId.present ? data.effectId.value : this.effectId,
       sellValue: data.sellValue.present ? data.sellValue.value : this.sellValue,
+      probabilityWeight: data.probabilityWeight.present
+          ? data.probabilityWeight.value
+          : this.probabilityWeight,
       isEnabled: data.isEnabled.present ? data.isEnabled.value : this.isEnabled,
     );
   }
@@ -4899,6 +4936,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
           ..write('frameId: $frameId, ')
           ..write('effectId: $effectId, ')
           ..write('sellValue: $sellValue, ')
+          ..write('probabilityWeight: $probabilityWeight, ')
           ..write('isEnabled: $isEnabled')
           ..write(')'))
         .toString();
@@ -4916,6 +4954,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
     frameId,
     effectId,
     sellValue,
+    probabilityWeight,
     isEnabled,
   );
   @override
@@ -4932,6 +4971,7 @@ class RarityRow extends DataClass implements Insertable<RarityRow> {
           other.frameId == this.frameId &&
           other.effectId == this.effectId &&
           other.sellValue == this.sellValue &&
+          other.probabilityWeight == this.probabilityWeight &&
           other.isEnabled == this.isEnabled);
 }
 
@@ -4946,6 +4986,7 @@ class RaritiesCompanion extends UpdateCompanion<RarityRow> {
   final Value<String> frameId;
   final Value<String?> effectId;
   final Value<int> sellValue;
+  final Value<int> probabilityWeight;
   final Value<bool> isEnabled;
   final Value<int> rowid;
   const RaritiesCompanion({
@@ -4959,6 +5000,7 @@ class RaritiesCompanion extends UpdateCompanion<RarityRow> {
     this.frameId = const Value.absent(),
     this.effectId = const Value.absent(),
     this.sellValue = const Value.absent(),
+    this.probabilityWeight = const Value.absent(),
     this.isEnabled = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -4973,6 +5015,7 @@ class RaritiesCompanion extends UpdateCompanion<RarityRow> {
     required String frameId,
     this.effectId = const Value.absent(),
     required int sellValue,
+    this.probabilityWeight = const Value.absent(),
     required bool isEnabled,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -4996,6 +5039,7 @@ class RaritiesCompanion extends UpdateCompanion<RarityRow> {
     Expression<String>? frameId,
     Expression<String>? effectId,
     Expression<int>? sellValue,
+    Expression<int>? probabilityWeight,
     Expression<bool>? isEnabled,
     Expression<int>? rowid,
   }) {
@@ -5010,6 +5054,7 @@ class RaritiesCompanion extends UpdateCompanion<RarityRow> {
       if (frameId != null) 'frame_id': frameId,
       if (effectId != null) 'effect_id': effectId,
       if (sellValue != null) 'sell_value': sellValue,
+      if (probabilityWeight != null) 'probability_weight': probabilityWeight,
       if (isEnabled != null) 'is_enabled': isEnabled,
       if (rowid != null) 'rowid': rowid,
     });
@@ -5026,6 +5071,7 @@ class RaritiesCompanion extends UpdateCompanion<RarityRow> {
     Value<String>? frameId,
     Value<String?>? effectId,
     Value<int>? sellValue,
+    Value<int>? probabilityWeight,
     Value<bool>? isEnabled,
     Value<int>? rowid,
   }) {
@@ -5040,6 +5086,7 @@ class RaritiesCompanion extends UpdateCompanion<RarityRow> {
       frameId: frameId ?? this.frameId,
       effectId: effectId ?? this.effectId,
       sellValue: sellValue ?? this.sellValue,
+      probabilityWeight: probabilityWeight ?? this.probabilityWeight,
       isEnabled: isEnabled ?? this.isEnabled,
       rowid: rowid ?? this.rowid,
     );
@@ -5078,6 +5125,9 @@ class RaritiesCompanion extends UpdateCompanion<RarityRow> {
     if (sellValue.present) {
       map['sell_value'] = Variable<int>(sellValue.value);
     }
+    if (probabilityWeight.present) {
+      map['probability_weight'] = Variable<int>(probabilityWeight.value);
+    }
     if (isEnabled.present) {
       map['is_enabled'] = Variable<bool>(isEnabled.value);
     }
@@ -5100,6 +5150,7 @@ class RaritiesCompanion extends UpdateCompanion<RarityRow> {
           ..write('frameId: $frameId, ')
           ..write('effectId: $effectId, ')
           ..write('sellValue: $sellValue, ')
+          ..write('probabilityWeight: $probabilityWeight, ')
           ..write('isEnabled: $isEnabled, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -15515,6 +15566,7 @@ typedef $$RaritiesTableCreateCompanionBuilder =
       required String frameId,
       Value<String?> effectId,
       required int sellValue,
+      Value<int> probabilityWeight,
       required bool isEnabled,
       Value<int> rowid,
     });
@@ -15530,6 +15582,7 @@ typedef $$RaritiesTableUpdateCompanionBuilder =
       Value<String> frameId,
       Value<String?> effectId,
       Value<int> sellValue,
+      Value<int> probabilityWeight,
       Value<bool> isEnabled,
       Value<int> rowid,
     });
@@ -15670,6 +15723,11 @@ class $$RaritiesTableFilterComposer
 
   ColumnFilters<int> get sellValue => $composableBuilder(
     column: $table.sellValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get probabilityWeight => $composableBuilder(
+    column: $table.probabilityWeight,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15832,6 +15890,11 @@ class $$RaritiesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get probabilityWeight => $composableBuilder(
+    column: $table.probabilityWeight,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isEnabled => $composableBuilder(
     column: $table.isEnabled,
     builder: (column) => ColumnOrderings(column),
@@ -15902,6 +15965,11 @@ class $$RaritiesTableAnnotationComposer
 
   GeneratedColumn<int> get sellValue =>
       $composableBuilder(column: $table.sellValue, builder: (column) => column);
+
+  GeneratedColumn<int> get probabilityWeight => $composableBuilder(
+    column: $table.probabilityWeight,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isEnabled =>
       $composableBuilder(column: $table.isEnabled, builder: (column) => column);
@@ -16050,6 +16118,7 @@ class $$RaritiesTableTableManager
                 Value<String> frameId = const Value.absent(),
                 Value<String?> effectId = const Value.absent(),
                 Value<int> sellValue = const Value.absent(),
+                Value<int> probabilityWeight = const Value.absent(),
                 Value<bool> isEnabled = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RaritiesCompanion(
@@ -16063,6 +16132,7 @@ class $$RaritiesTableTableManager
                 frameId: frameId,
                 effectId: effectId,
                 sellValue: sellValue,
+                probabilityWeight: probabilityWeight,
                 isEnabled: isEnabled,
                 rowid: rowid,
               ),
@@ -16078,6 +16148,7 @@ class $$RaritiesTableTableManager
                 required String frameId,
                 Value<String?> effectId = const Value.absent(),
                 required int sellValue,
+                Value<int> probabilityWeight = const Value.absent(),
                 required bool isEnabled,
                 Value<int> rowid = const Value.absent(),
               }) => RaritiesCompanion.insert(
@@ -16091,6 +16162,7 @@ class $$RaritiesTableTableManager
                 frameId: frameId,
                 effectId: effectId,
                 sellValue: sellValue,
+                probabilityWeight: probabilityWeight,
                 isEnabled: isEnabled,
                 rowid: rowid,
               ),

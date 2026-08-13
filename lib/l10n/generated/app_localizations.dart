@@ -460,6 +460,42 @@ abstract class AppLocalizations {
   /// **'Valor de venta'**
   String get sellValue;
 
+  /// Campo de probabilidad base de aparicion por rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Probabilidad de aparicion'**
+  String get appearanceProbability;
+
+  /// Error de probabilidad de rareza fuera de rango.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce un valor entre 0 y 100'**
+  String get probabilityWeightInvalid;
+
+  /// Resumen de probabilidad total de rarezas.
+  ///
+  /// In es, this message translates to:
+  /// **'Probabilidad total: {total} %'**
+  String rarityProbabilityTotal(int total);
+
+  /// Cantidad de probabilidad que falta hasta 100.
+  ///
+  /// In es, this message translates to:
+  /// **'Falta {missing} %'**
+  String rarityProbabilityMissing(int missing);
+
+  /// Cantidad de probabilidad que supera 100.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobran {excess} %'**
+  String rarityProbabilityExcess(int excess);
+
+  /// Estado de probabilidad completa en rarezas.
+  ///
+  /// In es, this message translates to:
+  /// **'Distribucion lista'**
+  String get rarityProbabilityComplete;
+
   /// Etiqueta de selector de color.
   ///
   /// In es, this message translates to:
@@ -1485,6 +1521,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cada distribucion necesita algun peso positivo'**
   String get probabilityNeedsWeight;
+
+  /// Texto de reglas de sobre que reutilizan probabilidades base de rareza.
+  ///
+  /// In es, this message translates to:
+  /// **'Usa las probabilidades de la coleccion'**
+  String get collectionRarityProbabilities;
 
   /// Error de nombre obligatorio de sobre.
   ///

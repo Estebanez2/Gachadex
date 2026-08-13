@@ -55,7 +55,12 @@ void main() {
             'app_settings',
           ]),
         );
-        expect(database.schemaVersion, 6);
+        expect(database.schemaVersion, 7);
+        final rarityColumns = await database
+            .customSelect('PRAGMA table_info(rarities)')
+            .map((row) => row.read<String>('name'))
+            .get();
+        expect(rarityColumns, contains('probability_weight'));
 
         final foreignKeys = await database
             .customSelect('PRAGMA foreign_keys')
@@ -396,7 +401,7 @@ CREATE TABLE pack_inventory (
             .map((row) => row.read<String>('sql'))
             .getSingle();
 
-        expect(database.schemaVersion, 6);
+        expect(database.schemaVersion, 7);
         expect(
           schemaSql,
           isNot(contains('available_count <= max_accumulated')),
