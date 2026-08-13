@@ -166,6 +166,24 @@ abstract class AppLocalizations {
   /// **'Todavía no hay colecciones.'**
   String get noCollections;
 
+  /// Estado vacio de la biblioteca principal de album.
+  ///
+  /// In es, this message translates to:
+  /// **'Aun no tienes ninguna coleccion.'**
+  String get albumEmptyTitle;
+
+  /// Descripcion del estado vacio de la biblioteca principal de album.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea una coleccion o importa un paquete .gachadex para empezar.'**
+  String get albumEmptyDescription;
+
+  /// Descripcion breve de la biblioteca principal de album.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus colecciones instaladas y jugables aparecen aqui.'**
+  String get albumLibraryDescription;
+
   /// Titulo de la lista de sobres disponibles en Inicio.
   ///
   /// In es, this message translates to:
@@ -201,6 +219,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Disponible'**
   String get available;
+
+  /// Total de sobres disponibles de una coleccion instalada.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{0 sobres disponibles} =1{1 sobre disponible} other{{count} sobres disponibles}}'**
+  String totalAvailablePacksCount(int count);
 
   /// Accion para abrir el detalle de una coleccion.
   ///
@@ -1876,10 +1900,10 @@ abstract class AppLocalizations {
   /// **'Nuevas: {newCount} · Repetidas: {repeatedCount}'**
   String openingSummaryCounts(int newCount, int repeatedCount);
 
-  /// Accion para ver album.
+  /// Accion para ver las cartas de una coleccion.
   ///
   /// In es, this message translates to:
-  /// **'Ver album'**
+  /// **'Ver cartas'**
   String get viewAlbum;
 
   /// Accion para volver a sobres.
@@ -1964,6 +1988,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Movimientos'**
   String get movements;
+
+  /// Estado vacio del historial de movimientos.
+  ///
+  /// In es, this message translates to:
+  /// **'Aun no hay movimientos.'**
+  String get noMovements;
 
   /// Accion para vender cartas repetidas.
   ///

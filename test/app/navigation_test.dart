@@ -16,8 +16,8 @@ void main() {
       expect(find.text('Ver error controlado'), findsNothing);
 
       await tester.tap(navigationLabel('\u00c1lbum'));
-      await _pumpUntilTextContaining(tester, 'hay colecciones');
-      expect(find.textContaining('hay colecciones'), findsOneWidget);
+      await _pumpUntilTextContaining(tester, 'ninguna colecci');
+      expect(find.textContaining('ninguna colecci'), findsOneWidget);
       expect(_selectedIndex(tester), 1);
 
       await tester.tap(navigationLabel('Crear'));

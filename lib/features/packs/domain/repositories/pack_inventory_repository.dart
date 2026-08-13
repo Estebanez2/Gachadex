@@ -4,6 +4,8 @@ import '../entities/pack_inventory.dart';
 abstract interface class PackInventoryRepository {
   Future<List<PackInventory>> getAll();
 
+  Stream<List<PackInventory>> watchAll();
+
   Future<List<PackInventory>> getByInstalledCollection(
     InstalledCollectionId installedCollectionId,
   );

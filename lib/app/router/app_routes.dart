@@ -16,7 +16,7 @@ abstract final class AppRoutes {
   }
 
   static String installedCollectionAlbumPath(String installedCollectionId) {
-    return '${installedCollectionPath(installedCollectionId)}?tab=album';
+    return '${installedCollectionPath(installedCollectionId)}?tab=cards';
   }
 
   static const packOpeningName = 'pack-opening';

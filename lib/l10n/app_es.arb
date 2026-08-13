@@ -48,6 +48,18 @@
   "@noCollections": {
     "description": "Estado vacio de la pantalla Colecciones."
   },
+  "albumEmptyTitle": "Aun no tienes ninguna coleccion.",
+  "@albumEmptyTitle": {
+    "description": "Estado vacio de la biblioteca principal de album."
+  },
+  "albumEmptyDescription": "Crea una coleccion o importa un paquete .gachadex para empezar.",
+  "@albumEmptyDescription": {
+    "description": "Descripcion del estado vacio de la biblioteca principal de album."
+  },
+  "albumLibraryDescription": "Tus colecciones instaladas y jugables aparecen aqui.",
+  "@albumLibraryDescription": {
+    "description": "Descripcion breve de la biblioteca principal de album."
+  },
   "availablePacksTitle": "Sobres disponibles",
   "@availablePacksTitle": {
     "description": "Titulo de la lista de sobres disponibles en Inicio."
@@ -84,6 +96,15 @@
   "available": "Disponible",
   "@available": {
     "description": "Estado disponible para un sobre."
+  },
+  "totalAvailablePacksCount": "{count, plural, =0{0 sobres disponibles} =1{1 sobre disponible} other{{count} sobres disponibles}}",
+  "@totalAvailablePacksCount": {
+    "description": "Total de sobres disponibles de una coleccion instalada.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "viewCollection": "Ver coleccion",
   "@viewCollection": {
@@ -1320,9 +1341,9 @@
       }
     }
   },
-  "viewAlbum": "Ver album",
+  "viewAlbum": "Ver cartas",
   "@viewAlbum": {
-    "description": "Accion para ver album."
+    "description": "Accion para ver las cartas de una coleccion."
   },
   "backToPacks": "Volver a sobres",
   "@backToPacks": {
@@ -1394,6 +1415,10 @@
   "movements": "Movimientos",
   "@movements": {
     "description": "Titulo del historial de movimientos."
+  },
+  "noMovements": "Aun no hay movimientos.",
+  "@noMovements": {
+    "description": "Estado vacio del historial de movimientos."
   },
   "sellDuplicates": "Vender repetidas",
   "@sellDuplicates": {
