@@ -10,6 +10,12 @@ final class DriftPackInventoryRepository implements PackInventoryRepository {
   final AppDatabase database;
 
   @override
+  Future<List<PackInventory>> getAll() async {
+    final rows = await database.select(database.packInventory).get();
+    return rows.map((row) => row.toDomain()).toList(growable: false);
+  }
+
+  @override
   Future<List<PackInventory>> getByInstalledCollection(
     InstalledCollectionId installedCollectionId,
   ) async {

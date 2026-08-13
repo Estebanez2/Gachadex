@@ -48,13 +48,46 @@
   "@noCollections": {
     "description": "Estado vacio de la pantalla Colecciones."
   },
-  "comingSoon": "Próximamente",
-  "@comingSoon": {
-    "description": "Etiqueta para funciones aun no disponibles."
+  "availablePacksTitle": "Sobres disponibles",
+  "@availablePacksTitle": {
+    "description": "Titulo de la lista de sobres disponibles en Inicio."
   },
-  "homePackMessage": "Aquí aparecerán los sobres disponibles.",
-  "@homePackMessage": {
-    "description": "Mensaje provisional de la pantalla Inicio."
+  "homeAvailablePacksCount": "Tienes {count} sobres disponibles",
+  "@homeAvailablePacksCount": {
+    "description": "Resumen de sobres disponibles en Inicio.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noAvailablePacks": "No tienes sobres disponibles",
+  "@noAvailablePacks": {
+    "description": "Estado cuando no hay sobres disponibles en Inicio."
+  },
+  "homeEmptyDescription": "Importa una coleccion o vuelve mas tarde cuando se recarguen tus sobres.",
+  "@homeEmptyDescription": {
+    "description": "Descripcion del estado vacio de Inicio."
+  },
+  "homePackAvailableLine": "{available}/{max} disponibles",
+  "@homePackAvailableLine": {
+    "description": "Cantidad disponible de un tipo de sobre en Inicio.",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "available": "Disponible",
+  "@available": {
+    "description": "Estado disponible para un sobre."
+  },
+  "viewCollection": "Ver coleccion",
+  "@viewCollection": {
+    "description": "Accion para abrir el detalle de una coleccion."
   },
   "collectionsEmptyDescription": "Aquí aparecerán las colecciones instaladas y los proyectos creados.",
   "@collectionsEmptyDescription": {
@@ -63,22 +96,6 @@
   "createDescription": "Aquí se crearán colecciones cuando la fase de creador esté lista.",
   "@createDescription": {
     "description": "Descripcion provisional de la pantalla Crear."
-  },
-  "controlledError": "Error controlado",
-  "@controlledError": {
-    "description": "Titulo de la pantalla de error controlado."
-  },
-  "controlledErrorDescription": "Esta pantalla comprueba que los errores se muestran con un mensaje seguro.",
-  "@controlledErrorDescription": {
-    "description": "Descripcion segura del error controlado."
-  },
-  "openControlledError": "Ver error controlado",
-  "@openControlledError": {
-    "description": "Boton para abrir la ruta de error controlado."
-  },
-  "openControlledErrorTooltip": "Abre la pantalla de error controlado",
-  "@openControlledErrorTooltip": {
-    "description": "Tooltip del boton que abre el error controlado."
   },
   "notFoundTitle": "Página no encontrada",
   "@notFoundTitle": {
@@ -1079,7 +1096,7 @@
   "@continueOpening": {
     "description": "Accion para continuar una apertura pendiente."
   },
-  "album": "Album",
+  "album": "Álbum",
   "@album": {
     "description": "Seccion de album."
   },

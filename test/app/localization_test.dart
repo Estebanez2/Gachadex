@@ -16,7 +16,7 @@ void main() {
     expect(locale.languageCode, 'es');
     expect(l10n.appTitle, 'Gachadex');
     expect(find.text('Inicio'), findsWidgets);
-    expect(find.text('Colecciones'), findsWidgets);
+    expect(find.text('\u00c1lbum'), findsWidgets);
     expect(find.text('Crear'), findsWidgets);
     expect(find.text('Ajustes'), findsWidgets);
   });

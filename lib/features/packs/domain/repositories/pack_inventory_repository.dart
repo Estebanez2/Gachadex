@@ -2,6 +2,8 @@ import '../../../../core/identifiers/entity_id.dart';
 import '../entities/pack_inventory.dart';
 
 abstract interface class PackInventoryRepository {
+  Future<List<PackInventory>> getAll();
+
   Future<List<PackInventory>> getByInstalledCollection(
     InstalledCollectionId installedCollectionId,
   );

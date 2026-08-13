@@ -4,10 +4,13 @@ abstract final class AppRoutes {
   static const homeName = 'home';
   static const homePath = '/home';
 
+  static const albumName = 'album';
+  static const albumPath = '/album';
+
   static const collectionsName = 'collections';
   static const collectionsPath = '/collections';
   static const installedCollectionName = 'installed-collection';
-  static const installedCollectionPathPrefix = '/collections';
+  static const installedCollectionPathPrefix = '/album';
   static String installedCollectionPath(String installedCollectionId) {
     return '$installedCollectionPathPrefix/$installedCollectionId';
   }
@@ -61,7 +64,4 @@ abstract final class AppRoutes {
 
   static const settingsName = 'settings';
   static const settingsPath = '/settings';
-
-  static const controlledErrorName = 'controlled-error';
-  static const controlledErrorPath = '/controlled-error';
 }
