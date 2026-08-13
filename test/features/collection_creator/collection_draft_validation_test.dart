@@ -17,6 +17,8 @@ void main() {
         name: '   ',
         coverStyle: DraftCoverStyle.defaultStyle(),
         rarityCount: 0,
+        rarityProbabilityTotal: 0,
+        hasPositiveRarityProbability: false,
         cardCount: 0,
         packCount: 0,
         infoErrors: errors,
@@ -52,7 +54,9 @@ void main() {
         final completeness = CollectionDraftValidation.completeness(
           name: 'Viaje',
           coverStyle: DraftCoverStyle.defaultStyle(),
-          rarityCount: 1,
+          rarityCount: 4,
+          rarityProbabilityTotal: 100,
+          hasPositiveRarityProbability: true,
           cardCount: 1,
           packCount: 1,
           infoErrors: errors,
@@ -66,6 +70,38 @@ void main() {
         expect(completeness.hasFuturePendingWork, isTrue);
       },
     );
+
+    test('requires rarity probabilities to sum 100 for completeness', () {
+      final errors = CollectionDraftValidation.validateInfo(
+        name: 'Viaje',
+        author: '',
+        description: '',
+      );
+
+      final incomplete = CollectionDraftValidation.completeness(
+        name: 'Viaje',
+        coverStyle: DraftCoverStyle.defaultStyle(),
+        rarityCount: 2,
+        rarityProbabilityTotal: 85,
+        hasPositiveRarityProbability: true,
+        cardCount: 1,
+        packCount: 1,
+        infoErrors: errors,
+      );
+      final overflow = CollectionDraftValidation.completeness(
+        name: 'Viaje',
+        coverStyle: DraftCoverStyle.defaultStyle(),
+        rarityCount: 2,
+        rarityProbabilityTotal: 110,
+        hasPositiveRarityProbability: true,
+        cardCount: 1,
+        packCount: 1,
+        infoErrors: errors,
+      );
+
+      expect(incomplete.rarities, DraftSectionCompletion.incomplete);
+      expect(overflow.rarities, DraftSectionCompletion.incomplete);
+    });
 
     test('validates draft cover identifiers against the catalog', () {
       final style = DraftCoverStyle(
@@ -98,6 +134,7 @@ void main() {
         frameId: 'missing_frame',
         effectId: 'missing_effect',
         sellValue: -1,
+        probabilityWeight: -1,
       );
 
       expect(
@@ -106,6 +143,7 @@ void main() {
           RarityValidationIssue.emptyName,
           RarityValidationIssue.duplicateName,
           RarityValidationIssue.negativeSellValue,
+          RarityValidationIssue.negativeProbabilityWeight,
           RarityValidationIssue.colorNotAllowed,
           RarityValidationIssue.iconNotAllowed,
           RarityValidationIssue.frameNotAllowed,
@@ -131,6 +169,7 @@ void main() {
         frameId: RarityVisualCatalog.defaultFrameId,
         effectId: RarityVisualCatalog.defaultEffectId,
         sellValue: RarityVisualCatalog.maxSellValue,
+        probabilityWeight: 0,
       );
       final rejected = RarityValidation.validate(
         name: 'Legendaria',
@@ -140,10 +179,15 @@ void main() {
         frameId: RarityVisualCatalog.defaultFrameId,
         effectId: RarityVisualCatalog.defaultEffectId,
         sellValue: RarityVisualCatalog.maxSellValue + 1,
+        probabilityWeight: 101,
       );
 
       expect(accepted.canSave, isTrue);
       expect(rejected.issues, contains(RarityValidationIssue.sellValueTooHigh));
+      expect(
+        rejected.issues,
+        contains(RarityValidationIssue.probabilityWeightTooHigh),
+      );
     });
   });
 }

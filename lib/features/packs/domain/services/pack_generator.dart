@@ -139,29 +139,38 @@ final class PackGenerator {
       throw const PackGenerationException('Falta grupo de probabilidad.');
     }
     final allowedIds = rarities.map((rarity) => rarity.id).toSet();
-    final weights = probabilities
+    final configuredWeights = probabilities
         .where(
           (probability) =>
               probability.probabilityGroupId == groupId &&
               allowedIds.contains(probability.rarityId),
         )
         .toList();
-    final total = weights.fold<int>(0, (sum, probability) {
-      return sum + probability.weight;
-    });
+    final weights = configuredWeights.isEmpty
+        ? {
+            for (final rarity in rarities)
+              if (rarity.probabilityWeight > 0)
+                rarity.id: rarity.probabilityWeight,
+          }
+        : {
+            for (final probability in configuredWeights)
+              if (probability.weight > 0)
+                probability.rarityId: probability.weight,
+          };
+    final total = weights.values.fold<int>(0, (sum, weight) => sum + weight);
     if (total <= 0) {
       throw const PackGenerationException('La distribucion no tiene pesos.');
     }
 
     var roll = random.nextInt(total);
-    for (final weight in weights) {
-      if (roll < weight.weight) {
-        return rarities.firstWhere((rarity) => rarity.id == weight.rarityId);
+    for (final entry in weights.entries) {
+      if (roll < entry.value) {
+        return rarities.firstWhere((rarity) => rarity.id == entry.key);
       }
-      roll -= weight.weight;
+      roll -= entry.value;
     }
 
-    return rarities.firstWhere((rarity) => rarity.id == weights.last.rarityId);
+    return rarities.firstWhere((rarity) => rarity.id == weights.keys.last);
   }
 
   Rarity _fallbackRarity({

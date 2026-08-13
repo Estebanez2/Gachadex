@@ -6,6 +6,8 @@ enum RarityValidationIssue {
   duplicateName,
   negativeSellValue,
   sellValueTooHigh,
+  negativeProbabilityWeight,
+  probabilityWeightTooHigh,
   colorNotAllowed,
   iconNotAllowed,
   frameNotAllowed,
@@ -33,6 +35,7 @@ abstract final class RarityValidation {
     required String frameId,
     required String effectId,
     required int sellValue,
+    required int probabilityWeight,
   }) {
     final issues = <RarityValidationIssue>{};
     final normalized = normalizedName(name);
@@ -51,6 +54,12 @@ abstract final class RarityValidation {
     }
     if (sellValue > RarityVisualCatalog.maxSellValue) {
       issues.add(RarityValidationIssue.sellValueTooHigh);
+    }
+    if (probabilityWeight < 0) {
+      issues.add(RarityValidationIssue.negativeProbabilityWeight);
+    }
+    if (probabilityWeight > 100) {
+      issues.add(RarityValidationIssue.probabilityWeightTooHigh);
     }
     if (!RarityVisualCatalog.isColorValue(colorValue)) {
       issues.add(RarityValidationIssue.colorNotAllowed);

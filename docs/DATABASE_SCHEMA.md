@@ -1,8 +1,8 @@
 # Esquema de base de datos
 
-Fecha: 2026-08-11
+Fecha: 2026-08-13
 
-Schema version: `6`
+Schema version: `7`
 
 Motor: SQLite mediante Drift.
 
@@ -107,6 +107,8 @@ Restricciones:
 
 - `order_index >= 0`.
 - `sell_value >= 0`.
+- `probability_weight >= 0`.
+- `probability_weight <= 100`.
 
 ### `media_assets`
 
@@ -252,6 +254,10 @@ Restricciones:
 ### `pack_rarity_probabilities`
 
 Pesos enteros por grupo de probabilidad.
+
+En la interfaz actual los sobres normales reutilizan `rarities.probability_weight`
+como distribucion base. Esta tabla queda como soporte de pesos explicitos por
+slot cuando una configuracion antigua o especial ya los tiene guardados.
 
 Claves:
 
@@ -458,6 +464,13 @@ Crea `app_settings`:
 
 La tabla se usa para preferencias locales como notificaciones de sobres. No
 modifica contenido, progreso, inventario ni paquetes exportados.
+
+### Version 6 -> 7
+
+Anade `rarities.probability_weight INTEGER NOT NULL DEFAULT 0`.
+
+Las rarezas existentes quedan con `0` para conservar compatibilidad; el usuario
+puede completar despues la distribucion base hasta sumar `100`.
 
 ### Proximas versiones
 

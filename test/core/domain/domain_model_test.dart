@@ -149,6 +149,7 @@ void main() {
           frameId: 'basic',
           effectId: null,
           sellValue: -1,
+          probabilityWeight: 0,
           isEnabled: true,
         ),
         throwsArgumentError,

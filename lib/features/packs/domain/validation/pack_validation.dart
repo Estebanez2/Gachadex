@@ -110,7 +110,11 @@ abstract final class PackValidation {
             issues.add(PackValidationIssue.slotCannotGenerateCard);
           }
         case PackSlotRuleType.probabilityDistribution:
-          if (!_hasPositiveWeight(configuration, rule.probabilityGroupId)) {
+          if (!_hasPositiveWeight(
+            configuration: configuration,
+            probabilityGroupId: rule.probabilityGroupId,
+            rarities: rarities,
+          )) {
             issues.add(PackValidationIssue.missingProbabilityWeight);
           }
           if (eligibleCards.isEmpty) {
@@ -129,7 +133,16 @@ abstract final class PackValidation {
             issues.add(PackValidationIssue.invalidMinimumRarity);
             issues.add(PackValidationIssue.slotCannotGenerateCard);
           }
-          if (!_hasPositiveWeight(configuration, groupId)) {
+          final allowedRarities = minimum == null
+              ? const <Rarity>[]
+              : rarities
+                    .where((rarity) => rarity.orderIndex >= minimum)
+                    .toList();
+          if (!_hasPositiveWeight(
+            configuration: configuration,
+            probabilityGroupId: groupId,
+            rarities: allowedRarities,
+          )) {
             issues.add(PackValidationIssue.missingProbabilityWeight);
           }
       }
@@ -138,18 +151,26 @@ abstract final class PackValidation {
     return PackValidationResult(issues);
   }
 
-  static bool _hasPositiveWeight(
-    PackConfiguration configuration,
-    ProbabilityGroupId? probabilityGroupId,
-  ) {
+  static bool _hasPositiveWeight({
+    required PackConfiguration configuration,
+    required ProbabilityGroupId? probabilityGroupId,
+    required List<Rarity> rarities,
+  }) {
     if (probabilityGroupId == null) {
       return false;
     }
 
-    return configuration.probabilities.any(
+    final allowedIds = rarities.map((rarity) => rarity.id).toSet();
+    final configured = configuration.probabilities.where(
       (probability) =>
           probability.probabilityGroupId == probabilityGroupId &&
+          allowedIds.contains(probability.rarityId) &&
           probability.weight > 0,
     );
+    if (configured.isNotEmpty) {
+      return true;
+    }
+
+    return rarities.any((rarity) => rarity.probabilityWeight > 0);
   }
 }

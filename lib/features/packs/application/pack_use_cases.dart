@@ -46,7 +46,6 @@ final class PackInput {
   });
 
   factory PackInput.defaults(List<Rarity> rarities, List<Card> cards) {
-    final weights = {for (final rarity in rarities) rarity.id: 1};
     return PackInput(
       name: '',
       description: '',
@@ -62,7 +61,7 @@ final class PackInput {
         5,
         (_) => PackSlotRuleInput(
           ruleType: PackSlotRuleType.probabilityDistribution,
-          weights: weights,
+          weights: const {},
         ),
       ),
     );

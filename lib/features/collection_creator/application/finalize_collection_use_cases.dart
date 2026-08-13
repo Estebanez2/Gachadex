@@ -87,6 +87,24 @@ final class ValidateCollectionForFinalization {
           message: 'Debe existir al menos una rareza.',
         ),
       );
+    } else {
+      final activeRarities = rarities.where((rarity) => rarity.isEnabled);
+      final probabilityTotal = activeRarities.fold<int>(
+        0,
+        (sum, rarity) => sum + rarity.probabilityWeight,
+      );
+      final hasPositiveProbability = activeRarities.any(
+        (rarity) => rarity.probabilityWeight > 0,
+      );
+      if (probabilityTotal != 100 || !hasPositiveProbability) {
+        issues.add(
+          const CollectionFinalizationIssue(
+            section: FinalizationSection.rarities,
+            message:
+                'Las probabilidades de las rarezas deben sumar exactamente 100%.',
+          ),
+        );
+      }
     }
 
     final cardDetails = await _cardRepository

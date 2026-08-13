@@ -1042,6 +1042,7 @@ Map<String, Object?> _rarityToJson(RarityRow row) => {
   'frameId': row.frameId,
   'effectId': row.effectId,
   'sellValue': row.sellValue,
+  'probabilityWeight': row.probabilityWeight,
   'isEnabled': row.isEnabled,
 };
 
@@ -1056,6 +1057,9 @@ RarityRow _rarityFromJson(Map<String, Object?> json) => RarityRow(
   frameId: _string(json, 'frameId'),
   effectId: json['effectId'] as String?,
   sellValue: _int(json, 'sellValue'),
+  probabilityWeight: json['probabilityWeight'] is int
+      ? json['probabilityWeight']! as int
+      : 0,
   isEnabled: _bool(json, 'isEnabled'),
 );
 

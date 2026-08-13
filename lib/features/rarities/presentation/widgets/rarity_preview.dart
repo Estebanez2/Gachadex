@@ -4,7 +4,6 @@ import '../../../../app/localization/app_localizations.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../domain/catalogs/rarity_visual_catalog.dart';
 import '../../domain/entities/rarity.dart';
-import 'rarity_effect_layer.dart';
 
 class RarityPreview extends StatelessWidget {
   const RarityPreview({super.key, required this.rarity, this.compact = false});
@@ -17,22 +16,7 @@ class RarityPreview extends StatelessWidget {
     final colorOption = RarityVisualCatalog.colorByValue(rarity.colorValue);
     final baseColor = Color(rarity.colorValue);
     final textColor = colorOption.prefersDarkText ? Colors.black : Colors.white;
-    final radius = rarity.frameId == 'rarity_frame_rounded' ? 8.0 : 3.0;
-    final borderWidth = switch (rarity.frameId) {
-      'rarity_frame_double' => 3.0,
-      'rarity_frame_neon' => 2.5,
-      'rarity_frame_pixel' => 2.0,
-      _ => 1.5,
-    };
-    final borderColor = switch (rarity.frameId) {
-      'rarity_frame_metallic' => Colors.white.withValues(alpha: 0.82),
-      'rarity_frame_neon' => Colors.cyanAccent,
-      'rarity_frame_comic' => Colors.black,
-      'rarity_frame_elegant' => Colors.white70,
-      _ => textColor.withValues(alpha: 0.78),
-    };
-
-    final borderRadius = BorderRadius.circular(radius);
+    final borderRadius = BorderRadius.circular(AppConstants.cardRadius);
 
     return Semantics(
       label: rarity.name,
@@ -40,59 +24,67 @@ class RarityPreview extends StatelessWidget {
         constraints: compact
             ? const BoxConstraints(minHeight: 68)
             : const BoxConstraints(minHeight: 112),
-        child: RarityEffectFrame(
-          effectId: rarity.effectId,
-          baseColor: baseColor,
-          borderRadius: borderRadius,
-          animate: !compact,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: baseColor,
-              borderRadius: borderRadius,
-              border: Border.all(color: borderColor, width: borderWidth),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: baseColor,
+            borderRadius: borderRadius,
+            border: Border.all(
+              color: textColor.withValues(alpha: 0.72),
+              width: 1.5,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.spacingMd),
-              child: Row(
-                children: [
-                  Icon(_rarityIcon(rarity.iconId), color: textColor, size: 32),
-                  const SizedBox(width: AppConstants.spacingMd),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          rarity.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: textColor,
-                                fontWeight: FontWeight.w800,
-                              ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${context.l10n.sellValue}: ${rarity.sellValue}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodySmall?.copyWith(color: textColor),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '#${rarity.orderIndex + 1}',
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppConstants.spacingMd),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: textColor.withValues(alpha: 0.16),
+                  foregroundColor: textColor,
+                  child: Text(
+                    '${rarity.probabilityWeight}%',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: textColor,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: AppConstants.spacingMd),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        rarity.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: textColor,
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${context.l10n.sellValue}: ${rarity.sellValue}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: textColor),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppConstants.spacingMd),
+                Text(
+                  '#${rarity.orderIndex + 1}',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: textColor,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

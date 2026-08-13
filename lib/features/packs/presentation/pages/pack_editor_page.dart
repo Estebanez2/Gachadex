@@ -117,7 +117,6 @@ class _PackEditorPageState extends ConsumerState<PackEditorPage> {
           .putIfAbsent(probability.probabilityGroupId, () => {})
           .putIfAbsent(probability.rarityId, () => probability.weight);
     }
-    final defaultWeights = {for (final rarity in rarities) rarity.id: 1};
     final rules = [...config.slotRules]
       ..sort((a, b) => a.slotIndex.compareTo(b.slotIndex));
     return PackInput(
@@ -140,8 +139,7 @@ class _PackEditorPageState extends ConsumerState<PackEditorPage> {
             ruleType: rule.ruleType,
             fixedRarityId: rule.fixedRarityId,
             minimumRarityOrder: rule.minimumRarityOrder,
-            weights:
-                probabilitiesByGroup[rule.probabilityGroupId] ?? defaultWeights,
+            weights: probabilitiesByGroup[rule.probabilityGroupId] ?? const {},
           ),
       ],
     );
@@ -156,7 +154,9 @@ class _PackEditorPageState extends ConsumerState<PackEditorPage> {
     setState(() => _submitted = true);
     final input = _input;
     final contentVersionId = project.currentContentVersionId;
-    if (input == null || contentVersionId == null || !_basicInputValid(input)) {
+    if (input == null ||
+        contentVersionId == null ||
+        !_basicInputValid(input, rarities)) {
       return;
     }
     final duplicate = packs.any((config) {
@@ -210,7 +210,10 @@ class _PackEditorPageState extends ConsumerState<PackEditorPage> {
     }
   }
 
-  bool _basicInputValid(PackInput input) {
+  bool _basicInputValid(PackInput input, List<Rarity> rarities) {
+    final hasBaseProbability = rarities.any(
+      (rarity) => rarity.probabilityWeight > 0,
+    );
     return input.name.trim().isNotEmpty &&
         input.name.trim().length <= PackValidation.maxNameLength &&
         input.cardCount >= PackValidation.minCardCount &&
@@ -226,9 +229,15 @@ class _PackEditorPageState extends ConsumerState<PackEditorPage> {
           }
           if (rule.ruleType == PackSlotRuleType.minimumRarity) {
             return rule.minimumRarityOrder != null &&
-                rule.weights.values.any((weight) => weight > 0);
+                (rule.weights.values.any((weight) => weight > 0) ||
+                    rarities.any(
+                      (rarity) =>
+                          rarity.orderIndex >= rule.minimumRarityOrder! &&
+                          rarity.probabilityWeight > 0,
+                    ));
           }
-          return rule.weights.values.any((weight) => weight > 0);
+          return rule.weights.values.any((weight) => weight > 0) ||
+              hasBaseProbability;
         });
   }
 
@@ -241,13 +250,12 @@ class _PackEditorPageState extends ConsumerState<PackEditorPage> {
       PackValidation.minCardCount,
       PackValidation.maxCardCount,
     );
-    final weights = {for (final rarity in rarities) rarity.id: 1};
     final rules = [...input.slotRules];
     while (rules.length < clamped) {
       rules.add(
         PackSlotRuleInput(
           ruleType: PackSlotRuleType.probabilityDistribution,
-          weights: weights,
+          weights: const {},
         ),
       );
     }
@@ -265,7 +273,7 @@ class _PackEditorPageState extends ConsumerState<PackEditorPage> {
   }) {
     final input = _input;
     final editing = _editingConfiguration;
-    if (input == null || !_basicInputValid(input)) {
+    if (input == null || !_basicInputValid(input, rarities)) {
       setState(
         () => _simulationText = context.l10n.packConfigurationIncomplete,
       );
@@ -609,6 +617,7 @@ class _PackEditorFormState extends ConsumerState<_PackEditorForm> {
         ),
         _ValidationSummary(
           input: input,
+          rarities: widget.rarities,
           duplicateName: duplicate,
           submitted: pageState._submitted,
         ),
@@ -1170,57 +1179,10 @@ class _SlotRuleTile extends StatelessWidget {
                 },
               ),
             if (rule.ruleType != PackSlotRuleType.fixedRarity)
-              for (final rarity in rarities)
-                _WeightRow(
-                  rarity: rarity,
-                  weight: rule.weights[rarity.id] ?? 0,
-                  onChanged: (weight) {
-                    final weights = {...rule.weights, rarity.id: weight};
-                    onChanged(
-                      PackSlotRuleInput(
-                        ruleType: rule.ruleType,
-                        minimumRarityOrder: rule.minimumRarityOrder,
-                        weights: weights,
-                      ),
-                    );
-                  },
-                ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _WeightRow extends StatelessWidget {
-  const _WeightRow({
-    required this.rarity,
-    required this.weight,
-    required this.onChanged,
-  });
-
-  final Rarity rarity;
-  final int weight;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(rarity.name),
-      trailing: SizedBox(
-        width: 126,
-        child: Row(
-          children: [
-            IconButton(
-              onPressed: weight <= 0 ? null : () => onChanged(weight - 1),
-              icon: const Icon(Icons.remove),
-            ),
-            Expanded(child: Center(child: Text(weight.toString()))),
-            IconButton(
-              onPressed: () => onChanged(weight + 1),
-              icon: const Icon(Icons.add),
-            ),
+              Padding(
+                padding: const EdgeInsets.only(top: AppConstants.spacingSm),
+                child: Text(context.l10n.collectionRarityProbabilities),
+              ),
           ],
         ),
       ),
@@ -1231,11 +1193,13 @@ class _WeightRow extends StatelessWidget {
 class _ValidationSummary extends StatelessWidget {
   const _ValidationSummary({
     required this.input,
+    required this.rarities,
     required this.duplicateName,
     required this.submitted,
   });
 
   final PackInput input;
+  final List<Rarity> rarities;
   final bool duplicateName;
   final bool submitted;
 
@@ -1247,11 +1211,23 @@ class _ValidationSummary extends StatelessWidget {
       if (input.enabledCardIds.isEmpty) context.l10n.noEligibleCards,
       if (input.isMain && input.maxAccumulated < 3)
         context.l10n.mainPackNeedsThree,
-      if (input.slotRules.any(
-        (rule) =>
-            rule.ruleType != PackSlotRuleType.fixedRarity &&
-            !rule.weights.values.any((weight) => weight > 0),
-      ))
+      if (input.slotRules.any((rule) {
+        if (rule.ruleType == PackSlotRuleType.fixedRarity) {
+          return false;
+        }
+        if (rule.weights.values.any((weight) => weight > 0)) {
+          return false;
+        }
+        if (rule.ruleType == PackSlotRuleType.minimumRarity &&
+            rule.minimumRarityOrder != null) {
+          return !rarities.any(
+            (rarity) =>
+                rarity.orderIndex >= rule.minimumRarityOrder! &&
+                rarity.probabilityWeight > 0,
+          );
+        }
+        return !rarities.any((rarity) => rarity.probabilityWeight > 0);
+      }))
         context.l10n.probabilityNeedsWeight,
     ];
     return Padding(

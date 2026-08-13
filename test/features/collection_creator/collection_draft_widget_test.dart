@@ -100,6 +100,19 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('Añadir rareza').first, warnIfMissed: false);
       await _pump(tester);
+      expect(find.widgetWithText(TextFormField, 'Nombre'), findsOneWidget);
+      expect(
+        find.widgetWithText(TextFormField, 'Valor de venta'),
+        findsOneWidget,
+      );
+      expect(
+        find.widgetWithText(TextFormField, 'Probabilidad de aparicion'),
+        findsOneWidget,
+      );
+      expect(find.text('Color'), findsOneWidget);
+      expect(find.text('Icono'), findsNothing);
+      expect(find.text('Marco'), findsNothing);
+      expect(find.text('Efecto'), findsNothing);
       await _tapSave(tester);
       await _pump(tester);
       expect(find.text('Escribe un nombre para la rareza'), findsOneWidget);

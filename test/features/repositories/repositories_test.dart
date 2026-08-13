@@ -232,12 +232,17 @@ void main() {
           frameId: 'foil',
           effectId: null,
           sellValue: 50,
+          probabilityWeight: 40,
           isEnabled: true,
         );
 
         await rarityRepository.insert(secondRarity);
         final updated = await rarityRepository.update(
-          secondRarity.copyWith(name: 'Mitica', sellValue: 60),
+          secondRarity.copyWith(
+            name: 'Mitica',
+            sellValue: 60,
+            probabilityWeight: 45,
+          ),
         );
         final reordered = await rarityRepository.reorder(
           collectionId: CollectionId(definition.collectionId),
@@ -246,6 +251,7 @@ void main() {
         );
 
         expect(updated.name, 'Mitica');
+        expect(updated.probabilityWeight, 45);
         expect(reordered.first.id, secondRarity.id);
         await expectLater(
           rarityRepository.delete(RarityId(definition.rarityId)),
@@ -274,6 +280,7 @@ void main() {
           frameId: RarityVisualCatalog.defaultFrameId,
           effectId: RarityVisualCatalog.defaultEffectId,
           sellValue: 100,
+          probabilityWeight: 20,
           isEnabled: true,
         );
 
@@ -616,6 +623,7 @@ void main() {
             frameId: RarityVisualCatalog.defaultFrameId,
             effectId: RarityVisualCatalog.defaultEffectId,
             sellValue: 1,
+            probabilityWeight: 60,
             isEnabled: true,
           ),
           Rarity(
@@ -629,6 +637,7 @@ void main() {
             frameId: 'rarity_frame_double',
             effectId: 'rarity_effect_spark',
             sellValue: 20,
+            probabilityWeight: 30,
             isEnabled: true,
           ),
           Rarity(
@@ -642,6 +651,7 @@ void main() {
             frameId: 'rarity_frame_neon',
             effectId: 'rarity_effect_holo',
             sellValue: 100,
+            probabilityWeight: 10,
             isEnabled: true,
           ),
         ];

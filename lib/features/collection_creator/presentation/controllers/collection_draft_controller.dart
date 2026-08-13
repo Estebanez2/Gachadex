@@ -93,6 +93,8 @@ final class CollectionDraftEditorState {
       name: name,
       coverStyle: draftCoverStyle,
       rarityCount: rarities.length,
+      rarityProbabilityTotal: _rarityProbabilityTotal(rarities),
+      hasPositiveRarityProbability: _hasPositiveRarityProbability(rarities),
       cardCount: cardCount,
       packCount: packCount,
       infoErrors: infoErrors,
@@ -142,12 +144,14 @@ final collectionDraftSummariesProvider =
         final summaries = <CollectionDraftSummary>[];
         for (final project in projects) {
           final contentVersionId = project.currentContentVersionId;
-          final rarityCount = contentVersionId == null
-              ? 0
-              : await rarityRepository.countByCollectionVersion(
-                  collectionId: project.collectionId,
-                  contentVersionId: contentVersionId,
-                );
+          final rarities = contentVersionId == null
+              ? const <Rarity>[]
+              : await rarityRepository
+                    .watchByCollectionVersion(
+                      collectionId: project.collectionId,
+                      contentVersionId: contentVersionId,
+                    )
+                    .first;
           final cardCount = contentVersionId == null
               ? 0
               : await cardRepository
@@ -174,7 +178,11 @@ final collectionDraftSummariesProvider =
           final completeness = CollectionDraftValidation.completeness(
             name: project.name,
             coverStyle: project.draftCoverStyle,
-            rarityCount: rarityCount,
+            rarityCount: rarities.length,
+            rarityProbabilityTotal: _rarityProbabilityTotal(rarities),
+            hasPositiveRarityProbability: _hasPositiveRarityProbability(
+              rarities,
+            ),
             cardCount: cardCount,
             packCount: packCount,
             infoErrors: errors,
@@ -182,7 +190,7 @@ final collectionDraftSummariesProvider =
           summaries.add(
             CollectionDraftSummary(
               project: project,
-              rarityCount: rarityCount,
+              rarityCount: rarities.length,
               cardCount: cardCount,
               packCount: packCount,
               completeness: completeness,
@@ -571,4 +579,16 @@ final class CollectionDraftController
     _cardSubscription?.cancel();
     _packSubscription?.cancel();
   }
+}
+
+int _rarityProbabilityTotal(List<Rarity> rarities) {
+  return rarities
+      .where((rarity) => rarity.isEnabled)
+      .fold(0, (sum, rarity) => sum + rarity.probabilityWeight);
+}
+
+bool _hasPositiveRarityProbability(List<Rarity> rarities) {
+  return rarities.any(
+    (rarity) => rarity.isEnabled && rarity.probabilityWeight > 0,
+  );
 }

@@ -15,6 +15,7 @@ final class RarityInput {
     required this.frameId,
     required this.effectId,
     required this.sellValue,
+    required this.probabilityWeight,
     required this.isEnabled,
   });
 
@@ -26,6 +27,7 @@ final class RarityInput {
       frameId: RarityVisualCatalog.defaultFrameId,
       effectId: RarityVisualCatalog.defaultEffectId,
       sellValue: 0,
+      probabilityWeight: 0,
       isEnabled: true,
     );
   }
@@ -36,6 +38,7 @@ final class RarityInput {
   final String frameId;
   final String effectId;
   final int sellValue;
+  final int probabilityWeight;
   final bool isEnabled;
 }
 
@@ -77,6 +80,7 @@ final class CreateRarity {
       frameId: input.frameId,
       effectId: input.effectId,
       sellValue: input.sellValue,
+      probabilityWeight: input.probabilityWeight,
       isEnabled: input.isEnabled,
     );
 
@@ -117,6 +121,7 @@ final class UpdateRarity {
         frameId: input.frameId,
         effectId: input.effectId,
         sellValue: input.sellValue,
+        probabilityWeight: input.probabilityWeight,
         isEnabled: input.isEnabled,
       ),
     );
@@ -201,6 +206,7 @@ Future<void> _ensureValidInput({
     frameId: input.frameId,
     effectId: input.effectId,
     sellValue: input.sellValue,
+    probabilityWeight: input.probabilityWeight,
   );
 
   if (!validation.canSave) {

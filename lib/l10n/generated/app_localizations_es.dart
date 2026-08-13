@@ -215,6 +215,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sellValue => 'Valor de venta';
 
   @override
+  String get appearanceProbability => 'Probabilidad de aparicion';
+
+  @override
+  String get probabilityWeightInvalid => 'Introduce un valor entre 0 y 100';
+
+  @override
+  String rarityProbabilityTotal(int total) {
+    return 'Probabilidad total: $total %';
+  }
+
+  @override
+  String rarityProbabilityMissing(int missing) {
+    return 'Falta $missing %';
+  }
+
+  @override
+  String rarityProbabilityExcess(int excess) {
+    return 'Sobran $excess %';
+  }
+
+  @override
+  String get rarityProbabilityComplete => 'Distribucion lista';
+
+  @override
   String get color => 'Color';
 
   @override
@@ -753,6 +777,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get probabilityNeedsWeight =>
       'Cada distribucion necesita algun peso positivo';
+
+  @override
+  String get collectionRarityProbabilities =>
+      'Usa las probabilidades de la coleccion';
 
   @override
   String get packNameRequired => 'Escribe un nombre para el sobre';
