@@ -13,13 +13,10 @@ void main() {
       await pumpGachadexApp(tester);
 
       expect(_semanticsLabel(tester, 'Inicio'), contains('Inicio'));
-      expect(_semanticsLabel(tester, 'Colecciones'), contains('Colecciones'));
+      expect(_semanticsLabel(tester, '\u00c1lbum'), contains('\u00c1lbum'));
       expect(_semanticsLabel(tester, 'Crear'), contains('Crear'));
       expect(_semanticsLabel(tester, 'Ajustes'), contains('Ajustes'));
-      expect(
-        find.byTooltip('Abre la pantalla de error controlado'),
-        findsOneWidget,
-      );
+      expect(find.text('Error controlado'), findsNothing);
     } finally {
       semanticsHandle.dispose();
     }
@@ -38,7 +35,7 @@ void main() {
     await pumpGachadexApp(tester);
 
     try {
-      await tester.tap(navigationLabel('Colecciones'));
+      await tester.tap(navigationLabel('\u00c1lbum'));
       await _pumpNavigation(tester);
       await tester.tap(navigationLabel('Crear'));
       await _pumpNavigation(tester);

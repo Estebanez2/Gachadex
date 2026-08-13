@@ -171,7 +171,7 @@ class _IncomingPackageListenerState
         ScaffoldMessenger.of(interactionContext).showSnackBar(
           SnackBar(content: Text(l10n.collectionAlreadyInstalled)),
         );
-        ref.read(appRouterProvider).go(AppRoutes.collectionsPath);
+        ref.read(appRouterProvider).go(AppRoutes.albumPath);
         return;
       }
 

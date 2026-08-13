@@ -14,6 +14,14 @@ final class DriftInstalledCollectionRepository
   final AppDatabase database;
 
   @override
+  Future<List<InstalledCollection>> getAll() async {
+    final rows = await (database.select(
+      database.installedCollections,
+    )..orderBy([(table) => OrderingTerm.desc(table.installedAtUtc)])).get();
+    return rows.map((row) => row.toDomain()).toList(growable: false);
+  }
+
+  @override
   Future<InstalledCollection> insert(InstalledCollection collection) async {
     await _validateReferences(collection);
     final duplicate =

@@ -12,8 +12,8 @@ import '../../features/collections/presentation/collections_page.dart';
 import '../../features/collections/presentation/installed_collection_detail_page.dart';
 import '../../features/collection_creator/presentation/pages/collection_draft_editor_page.dart';
 import '../../features/collection_creator/presentation/pages/create_draft_page.dart';
-import '../../features/controlled_error/presentation/controlled_error_page.dart';
 import '../../features/creator/presentation/creator_page.dart';
+import '../../features/home/application/home_providers.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/packs/presentation/pages/pack_opening_page.dart';
 import '../../features/packs/presentation/pages/pack_editor_page.dart';
@@ -22,20 +22,25 @@ import '../localization/app_localizations.dart';
 import 'app_routes.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final router = createAppRouter();
+  final router = createAppRouter(
+    onHomeSelected: () => ref.invalidate(homeAvailablePacksProvider),
+  );
   ref.onDispose(router.dispose);
   return router;
 });
 
-GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
+GoRouter createAppRouter({
+  String initialLocation = AppRoutes.homePath,
+  VoidCallback? onHomeSelected,
+}) {
   final rootNavigatorKey = GlobalKey<NavigatorState>(
     debugLabel: 'rootNavigator',
   );
   final homeNavigatorKey = GlobalKey<NavigatorState>(
     debugLabel: 'homeNavigator',
   );
-  final collectionsNavigatorKey = GlobalKey<NavigatorState>(
-    debugLabel: 'collectionsNavigator',
+  final albumNavigatorKey = GlobalKey<NavigatorState>(
+    debugLabel: 'albumNavigator',
   );
   final createNavigatorKey = GlobalKey<NavigatorState>(
     debugLabel: 'createNavigator',
@@ -59,7 +64,10 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
       StatefulShellRoute.indexedStack(
         restorationScopeId: 'main_shell',
         builder: (context, state, navigationShell) {
-          return AppScaffold(navigationShell: navigationShell);
+          return AppScaffold(
+            navigationShell: navigationShell,
+            onHomeSelected: onHomeSelected,
+          );
         },
         branches: [
           StatefulShellBranch(
@@ -73,11 +81,11 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: collectionsNavigatorKey,
+            navigatorKey: albumNavigatorKey,
             routes: [
               GoRoute(
-                path: AppRoutes.collectionsPath,
-                name: AppRoutes.collectionsName,
+                path: AppRoutes.albumPath,
+                name: AppRoutes.albumName,
                 builder: (context, state) => const CollectionsPage(),
                 routes: [
                   GoRoute(
@@ -295,10 +303,46 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.homePath}) {
         },
       ),
       GoRoute(
-        parentNavigatorKey: rootNavigatorKey,
-        path: AppRoutes.controlledErrorPath,
-        name: AppRoutes.controlledErrorName,
-        builder: (context, state) => const ControlledErrorPage(),
+        path: AppRoutes.collectionsPath,
+        redirect: (context, state) => AppRoutes.albumPath,
+      ),
+      GoRoute(
+        path: '${AppRoutes.collectionsPath}/:installedCollectionId',
+        redirect: (context, state) {
+          final id = state.pathParameters['installedCollectionId'];
+          return id == null
+              ? AppRoutes.albumPath
+              : AppRoutes.installedCollectionPath(id);
+        },
+        routes: [
+          GoRoute(
+            path: 'openings/:openingId',
+            redirect: (context, state) {
+              final installedCollectionId =
+                  state.pathParameters['installedCollectionId'];
+              final openingId = state.pathParameters['openingId'];
+              if (installedCollectionId == null || openingId == null) {
+                return AppRoutes.albumPath;
+              }
+              return AppRoutes.packOpeningPath(
+                installedCollectionId,
+                openingId,
+              );
+            },
+          ),
+          GoRoute(
+            path: 'cards/:cardId',
+            redirect: (context, state) {
+              final installedCollectionId =
+                  state.pathParameters['installedCollectionId'];
+              final cardId = state.pathParameters['cardId'];
+              if (installedCollectionId == null || cardId == null) {
+                return AppRoutes.albumPath;
+              }
+              return AppRoutes.albumCardPath(installedCollectionId, cardId);
+            },
+          ),
+        ],
       ),
     ],
     errorBuilder: (context, state) {

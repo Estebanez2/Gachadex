@@ -45,10 +45,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noCollections => 'Todavía no hay colecciones.';
 
   @override
-  String get comingSoon => 'Próximamente';
+  String get availablePacksTitle => 'Sobres disponibles';
 
   @override
-  String get homePackMessage => 'Aquí aparecerán los sobres disponibles.';
+  String homeAvailablePacksCount(int count) {
+    return 'Tienes $count sobres disponibles';
+  }
+
+  @override
+  String get noAvailablePacks => 'No tienes sobres disponibles';
+
+  @override
+  String get homeEmptyDescription =>
+      'Importa una coleccion o vuelve mas tarde cuando se recarguen tus sobres.';
+
+  @override
+  String homePackAvailableLine(int available, int max) {
+    return '$available/$max disponibles';
+  }
+
+  @override
+  String get available => 'Disponible';
+
+  @override
+  String get viewCollection => 'Ver coleccion';
 
   @override
   String get collectionsEmptyDescription =>
@@ -57,20 +77,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get createDescription =>
       'Aquí se crearán colecciones cuando la fase de creador esté lista.';
-
-  @override
-  String get controlledError => 'Error controlado';
-
-  @override
-  String get controlledErrorDescription =>
-      'Esta pantalla comprueba que los errores se muestran con un mensaje seguro.';
-
-  @override
-  String get openControlledError => 'Ver error controlado';
-
-  @override
-  String get openControlledErrorTooltip =>
-      'Abre la pantalla de error controlado';
 
   @override
   String get notFoundTitle => 'Página no encontrada';
@@ -826,7 +832,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get continueOpening => 'Continuar apertura';
 
   @override
-  String get album => 'Album';
+  String get album => 'Álbum';
 
   @override
   String get all => 'Todas';

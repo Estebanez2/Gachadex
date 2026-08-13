@@ -166,17 +166,47 @@ abstract class AppLocalizations {
   /// **'Todavía no hay colecciones.'**
   String get noCollections;
 
-  /// Etiqueta para funciones aun no disponibles.
+  /// Titulo de la lista de sobres disponibles en Inicio.
   ///
   /// In es, this message translates to:
-  /// **'Próximamente'**
-  String get comingSoon;
+  /// **'Sobres disponibles'**
+  String get availablePacksTitle;
 
-  /// Mensaje provisional de la pantalla Inicio.
+  /// Resumen de sobres disponibles en Inicio.
   ///
   /// In es, this message translates to:
-  /// **'Aquí aparecerán los sobres disponibles.'**
-  String get homePackMessage;
+  /// **'Tienes {count} sobres disponibles'**
+  String homeAvailablePacksCount(int count);
+
+  /// Estado cuando no hay sobres disponibles en Inicio.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes sobres disponibles'**
+  String get noAvailablePacks;
+
+  /// Descripcion del estado vacio de Inicio.
+  ///
+  /// In es, this message translates to:
+  /// **'Importa una coleccion o vuelve mas tarde cuando se recarguen tus sobres.'**
+  String get homeEmptyDescription;
+
+  /// Cantidad disponible de un tipo de sobre en Inicio.
+  ///
+  /// In es, this message translates to:
+  /// **'{available}/{max} disponibles'**
+  String homePackAvailableLine(int available, int max);
+
+  /// Estado disponible para un sobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Disponible'**
+  String get available;
+
+  /// Accion para abrir el detalle de una coleccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver coleccion'**
+  String get viewCollection;
 
   /// Descripcion del estado vacio de colecciones.
   ///
@@ -189,30 +219,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Aquí se crearán colecciones cuando la fase de creador esté lista.'**
   String get createDescription;
-
-  /// Titulo de la pantalla de error controlado.
-  ///
-  /// In es, this message translates to:
-  /// **'Error controlado'**
-  String get controlledError;
-
-  /// Descripcion segura del error controlado.
-  ///
-  /// In es, this message translates to:
-  /// **'Esta pantalla comprueba que los errores se muestran con un mensaje seguro.'**
-  String get controlledErrorDescription;
-
-  /// Boton para abrir la ruta de error controlado.
-  ///
-  /// In es, this message translates to:
-  /// **'Ver error controlado'**
-  String get openControlledError;
-
-  /// Tooltip del boton que abre el error controlado.
-  ///
-  /// In es, this message translates to:
-  /// **'Abre la pantalla de error controlado'**
-  String get openControlledErrorTooltip;
 
   /// Titulo para rutas desconocidas.
   ///
@@ -1627,7 +1633,7 @@ abstract class AppLocalizations {
   /// Seccion de album.
   ///
   /// In es, this message translates to:
-  /// **'Album'**
+  /// **'Álbum'**
   String get album;
 
   /// Filtro de todas las cartas.

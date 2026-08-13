@@ -15,10 +15,19 @@ void main() {
     expect(find.byType(MaterialApp), findsOneWidget);
     expect(find.byType(HomePage), findsOneWidget);
     expect(find.text('Inicio'), findsWidgets);
-    expect(
-      find.text('Aquí aparecerán los sobres disponibles.'),
-      findsOneWidget,
-    );
+    await _pumpUntilText(tester, 'Sobres disponibles');
+    expect(find.text('Sobres disponibles'), findsOneWidget);
+    expect(find.text('No tienes sobres disponibles'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
+}
+
+Future<void> _pumpUntilText(WidgetTester tester, String text) async {
+  for (var attempt = 0; attempt < 20; attempt += 1) {
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    if (find.text(text).evaluate().isNotEmpty) {
+      return;
+    }
+  }
 }
