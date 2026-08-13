@@ -180,167 +180,250 @@ final class GachadexPackageService {
   }
 
   Future<GachadexPackagePreview> previewFile(String packagePath) async {
-    final archive = await _decodePackage(packagePath);
-    final manifest = _readManifest(archive);
-    final duplicate = await _isInstalled(
-      collectionId: manifest.collectionId,
-      contentVersionId: manifest.contentVersionId,
-    );
-    return GachadexPackagePreview(
-      collectionId: manifest.collectionId,
-      contentVersionId: manifest.contentVersionId,
-      name: manifest.name,
-      author: manifest.author,
-      cardCount: manifest.cardCount,
-      videoCount: manifest.videoCount,
-      packTypeCount: manifest.packTypeCount,
-      totalBytes: manifest.totalBytes,
-      alreadyInstalled: duplicate,
-    );
+    try {
+      final archive = await _decodePackage(packagePath);
+      final manifest = _readManifest(archive);
+      final duplicate = await _isInstalled(
+        collectionId: manifest.collectionId,
+        contentVersionId: manifest.contentVersionId,
+      );
+      return GachadexPackagePreview(
+        collectionId: manifest.collectionId,
+        contentVersionId: manifest.contentVersionId,
+        name: manifest.name,
+        author: manifest.author,
+        cardCount: manifest.cardCount,
+        videoCount: manifest.videoCount,
+        packTypeCount: manifest.packTypeCount,
+        totalBytes: manifest.totalBytes,
+        alreadyInstalled: duplicate,
+      );
+    } on GachadexPackageFailure {
+      rethrow;
+    } on Object catch (error) {
+      throw GachadexPackageFailure(
+        'No se pudo validar el paquete .gachadex. Detalle: $error',
+      );
+    }
   }
 
   Future<GachadexImportResult> importFile(String packagePath) async {
-    final archive = await _decodePackage(packagePath);
-    final manifest = _readManifest(archive);
-    final collection = _readCollection(archive);
-
-    if (manifest.collectionId != collection.collectionVersion.collectionId ||
-        manifest.contentVersionId != collection.collectionVersion.id) {
-      throw const GachadexPackageFailure(
-        'El manifiesto no coincide con la coleccion.',
-      );
-    }
-    if (await _isInstalled(
-      collectionId: manifest.collectionId,
-      contentVersionId: manifest.contentVersionId,
-    )) {
-      throw const GachadexPackageFailure('Esta coleccion ya esta instalada.');
-    }
-
-    _validateRelations(collection);
-    _verifyManifestFiles(archive, manifest);
-
-    final copiedFiles = <File>[];
-    final now = _clock.nowUtc();
-    final installedCollectionId = _uuidGenerator.generate();
     try {
-      for (final relativePath in _mediaPaths(collection)) {
-        final targetPath = RelativeMediaPath(relativePath);
-        final target = await _mediaStorage.resolve(targetPath);
-        await target.parent.create(recursive: true);
-        final archiveFile = _requiredFile(
-          archive,
-          _assetArchivePath(relativePath),
+      final archive = await _decodePackage(packagePath);
+      final manifest = _readManifest(archive);
+      final collection = _readCollection(archive);
+
+      if (manifest.collectionId != collection.collectionVersion.collectionId ||
+          manifest.contentVersionId != collection.collectionVersion.id) {
+        throw const GachadexPackageFailure(
+          'El manifiesto no coincide con la coleccion.',
         );
-        await target.writeAsBytes(archiveFile.content, flush: true);
-        copiedFiles.add(target);
+      }
+      if (await _isInstalled(
+        collectionId: manifest.collectionId,
+        contentVersionId: manifest.contentVersionId,
+      )) {
+        throw const GachadexPackageFailure('Esta coleccion ya esta instalada.');
       }
 
-      await _database.transaction(() async {
-        if (await _isInstalled(
-          collectionId: manifest.collectionId,
-          contentVersionId: manifest.contentVersionId,
-        )) {
-          throw const GachadexPackageFailure(
-            'Esta coleccion ya esta instalada.',
+      _validateRelations(collection);
+      _verifyManifestFiles(archive, manifest);
+      await _deleteIncompleteDefinitionIfNeeded(
+        collectionId: manifest.collectionId,
+        contentVersionId: manifest.contentVersionId,
+      );
+
+      final copiedFiles = <File>[];
+      final now = _clock.nowUtc();
+      final installedCollectionId = _uuidGenerator.generate();
+      try {
+        for (final relativePath in _mediaPaths(collection)) {
+          final targetPath = RelativeMediaPath(relativePath);
+          final target = await _mediaStorage.resolve(targetPath);
+          await target.parent.create(recursive: true);
+          final archiveFile = _requiredFile(
+            archive,
+            _assetArchivePath(relativePath),
           );
+          await target.writeAsBytes(
+            _archiveFileBytes(archiveFile),
+            flush: true,
+          );
+          copiedFiles.add(target);
         }
 
-        await _database
-            .into(_database.contentVersions)
-            .insert(collection.collectionVersion.toCompanion(false));
-        for (final rarity in collection.rarities) {
-          await _database
-              .into(_database.rarities)
-              .insert(rarity.toCompanion(false));
-        }
-        for (final asset in collection.mediaAssets) {
-          await _database
-              .into(_database.mediaAssets)
-              .insert(asset.toCompanion(false));
-        }
-        for (final card in collection.cards) {
-          await _database.into(_database.cards).insert(card.toCompanion(false));
-        }
-        for (final field in collection.cardFields) {
-          await _database
-              .into(_database.cardFieldValues)
-              .insert(field.toCompanion(false));
-        }
-        for (final pack in collection.packTypes) {
-          await _database
-              .into(_database.packTypes)
-              .insert(pack.toCompanion(false));
-        }
-        for (final pool in collection.packCardPool) {
-          await _database
-              .into(_database.packCardPool)
-              .insert(pool.toCompanion(false));
-        }
-        for (final rule in collection.packSlotRules) {
-          await _database
-              .into(_database.packSlotRules)
-              .insert(rule.toCompanion(false));
-        }
-        for (final probability in collection.packRarityProbabilities) {
-          await _database
-              .into(_database.packRarityProbabilities)
-              .insert(probability.toCompanion(false));
-        }
-
-        await _database
-            .into(_database.installedCollections)
-            .insert(
-              InstalledCollectionsCompanion(
-                id: Value(installedCollectionId),
-                collectionId: Value(manifest.collectionId),
-                contentVersionId: Value(manifest.contentVersionId),
-                name: Value(manifest.name),
-                author: Value(manifest.author),
-                description: Value(collection.description),
-                coverRelativePath: Value(collection.coverRelativePath),
-                mainPackTypeId: Value(manifest.mainPackTypeId),
-                installedAtUtc: Value(now),
-                source: const Value(InstalledCollectionSource.imported),
-                coins: const Value(0),
-                totalCardCount: Value(collection.cards.length),
-                distinctOwnedCount: const Value(0),
-              ),
+        await _database.transaction(() async {
+          if (await _isInstalled(
+            collectionId: manifest.collectionId,
+            contentVersionId: manifest.contentVersionId,
+          )) {
+            throw const GachadexPackageFailure(
+              'Esta coleccion ya esta instalada.',
             );
+          }
 
-        for (final pack in collection.packTypes) {
-          final initial = pack.id == manifest.mainPackTypeId
-              ? gachadexStartingPackCount
-              : 0;
           await _database
-              .into(_database.packInventory)
+              .into(_database.contentVersions)
+              .insert(collection.collectionVersion.toCompanion(false));
+          for (final rarity in collection.rarities) {
+            await _database
+                .into(_database.rarities)
+                .insert(rarity.toCompanion(false));
+          }
+          for (final asset in collection.mediaAssets) {
+            await _database
+                .into(_database.mediaAssets)
+                .insert(asset.toCompanion(false));
+          }
+          for (final card in collection.cards) {
+            await _database
+                .into(_database.cards)
+                .insert(card.toCompanion(false));
+          }
+          for (final field in collection.cardFields) {
+            await _database
+                .into(_database.cardFieldValues)
+                .insert(field.toCompanion(false));
+          }
+          for (final pack in collection.packTypes) {
+            await _database
+                .into(_database.packTypes)
+                .insert(pack.toCompanion(false));
+          }
+          for (final pool in collection.packCardPool) {
+            await _database
+                .into(_database.packCardPool)
+                .insert(pool.toCompanion(false));
+          }
+          for (final rule in collection.packSlotRules) {
+            await _database
+                .into(_database.packSlotRules)
+                .insert(rule.toCompanion(false));
+          }
+          for (final probability in collection.packRarityProbabilities) {
+            await _database
+                .into(_database.packRarityProbabilities)
+                .insert(probability.toCompanion(false));
+          }
+
+          await _database
+              .into(_database.installedCollections)
               .insert(
-                PackInventoryCompanion(
-                  installedCollectionId: Value(installedCollectionId),
-                  packTypeId: Value(pack.id),
-                  availableCount: Value(initial.clamp(0, pack.maxAccumulated)),
-                  maxAccumulated: Value(pack.maxAccumulated),
-                  nextRechargeAtUtc: Value(
-                    now.add(Duration(seconds: pack.rechargeSeconds)),
-                  ),
-                  lastCalculatedAtUtc: Value(now),
+                InstalledCollectionsCompanion(
+                  id: Value(installedCollectionId),
+                  collectionId: Value(manifest.collectionId),
+                  contentVersionId: Value(manifest.contentVersionId),
+                  name: Value(manifest.name),
+                  author: Value(manifest.author),
+                  description: Value(collection.description),
+                  coverRelativePath: Value(collection.coverRelativePath),
+                  mainPackTypeId: Value(manifest.mainPackTypeId),
+                  installedAtUtc: Value(now),
+                  source: const Value(InstalledCollectionSource.imported),
+                  coins: const Value(0),
+                  totalCardCount: Value(collection.cards.length),
+                  distinctOwnedCount: const Value(0),
                 ),
               );
+
+          for (final pack in collection.packTypes) {
+            final initial = pack.id == manifest.mainPackTypeId
+                ? gachadexStartingPackCount
+                : 0;
+            await _database
+                .into(_database.packInventory)
+                .insert(
+                  PackInventoryCompanion(
+                    installedCollectionId: Value(installedCollectionId),
+                    packTypeId: Value(pack.id),
+                    availableCount: Value(
+                      initial.clamp(0, pack.maxAccumulated),
+                    ),
+                    maxAccumulated: Value(pack.maxAccumulated),
+                    nextRechargeAtUtc: Value(
+                      now.add(Duration(seconds: pack.rechargeSeconds)),
+                    ),
+                    lastCalculatedAtUtc: Value(now),
+                  ),
+                );
+          }
+        });
+      } on Object {
+        for (final file in copiedFiles) {
+          if (await file.exists()) {
+            await file.delete();
+          }
         }
-      });
-    } on Object {
-      for (final file in copiedFiles) {
-        if (await file.exists()) {
-          await file.delete();
-        }
+        rethrow;
       }
+
+      await _notificationScheduler?.tryRescheduleCollection(
+        InstalledCollectionId(installedCollectionId),
+      );
+      return GachadexImportResult(installedCollectionId: installedCollectionId);
+    } on GachadexPackageFailure {
       rethrow;
+    } on Object catch (error) {
+      throw GachadexPackageFailure(
+        'No se pudo importar el paquete .gachadex. Detalle: $error',
+      );
+    }
+  }
+
+  Future<void> _deleteIncompleteDefinitionIfNeeded({
+    required String collectionId,
+    required String contentVersionId,
+  }) async {
+    final installed =
+        await (_database.select(_database.installedCollections)..where(
+              (table) =>
+                  table.collectionId.equals(collectionId) &
+                  table.contentVersionId.equals(contentVersionId),
+            ))
+            .getSingleOrNull();
+    if (installed != null) {
+      return;
     }
 
-    await _notificationScheduler?.tryRescheduleCollection(
-      InstalledCollectionId(installedCollectionId),
-    );
-    return GachadexImportResult(installedCollectionId: installedCollectionId);
+    final version =
+        await (_database.select(_database.contentVersions)..where(
+              (table) =>
+                  table.collectionId.equals(collectionId) &
+                  table.id.equals(contentVersionId),
+            ))
+            .getSingleOrNull();
+    if (version == null) {
+      return;
+    }
+
+    await _database.transaction(() async {
+      await _database.customStatement(
+        'DELETE FROM pack_rarity_probabilities '
+        'WHERE probability_group_id IN ('
+        'SELECT probability_group_id FROM pack_slot_rules '
+        'WHERE pack_type_id IN ('
+        'SELECT id FROM pack_types WHERE content_version_id = ?'
+        ') AND probability_group_id IS NOT NULL'
+        ')',
+        [contentVersionId],
+      );
+      await _database.customStatement(
+        'DELETE FROM pack_rarity_probabilities '
+        'WHERE rarity_id IN ('
+        'SELECT id FROM rarities WHERE content_version_id = ?'
+        ')',
+        [contentVersionId],
+      );
+      await (_database.delete(_database.contentVersions)..where(
+            (table) =>
+                table.collectionId.equals(collectionId) &
+                table.id.equals(contentVersionId),
+          ))
+          .go();
+      await (_database.delete(
+        _database.mediaAssets,
+      )..where((table) => table.collectionId.equals(collectionId))).go();
+    });
   }
 
   Future<_PackageDefinition> _readDefinition({
@@ -553,7 +636,7 @@ final class GachadexPackageService {
     if (entry.size > _maxJsonBytes) {
       throw const GachadexPackageFailure('El manifiesto es demasiado grande.');
     }
-    final map = _decodeJsonMap(entry.content);
+    final map = _decodeJsonMap(_archiveFileBytes(entry));
     return _PackageManifest.fromJson(map);
   }
 
@@ -562,7 +645,7 @@ final class GachadexPackageService {
     if (entry.size > _maxJsonBytes) {
       throw const GachadexPackageFailure('El contenido es demasiado grande.');
     }
-    final map = _decodeJsonMap(entry.content);
+    final map = _decodeJsonMap(_archiveFileBytes(entry));
     return _PackageDefinition.fromJson(map);
   }
 
@@ -575,7 +658,11 @@ final class GachadexPackageService {
     throw GachadexPackageFailure('Falta $path en el paquete.');
   }
 
-  Map<String, Object?> _decodeJsonMap(Uint8List bytes) {
+  List<int> _archiveFileBytes(ArchiveFile file) {
+    return file.content;
+  }
+
+  Map<String, Object?> _decodeJsonMap(List<int> bytes) {
     try {
       final decoded = jsonDecode(utf8.decode(bytes));
       if (decoded is Map<String, Object?>) {
@@ -602,7 +689,7 @@ final class GachadexPackageService {
           'El tamano de un archivo no coincide.',
         );
       }
-      final hash = sha256.convert(entry.content).toString();
+      final hash = sha256.convert(_archiveFileBytes(entry)).toString();
       if (hash != file.sha256) {
         throw const GachadexPackageFailure(
           'El hash de un archivo no coincide.',

@@ -53,6 +53,10 @@ final class GachadexPackageActions {
     if (path == null || path.isEmpty) {
       throw const GachadexPackageCanceled();
     }
+    return previewExternalFile(path);
+  }
+
+  Future<PickedGachadexPackage> previewExternalFile(String path) async {
     if (!path.toLowerCase().endsWith(gachadexPackageExtension)) {
       throw const GachadexPackageFailure(
         'El archivo debe terminar en .gachadex.',

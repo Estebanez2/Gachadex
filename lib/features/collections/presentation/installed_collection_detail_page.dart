@@ -17,6 +17,7 @@ import '../../../core/widgets/app_error_view.dart';
 import '../../../core/widgets/app_loading_view.dart';
 import '../../album/application/album_providers.dart';
 import '../../album/domain/entities/album_card_entry.dart';
+import '../../cards/presentation/widgets/gachadex_card.dart';
 import '../../economy/application/economy_providers.dart';
 import '../../economy/application/economy_use_cases.dart';
 import '../../economy/domain/entities/economy_transaction_entry.dart';
@@ -25,7 +26,6 @@ import '../../packs/application/pack_notification_coordinator_provider.dart';
 import '../../packs/application/pack_providers.dart';
 import '../../packs/domain/entities/pack_inventory.dart';
 import '../../packs/domain/entities/pack_type.dart';
-import '../../rarities/presentation/widgets/rarity_effect_layer.dart';
 import '../application/installed_collection_providers.dart';
 
 final _packTypeProvider = FutureProvider.autoDispose
@@ -793,7 +793,7 @@ class _AlbumTab extends ConsumerWidget {
             itemCount: cards.length,
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 180,
-              childAspectRatio: 0.68,
+              childAspectRatio: GachadexCardLayout.aspectRatio,
               mainAxisSpacing: AppConstants.spacingMd,
               crossAxisSpacing: AppConstants.spacingMd,
             ),
@@ -871,96 +871,98 @@ class _AlbumCardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final title = entry.isOwned ? entry.name! : l10n.undiscovered;
-    final rarityColor = entry.rarityColorValue == null
-        ? Theme.of(context).colorScheme.outlineVariant
-        : Color(entry.rarityColorValue!);
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: entry.isOwned
-            ? () => context.go(
-                AppRoutes.albumCardPath(
-                  installedCollectionId.value,
-                  entry.cardId.value,
+    return InkWell(
+      onTap: entry.isOwned
+          ? () => context.go(
+              AppRoutes.albumCardPath(
+                installedCollectionId.value,
+                entry.cardId.value,
+              ),
+            )
+          : null,
+      borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
+            child: entry.isOwned
+                ? GachadexCard(
+                    name: entry.name ?? '',
+                    health: entry.health,
+                    description: entry.description ?? '',
+                    rarityName: entry.rarityName ?? '',
+                    rarityColorValue: entry.rarityColorValue,
+                    rarityEffectId: entry.rarityEffectId,
+                    mediaType: entry.mediaType,
+                    compact: true,
+                    media: entry.thumbnailRelativePath == null
+                        ? null
+                        : StoredMediaImage(path: entry.thumbnailRelativePath!),
+                    showVideoIndicator: entry.mediaType == MediaType.video,
+                  )
+                : const GachadexCardBack(),
+          ),
+          Positioned(
+            left: AppConstants.spacingXs,
+            top: AppConstants.spacingXs,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.88),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.spacingSm,
+                  vertical: AppConstants.spacingXs,
                 ),
-              )
-            : null,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: RarityEffectFrame(
-                effectId: entry.rarityEffectId,
-                baseColor: rarityColor,
-                borderRadius: BorderRadius.zero,
-                animate: false,
-                clip: false,
-                child: entry.thumbnailRelativePath == null
-                    ? ColoredBox(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHighest,
-                        child: const Icon(Icons.lock_outline, size: 44),
-                      )
-                    : StoredMediaImage(
-                        path: entry.thumbnailRelativePath!,
-                        fit: BoxFit.cover,
-                      ),
+                child: Text(
+                  '#${entry.collectionNumber}',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
               ),
             ),
-            if (entry.mediaType == MediaType.video && entry.isOwned)
-              const Align(
-                alignment: Alignment.topRight,
-                child: Padding(
-                  padding: EdgeInsets.all(AppConstants.spacingXs),
-                  child: Icon(Icons.play_circle_fill),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(AppConstants.spacingSm),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '#${entry.collectionNumber} $title',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          entry.isOwned
-                              ? _albumSubtitle(context, entry)
-                              : l10n.missing,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (entry.isOwned)
-                        IconButton(
-                          tooltip: l10n.favoriteToggle,
-                          onPressed: onToggleFavorite,
-                          icon: Icon(
-                            entry.isFavorite
-                                ? Icons.star
-                                : Icons.star_border_outlined,
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
+          ),
+          if (entry.isOwned && entry.quantity > 1)
+            Positioned(
+              right: AppConstants.spacingXs,
+              top: AppConstants.spacingXs,
+              child: Chip(
+                visualDensity: VisualDensity.compact,
+                label: Text('x${entry.quantity}'),
               ),
             ),
-          ],
-        ),
+          if (entry.isOwned)
+            Positioned(
+              right: AppConstants.spacingXs,
+              bottom: AppConstants.spacingXs,
+              child: IconButton.filledTonal(
+                tooltip: l10n.favoriteToggle,
+                onPressed: onToggleFavorite,
+                icon: Icon(
+                  entry.isFavorite ? Icons.star : Icons.star_border_outlined,
+                ),
+              ),
+            ),
+          if (!entry.isOwned)
+            Positioned(
+              left: AppConstants.spacingXs,
+              right: AppConstants.spacingXs,
+              bottom: AppConstants.spacingXs,
+              child: Chip(
+                visualDensity: VisualDensity.compact,
+                avatar: const Icon(Icons.lock_outline, size: 16),
+                label: Text(l10n.missing),
+              ),
+            ),
+        ],
       ),
     );
   }
 
+  // ignore: unused_element
   String _albumSubtitle(BuildContext context, AlbumCardEntry entry) {
     final l10n = context.l10n;
     final base = '${entry.rarityName} · x${entry.quantity}';
