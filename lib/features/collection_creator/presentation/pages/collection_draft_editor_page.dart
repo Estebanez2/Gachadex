@@ -25,11 +25,9 @@ import '../../../rarities/domain/entities/rarity.dart';
 import '../../../rarities/domain/validation/rarity_validation.dart';
 import '../../../rarities/presentation/widgets/rarity_preview.dart';
 import '../../application/collection_draft_use_case_providers.dart';
-import '../../domain/catalogs/draft_cover_catalog.dart';
 import '../../domain/validation/collection_draft_validation.dart';
 import '../../domain/validation/collection_finalization_validation.dart';
 import '../controllers/collection_draft_controller.dart';
-import '../widgets/draft_cover_preview.dart';
 import '../widgets/visual_option_labels.dart';
 
 enum _EditorSection { information, rarities, cards, packs, review }
@@ -299,89 +297,172 @@ class _CompletionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final summaries = _sectionSummaries(context, state);
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingMd),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _CompletionRow(
-              title: l10n.information,
-              status: state.completeness.info,
-              missingText: l10n.collectionNeedsName,
-              onTap: () => onSectionChanged(_EditorSection.information),
+            Text(
+              l10n.draftSectionsProgress(
+                state.completeness.completedRequiredCount,
+                state.completeness.requiredSectionCount,
+              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
-            const Divider(),
-            _CompletionRow(
-              title: l10n.rarities,
-              status: state.completeness.rarities,
-              missingText: l10n.atLeastOneRarity,
-              onTap: () => onSectionChanged(_EditorSection.rarities),
-            ),
-            const Divider(),
-            _CompletionRow(
-              title: l10n.cards,
-              status: state.completeness.cards,
-              missingText: l10n.atLeastOneCard,
-              onTap: () => onSectionChanged(_EditorSection.cards),
-            ),
-            const Divider(),
-            _CompletionRow(
-              title: l10n.packs,
-              status: state.completeness.packs,
-              missingText: l10n.atLeastOnePack,
-              onTap: () => onSectionChanged(_EditorSection.packs),
-            ),
-            const Divider(),
-            _CompletionRow(
-              title: l10n.review,
-              status: state.completeness.completeForThisPhase
-                  ? DraftSectionCompletion.completeForThisPhase
-                  : DraftSectionCompletion.incomplete,
-              missingText: l10n.reviewNeedsCompleteDraft,
-              onTap: () => onSectionChanged(_EditorSection.review),
-            ),
+            const SizedBox(height: AppConstants.spacingSm),
+            for (var index = 0; index < summaries.length; index++) ...[
+              if (index > 0) const Divider(),
+              _CompletionRow(
+                summary: summaries[index],
+                onTap: () => onSectionChanged(summaries[index].section),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
+
+  List<_DraftSectionSummary> _sectionSummaries(
+    BuildContext context,
+    CollectionDraftEditorState state,
+  ) {
+    final l10n = context.l10n;
+    final requiredProgress = l10n.draftSectionsProgress(
+      state.completeness.completedRequiredCount,
+      state.completeness.requiredSectionCount,
+    );
+
+    return [
+      _DraftSectionSummary(
+        section: _EditorSection.information,
+        title: l10n.information,
+        status: state.completeness.info,
+        summary: _informationSummary(l10n, state),
+      ),
+      _DraftSectionSummary(
+        section: _EditorSection.rarities,
+        title: l10n.rarities,
+        status: state.completeness.rarities,
+        summary: state.rarities.isEmpty
+            ? l10n.raritiesMissingSummary
+            : l10n.rarityProbabilitySummary(
+                state.rarities.length,
+                _rarityProbabilityTotal(state.rarities),
+              ),
+      ),
+      _DraftSectionSummary(
+        section: _EditorSection.cards,
+        title: l10n.cards,
+        status: state.completeness.cards,
+        summary: state.cardCount <= 0
+            ? l10n.cardsMissingSummary
+            : l10n.cardsCreatedSummary(state.cardCount),
+      ),
+      _DraftSectionSummary(
+        section: _EditorSection.packs,
+        title: l10n.packs,
+        status: state.completeness.packs,
+        summary: state.packCount <= 0 || !state.hasMainPack
+            ? l10n.mainPackMissingSummary
+            : l10n.packsCreatedSummary(state.packCount),
+      ),
+      _DraftSectionSummary(
+        section: _EditorSection.review,
+        title: l10n.review,
+        status: state.completeness.completeForThisPhase
+            ? DraftSectionCompletion.completeForThisPhase
+            : DraftSectionCompletion.incomplete,
+        summary: requiredProgress,
+      ),
+    ];
+  }
+
+  String _informationSummary(
+    AppLocalizations l10n,
+    CollectionDraftEditorState state,
+  ) {
+    if (state.infoErrors.hasErrors) {
+      return l10n.fixMarkedFields;
+    }
+    if (!CollectionDraftValidation.isNameComplete(state.name)) {
+      return l10n.missingName;
+    }
+    if (!CollectionDraftValidation.isAuthorComplete(state.author)) {
+      return l10n.missingAuthor;
+    }
+    return '${state.name.trim()} - ${state.author.trim()}';
+  }
+}
+
+final class _DraftSectionSummary {
+  const _DraftSectionSummary({
+    required this.section,
+    required this.title,
+    required this.status,
+    required this.summary,
+  });
+
+  final _EditorSection section;
+  final String title;
+  final DraftSectionCompletion status;
+  final String summary;
 }
 
 class _CompletionRow extends StatelessWidget {
-  const _CompletionRow({
-    required this.title,
-    required this.status,
-    required this.missingText,
-    required this.onTap,
-  });
+  const _CompletionRow({required this.summary, required this.onTap});
 
-  final String title;
-  final DraftSectionCompletion status;
-  final String missingText;
+  final _DraftSectionSummary summary;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final complete = status == DraftSectionCompletion.completeForThisPhase;
-    final label = switch (status) {
-      DraftSectionCompletion.notStarted => l10n.notStarted,
-      DraftSectionCompletion.incomplete => l10n.incomplete,
-      DraftSectionCompletion.completeForThisPhase => l10n.completeForThisPhase,
-      DraftSectionCompletion.withErrors => l10n.withErrors,
-    };
-
+    final (icon, label) = _statusVisuals(context, summary.status);
     return ListTile(
       contentPadding: EdgeInsets.zero,
       onTap: onTap,
-      leading: Icon(
-        complete ? Icons.check_circle_outline : Icons.radio_button_unchecked,
+      leading: Icon(icon),
+      title: Text(summary.title),
+      subtitle: Text(summary.summary),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          const SizedBox(width: AppConstants.spacingXs),
+          const Icon(Icons.chevron_right),
+        ],
       ),
-      title: Text(title),
-      subtitle: complete ? null : Text(missingText),
-      trailing: Text(label),
     );
+  }
+
+  (IconData, String) _statusVisuals(
+    BuildContext context,
+    DraftSectionCompletion status,
+  ) {
+    final l10n = context.l10n;
+    return switch (status) {
+      DraftSectionCompletion.notStarted => (
+        Icons.radio_button_unchecked,
+        l10n.pending,
+      ),
+      DraftSectionCompletion.incomplete => (
+        Icons.info_outline,
+        l10n.incomplete,
+      ),
+      DraftSectionCompletion.withErrors => (
+        Icons.warning_amber_outlined,
+        l10n.incomplete,
+      ),
+      DraftSectionCompletion.completeForThisPhase => (
+        Icons.check_circle_outline,
+        l10n.sectionComplete,
+      ),
+    };
   }
 }
 
@@ -400,11 +481,6 @@ class _InformationSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DraftCoverPreview(
-          style: state.draftCoverStyle,
-          collectionName: state.name,
-        ),
-        const SizedBox(height: AppConstants.spacingMd),
         TextFormField(
           key: ValueKey('draft-name-${state.project.id.value}'),
           initialValue: state.name,
@@ -448,8 +524,6 @@ class _InformationSection extends ConsumerWidget {
           buildCounter: _buildCounter,
           onChanged: controller.editDescription,
         ),
-        const SizedBox(height: AppConstants.spacingLg),
-        _CoverStyleSection(state: state),
       ],
     );
   }
@@ -466,109 +540,6 @@ class _InformationSection extends ConsumerWidget {
     }
 
     return Text(context.l10n.charactersCounter(currentLength, max));
-  }
-}
-
-class _CoverStyleSection extends ConsumerWidget {
-  const _CoverStyleSection({required this.state});
-
-  final CollectionDraftEditorState state;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final controller = ref.read(
-      collectionDraftControllerProvider(state.project.id).notifier,
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.cover,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: AppConstants.spacingMd),
-        _OptionTitle(label: l10n.primaryColor),
-        Wrap(
-          spacing: AppConstants.spacingSm,
-          runSpacing: AppConstants.spacingSm,
-          children: [
-            for (final option in DraftCoverCatalog.colors)
-              ChoiceChip(
-                avatar: CircleAvatar(backgroundColor: Color(option.colorValue)),
-                label: Text(coverColorLabel(l10n, option.id)),
-                selected: state.draftCoverStyle.backgroundColorId == option.id,
-                onSelected: (_) {
-                  controller.editCover(
-                    state.draftCoverStyle.copyWith(
-                      backgroundColorId: option.id,
-                    ),
-                  );
-                },
-              ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.spacingMd),
-        _OptionTitle(label: l10n.accentColor),
-        Wrap(
-          spacing: AppConstants.spacingSm,
-          runSpacing: AppConstants.spacingSm,
-          children: [
-            for (final option in DraftCoverCatalog.colors)
-              ChoiceChip(
-                avatar: CircleAvatar(backgroundColor: Color(option.colorValue)),
-                label: Text(coverColorLabel(l10n, option.id)),
-                selected: state.draftCoverStyle.accentColorId == option.id,
-                onSelected: (_) {
-                  controller.editCover(
-                    state.draftCoverStyle.copyWith(accentColorId: option.id),
-                  );
-                },
-              ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.spacingMd),
-        _OptionTitle(label: l10n.icon),
-        Wrap(
-          spacing: AppConstants.spacingSm,
-          runSpacing: AppConstants.spacingSm,
-          children: [
-            for (final option in DraftCoverCatalog.icons)
-              ChoiceChip(
-                avatar: Icon(coverIconForId(option.id), size: 18),
-                label: Text(coverIconLabel(l10n, option.id)),
-                selected: state.draftCoverStyle.iconId == option.id,
-                onSelected: (_) {
-                  controller.editCover(
-                    state.draftCoverStyle.copyWith(iconId: option.id),
-                  );
-                },
-              ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.spacingMd),
-        _OptionTitle(label: l10n.style),
-        Wrap(
-          spacing: AppConstants.spacingSm,
-          runSpacing: AppConstants.spacingSm,
-          children: [
-            for (final option in DraftCoverCatalog.patterns)
-              ChoiceChip(
-                label: Text(coverPatternLabel(l10n, option.id)),
-                selected: state.draftCoverStyle.patternId == option.id,
-                onSelected: (_) {
-                  controller.editCover(
-                    state.draftCoverStyle.copyWith(patternId: option.id),
-                  );
-                },
-              ),
-          ],
-        ),
-      ],
-    );
   }
 }
 
@@ -756,9 +727,11 @@ class _CardsSection extends ConsumerWidget {
               ),
             ),
             FilledButton.icon(
-              onPressed: () => context.go(
-                AppRoutes.createCardNewPath(state.project.id.value),
-              ),
+              onPressed: state.rarities.isEmpty
+                  ? null
+                  : () => context.go(
+                      AppRoutes.createCardNewPath(state.project.id.value),
+                    ),
               icon: const Icon(Icons.add),
               label: Text(l10n.addCard),
             ),
@@ -772,6 +745,14 @@ class _CardsSection extends ConsumerWidget {
             description: l10n.saveError,
           ),
           data: (cards) {
+            if (state.rarities.isEmpty) {
+              return AppEmptyView(
+                icon: Icons.auto_awesome_outlined,
+                title: l10n.noRaritiesTitle,
+                description: l10n.needRarityBeforeCards,
+              );
+            }
+
             if (cards.isEmpty) {
               return AppEmptyView(
                 icon: Icons.style_outlined,
@@ -1082,15 +1063,7 @@ class _PackListItem extends StatelessWidget {
     final pack = config.packType;
     final complete =
         config.pool.any((entry) => entry.isEnabled) &&
-        config.slotRules.length == pack.cardCount &&
-        config.slotRules
-            .where((rule) => rule.probabilityGroupId != null)
-            .every(
-              (rule) => config.probabilities.any(
-                (probability) =>
-                    probability.probabilityGroupId == rule.probabilityGroupId,
-              ),
-            );
+        config.slotRules.length == pack.cardCount;
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingMd),

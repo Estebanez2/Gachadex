@@ -646,6 +646,78 @@ abstract class AppLocalizations {
   /// **'Pendiente'**
   String get pending;
 
+  /// Estado completo de una seccion del creador.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa'**
+  String get sectionComplete;
+
+  /// Progreso de secciones obligatorias del borrador.
+  ///
+  /// In es, this message translates to:
+  /// **'{completed} de {total} secciones completas'**
+  String draftSectionsProgress(int completed, int total);
+
+  /// Resumen de informacion sin nombre.
+  ///
+  /// In es, this message translates to:
+  /// **'Falta nombre'**
+  String get missingName;
+
+  /// Resumen de informacion sin autor.
+  ///
+  /// In es, this message translates to:
+  /// **'Falta autor'**
+  String get missingAuthor;
+
+  /// Resumen de campos con error.
+  ///
+  /// In es, this message translates to:
+  /// **'Corrige los campos marcados'**
+  String get fixMarkedFields;
+
+  /// Resumen cuando no hay rarezas.
+  ///
+  /// In es, this message translates to:
+  /// **'Falta configurar rarezas'**
+  String get raritiesMissingSummary;
+
+  /// Resumen de rarezas del borrador.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 rareza} other{{count} rarezas}} - Probabilidad total {total} %'**
+  String rarityProbabilitySummary(int count, int total);
+
+  /// Resumen de cartas creadas.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 carta creada} other{{count} cartas creadas}}'**
+  String cardsCreatedSummary(num count);
+
+  /// Resumen cuando no hay cartas.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavia no hay cartas'**
+  String get cardsMissingSummary;
+
+  /// Resumen de tipos de sobre creados.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 tipo de sobre} other{{count} tipos de sobre}}'**
+  String packsCreatedSummary(num count);
+
+  /// Resumen cuando falta un sobre principal.
+  ///
+  /// In es, this message translates to:
+  /// **'Falta configurar un sobre principal'**
+  String get mainPackMissingSummary;
+
+  /// Ayuda cuando se intenta crear cartas sin rarezas.
+  ///
+  /// In es, this message translates to:
+  /// **'Primero necesitas al menos una rareza.'**
+  String get needRarityBeforeCards;
+
   /// Requisito de completitud de nombre.
   ///
   /// In es, this message translates to:

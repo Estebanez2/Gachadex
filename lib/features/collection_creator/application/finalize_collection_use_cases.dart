@@ -65,6 +65,7 @@ final class ValidateCollectionForFinalization {
       description: project.description ?? '',
     );
     if (!CollectionDraftValidation.isNameComplete(project.name) ||
+        !CollectionDraftValidation.isAuthorComplete(project.author ?? '') ||
         !infoErrors.canSave) {
       issues.add(
         const CollectionFinalizationIssue(

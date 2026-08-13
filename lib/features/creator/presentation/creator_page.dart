@@ -193,7 +193,14 @@ class _DraftListItem extends ConsumerWidget {
               children: [
                 Chip(label: Text(l10n.draft)),
                 Chip(label: Text(l10n.rarityCount(summary.rarityCount))),
-                Chip(label: Text(_phaseStatusLabel(l10n, summary))),
+                Chip(
+                  label: Text(
+                    l10n.draftSectionsProgress(
+                      summary.completeness.completedRequiredCount,
+                      summary.completeness.requiredSectionCount,
+                    ),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: AppConstants.spacingSm),
@@ -216,17 +223,6 @@ class _DraftListItem extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  String _phaseStatusLabel(
-    AppLocalizations l10n,
-    CollectionDraftSummary summary,
-  ) {
-    if (summary.completeness.completeForThisPhase) {
-      return l10n.completeForThisPhase;
-    }
-
-    return l10n.incompleteDraft;
   }
 }
 
