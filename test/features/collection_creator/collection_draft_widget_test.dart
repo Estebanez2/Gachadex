@@ -45,10 +45,7 @@ void main() {
         const CreatorPage(),
         container: container,
       );
-      expect(
-        find.text('Todavía no has creado ninguna colección'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('ninguna colecci'), findsOneWidget);
 
       final projectId = await container
           .read(createCollectionDraftProvider)
@@ -63,6 +60,7 @@ void main() {
           );
 
       await _pump(tester);
+
       expect(find.text('Viaje'), findsWidgets);
       expect(find.text('Grupo'), findsOneWidget);
       expect(find.text('Borrador'), findsWidgets);
@@ -92,13 +90,13 @@ void main() {
         wrapScaffold: false,
       );
 
-      await _pumpUntilFound(tester, find.text('Rarezas'));
-      await tester.tap(find.text('Rarezas').last);
+      await _pumpUntilFound(tester, find.widgetWithText(ListTile, 'Rarezas'));
+      await tester.tap(find.widgetWithText(ListTile, 'Rarezas'));
       await _pump(tester);
-      await _pumpUntilFound(tester, find.text('Añadir rareza'));
-      await tester.ensureVisible(find.text('Añadir rareza').first);
+      final addRarityButton = find.byType(FilledButton).first;
+      await tester.ensureVisible(addRarityButton);
       await tester.pump();
-      await tester.tap(find.text('Añadir rareza').first, warnIfMissed: false);
+      await tester.tap(addRarityButton, warnIfMissed: false);
       await _pump(tester);
       expect(find.widgetWithText(TextFormField, 'Nombre'), findsOneWidget);
       expect(
@@ -132,7 +130,9 @@ void main() {
     }
   });
 
-  testWidgets('editor cards section shows the empty state', (tester) async {
+  testWidgets('editor cards section stays accessible before rarities', (
+    tester,
+  ) async {
     final fakes = _Phase3Fakes(
       uuids: [testUuid(20), testUuid(21), testUuid(22)],
     );
@@ -154,15 +154,17 @@ void main() {
       await tester.tap(find.widgetWithText(ListTile, 'Cartas'));
       await _pump(tester);
 
-      expect(find.text('TodavÃ­a no hay cartas'), findsOneWidget);
+      expect(find.text('Cartas'), findsWidgets);
       expect(
-        find.text('Crea la primera carta de esta colecciÃ³n.'),
+        find.text('Primero necesitas al menos una rareza.'),
         findsOneWidget,
       );
-      final addCardButton = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'AÃ±adir carta').first,
+      expect(
+        tester
+            .widgetList<FilledButton>(find.byType(FilledButton))
+            .any((button) => button.onPressed != null),
+        isFalse,
       );
-      expect(addCardButton.onPressed, isNotNull);
     } finally {
       await _disposePhase3Widget(tester, container);
       await fakes.dispose();

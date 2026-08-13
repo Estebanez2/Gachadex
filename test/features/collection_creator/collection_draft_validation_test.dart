@@ -15,12 +15,13 @@ void main() {
       );
       final completeness = CollectionDraftValidation.completeness(
         name: '   ',
-        coverStyle: DraftCoverStyle.defaultStyle(),
+        author: '',
         rarityCount: 0,
         rarityProbabilityTotal: 0,
         hasPositiveRarityProbability: false,
         cardCount: 0,
         packCount: 0,
+        hasMainPack: false,
         infoErrors: errors,
       );
 
@@ -53,12 +54,13 @@ void main() {
         );
         final completeness = CollectionDraftValidation.completeness(
           name: 'Viaje',
-          coverStyle: DraftCoverStyle.defaultStyle(),
+          author: 'Grupo',
           rarityCount: 4,
           rarityProbabilityTotal: 100,
           hasPositiveRarityProbability: true,
           cardCount: 1,
           packCount: 1,
+          hasMainPack: true,
           infoErrors: errors,
         );
 
@@ -80,27 +82,68 @@ void main() {
 
       final incomplete = CollectionDraftValidation.completeness(
         name: 'Viaje',
-        coverStyle: DraftCoverStyle.defaultStyle(),
+        author: 'Grupo',
         rarityCount: 2,
         rarityProbabilityTotal: 85,
         hasPositiveRarityProbability: true,
         cardCount: 1,
         packCount: 1,
+        hasMainPack: true,
         infoErrors: errors,
       );
       final overflow = CollectionDraftValidation.completeness(
         name: 'Viaje',
-        coverStyle: DraftCoverStyle.defaultStyle(),
+        author: 'Grupo',
         rarityCount: 2,
         rarityProbabilityTotal: 110,
         hasPositiveRarityProbability: true,
         cardCount: 1,
         packCount: 1,
+        hasMainPack: true,
         infoErrors: errors,
       );
 
       expect(incomplete.rarities, DraftSectionCompletion.incomplete);
       expect(overflow.rarities, DraftSectionCompletion.incomplete);
+    });
+
+    test('requires author and a main pack for completeness', () {
+      final errors = CollectionDraftValidation.validateInfo(
+        name: 'Viaje',
+        author: '',
+        description: '',
+      );
+
+      final missingAuthor = CollectionDraftValidation.completeness(
+        name: 'Viaje',
+        author: '',
+        rarityCount: 1,
+        rarityProbabilityTotal: 100,
+        hasPositiveRarityProbability: true,
+        cardCount: 1,
+        packCount: 1,
+        hasMainPack: true,
+        infoErrors: errors,
+      );
+      final missingMainPack = CollectionDraftValidation.completeness(
+        name: 'Viaje',
+        author: 'Grupo',
+        rarityCount: 1,
+        rarityProbabilityTotal: 100,
+        hasPositiveRarityProbability: true,
+        cardCount: 1,
+        packCount: 1,
+        hasMainPack: false,
+        infoErrors: CollectionDraftValidation.validateInfo(
+          name: 'Viaje',
+          author: 'Grupo',
+          description: '',
+        ),
+      );
+
+      expect(missingAuthor.info, DraftSectionCompletion.incomplete);
+      expect(missingMainPack.packs, DraftSectionCompletion.incomplete);
+      expect(missingMainPack.completedRequiredCount, 3);
     });
 
     test('validates draft cover identifiers against the catalog', () {

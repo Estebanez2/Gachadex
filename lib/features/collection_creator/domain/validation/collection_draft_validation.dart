@@ -1,5 +1,3 @@
-import '../value_objects/draft_cover_style.dart';
-
 enum DraftSectionCompletion {
   notStarted,
   incomplete,
@@ -52,6 +50,17 @@ final class CollectionDraftCompleteness {
   bool get packsComplete =>
       packs == DraftSectionCompletion.completeForThisPhase;
 
+  int get requiredSectionCount => 4;
+
+  int get completedRequiredCount {
+    return [
+      infoComplete,
+      raritiesComplete,
+      cardsComplete,
+      packsComplete,
+    ].where((complete) => complete).length;
+  }
+
   bool get completeForThisPhase =>
       infoComplete && raritiesComplete && cardsComplete && packsComplete;
 
@@ -77,27 +86,24 @@ abstract final class CollectionDraftValidation {
 
   static CollectionDraftCompleteness completeness({
     required String name,
-    required DraftCoverStyle coverStyle,
+    required String author,
     required int rarityCount,
     required int rarityProbabilityTotal,
     required bool hasPositiveRarityProbability,
     required int cardCount,
     required int packCount,
+    required bool hasMainPack,
     required CollectionDraftInfoErrors infoErrors,
   }) {
     return CollectionDraftCompleteness(
-      info: _infoCompletion(
-        name: name,
-        coverStyle: coverStyle,
-        infoErrors: infoErrors,
-      ),
+      info: _infoCompletion(name: name, author: author, infoErrors: infoErrors),
       rarities: _rarityCompletion(
         rarityCount: rarityCount,
         rarityProbabilityTotal: rarityProbabilityTotal,
         hasPositiveRarityProbability: hasPositiveRarityProbability,
       ),
       cards: _cardCompletion(cardCount),
-      packs: _packCompletion(packCount),
+      packs: _packCompletion(packCount: packCount, hasMainPack: hasMainPack),
     );
   }
 
@@ -105,20 +111,24 @@ abstract final class CollectionDraftValidation {
     return name.trim().isNotEmpty && name.length <= maxNameLength;
   }
 
+  static bool isAuthorComplete(String author) {
+    return author.trim().isNotEmpty && author.length <= maxAuthorLength;
+  }
+
   static DraftSectionCompletion _infoCompletion({
     required String name,
-    required DraftCoverStyle coverStyle,
+    required String author,
     required CollectionDraftInfoErrors infoErrors,
   }) {
     if (infoErrors.hasErrors) {
       return DraftSectionCompletion.withErrors;
     }
 
-    if (name.trim().isEmpty && coverStyle == DraftCoverStyle.defaultStyle()) {
+    if (name.trim().isEmpty && author.trim().isEmpty) {
       return DraftSectionCompletion.notStarted;
     }
 
-    if (!isNameComplete(name)) {
+    if (!isNameComplete(name) || !isAuthorComplete(author)) {
       return DraftSectionCompletion.incomplete;
     }
 
@@ -149,9 +159,16 @@ abstract final class CollectionDraftValidation {
     return DraftSectionCompletion.completeForThisPhase;
   }
 
-  static DraftSectionCompletion _packCompletion(int packCount) {
+  static DraftSectionCompletion _packCompletion({
+    required int packCount,
+    required bool hasMainPack,
+  }) {
     if (packCount <= 0) {
       return DraftSectionCompletion.notStarted;
+    }
+
+    if (!hasMainPack) {
+      return DraftSectionCompletion.incomplete;
     }
 
     return DraftSectionCompletion.completeForThisPhase;

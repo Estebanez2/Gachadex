@@ -326,6 +326,68 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pending => 'Pendiente';
 
   @override
+  String get sectionComplete => 'Completa';
+
+  @override
+  String draftSectionsProgress(int completed, int total) {
+    return '$completed de $total secciones completas';
+  }
+
+  @override
+  String get missingName => 'Falta nombre';
+
+  @override
+  String get missingAuthor => 'Falta autor';
+
+  @override
+  String get fixMarkedFields => 'Corrige los campos marcados';
+
+  @override
+  String get raritiesMissingSummary => 'Falta configurar rarezas';
+
+  @override
+  String rarityProbabilitySummary(int count, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rarezas',
+      one: '1 rareza',
+    );
+    return '$_temp0 - Probabilidad total $total %';
+  }
+
+  @override
+  String cardsCreatedSummary(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cartas creadas',
+      one: '1 carta creada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardsMissingSummary => 'Todavia no hay cartas';
+
+  @override
+  String packsCreatedSummary(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tipos de sobre',
+      one: '1 tipo de sobre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mainPackMissingSummary => 'Falta configurar un sobre principal';
+
+  @override
+  String get needRarityBeforeCards => 'Primero necesitas al menos una rareza.';
+
+  @override
   String get collectionNeedsName => 'La colección necesita un nombre';
 
   @override
