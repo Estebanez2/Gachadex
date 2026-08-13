@@ -45,6 +45,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noCollections => 'Todavía no hay colecciones.';
 
   @override
+  String get albumEmptyTitle => 'Aun no tienes ninguna coleccion.';
+
+  @override
+  String get albumEmptyDescription =>
+      'Crea una coleccion o importa un paquete .gachadex para empezar.';
+
+  @override
+  String get albumLibraryDescription =>
+      'Tus colecciones instaladas y jugables aparecen aqui.';
+
+  @override
   String get availablePacksTitle => 'Sobres disponibles';
 
   @override
@@ -66,6 +77,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get available => 'Disponible';
+
+  @override
+  String totalAvailablePacksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sobres disponibles',
+      one: '1 sobre disponible',
+      zero: '0 sobres disponibles',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get viewCollection => 'Ver coleccion';
@@ -974,7 +997,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get viewAlbum => 'Ver album';
+  String get viewAlbum => 'Ver cartas';
 
   @override
   String get backToPacks => 'Volver a sobres';
@@ -1023,6 +1046,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get movements => 'Movimientos';
+
+  @override
+  String get noMovements => 'Aun no hay movimientos.';
 
   @override
   String get sellDuplicates => 'Vender repetidas';

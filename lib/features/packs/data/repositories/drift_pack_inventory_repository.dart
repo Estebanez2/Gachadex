@@ -16,6 +16,14 @@ final class DriftPackInventoryRepository implements PackInventoryRepository {
   }
 
   @override
+  Stream<List<PackInventory>> watchAll() {
+    return database
+        .select(database.packInventory)
+        .watch()
+        .map((rows) => rows.map((row) => row.toDomain()).toList());
+  }
+
+  @override
   Future<List<PackInventory>> getByInstalledCollection(
     InstalledCollectionId installedCollectionId,
   ) async {

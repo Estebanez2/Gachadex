@@ -105,10 +105,9 @@ GoRouter createAppRouter({
                           installedCollectionId: InstalledCollectionId(
                             installedCollectionId,
                           ),
-                          initialTabIndex:
-                              state.uri.queryParameters['tab'] == 'album'
-                              ? 1
-                              : 0,
+                          initialTabIndex: _initialInstalledCollectionTabIndex(
+                            state.uri.queryParameters['tab'],
+                          ),
                         );
                       } on FormatException {
                         return _RouteError(
@@ -379,4 +378,12 @@ class _RouteError extends StatelessWidget {
       ),
     );
   }
+}
+
+int _initialInstalledCollectionTabIndex(String? tab) {
+  return switch (tab) {
+    'cards' || 'album' => 1,
+    'movements' => 2,
+    _ => 0,
+  };
 }

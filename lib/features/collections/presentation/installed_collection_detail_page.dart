@@ -26,6 +26,7 @@ import '../../packs/application/pack_notification_coordinator_provider.dart';
 import '../../packs/application/pack_providers.dart';
 import '../../packs/domain/entities/pack_inventory.dart';
 import '../../packs/domain/entities/pack_type.dart';
+import '../domain/entities/installed_collection.dart';
 import '../application/installed_collection_providers.dart';
 
 final _packTypeProvider = FutureProvider.autoDispose
@@ -98,19 +99,6 @@ class _InstalledCollectionDetailPageState
               orElse: () => const SizedBox.shrink(),
             ),
           ],
-          bottom: TabBar(
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.inventory_2_outlined),
-                text: l10n.packs,
-              ),
-              Tab(icon: const Icon(Icons.grid_view_outlined), text: l10n.album),
-              Tab(
-                icon: const Icon(Icons.receipt_long_outlined),
-                text: l10n.movements,
-              ),
-            ],
-          ),
         ),
         body: SafeArea(
           child: collectionAsync.when(
@@ -119,12 +107,39 @@ class _InstalledCollectionDetailPageState
               title: l10n.screenErrorTitle,
               description: l10n.projectNotFound,
             ),
-            data: (_) => TabBarView(
+            data: (collection) => Column(
               children: [
-                _PacksTab(installedCollectionId: widget.installedCollectionId),
-                _AlbumTab(installedCollectionId: widget.installedCollectionId),
-                _MovementsTab(
-                  installedCollectionId: widget.installedCollectionId,
+                _CollectionDetailHeader(collection: collection),
+                TabBar(
+                  tabs: [
+                    Tab(
+                      icon: const Icon(Icons.inventory_2_outlined),
+                      text: l10n.packs,
+                    ),
+                    Tab(
+                      icon: const Icon(Icons.grid_view_outlined),
+                      text: l10n.cards,
+                    ),
+                    Tab(
+                      icon: const Icon(Icons.receipt_long_outlined),
+                      text: l10n.movements,
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      _PacksTab(
+                        installedCollectionId: widget.installedCollectionId,
+                      ),
+                      _AlbumTab(
+                        installedCollectionId: widget.installedCollectionId,
+                      ),
+                      _MovementsTab(
+                        installedCollectionId: widget.installedCollectionId,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -163,6 +178,73 @@ class _InstalledCollectionDetailPageState
         setState(() => _exporting = false);
       }
     }
+  }
+}
+
+class _CollectionDetailHeader extends StatelessWidget {
+  const _CollectionDetailHeader({required this.collection});
+
+  final InstalledCollection collection;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final percent = collection.totalCardCount == 0
+        ? '0.0'
+        : (collection.distinctOwnedCount / collection.totalCardCount * 100)
+              .toStringAsFixed(1);
+
+    return Padding(
+      padding: AppConstants.pagePadding.copyWith(
+        bottom: AppConstants.spacingSm,
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+            child: SizedBox.square(
+              dimension: 64,
+              child: collection.coverRelativePath == null
+                  ? ColoredBox(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      child: Icon(
+                        Icons.collections_bookmark_outlined,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
+                      ),
+                    )
+                  : StoredMediaImage(path: collection.coverRelativePath!),
+            ),
+          ),
+          const SizedBox(width: AppConstants.spacingMd),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  collection.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacingXs),
+                Text(
+                  l10n.albumProgress(
+                    collection.distinctOwnedCount,
+                    collection.totalCardCount,
+                    percent,
+                  ),
+                ),
+                Text(l10n.gachacoinBalance(collection.coins)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -227,23 +309,6 @@ class _PacksTab extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppConstants.spacingMd),
               ],
-              collectionAsync.when(
-                loading: () => const SizedBox.shrink(),
-                error: (_, _) => const SizedBox.shrink(),
-                data: (collection) => Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.toll_outlined),
-                    title: Text(l10n.gachacoinBalance(collection.coins)),
-                    trailing: TextButton.icon(
-                      onPressed: () =>
-                          DefaultTabController.of(context).animateTo(2),
-                      icon: const Icon(Icons.receipt_long_outlined),
-                      label: Text(l10n.movements),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppConstants.spacingMd),
               Text(
                 l10n.packInventory,
                 style: Theme.of(
@@ -584,7 +649,7 @@ class _MovementsTab extends ConsumerWidget {
           return AppEmptyView(
             icon: Icons.receipt_long_outlined,
             title: l10n.movements,
-            description: l10n.collectionsEmptyDescription,
+            description: l10n.noMovements,
           );
         }
         return ListView.separated(
@@ -835,7 +900,7 @@ class _AlbumStatsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              l10n.album,
+              l10n.cards,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
