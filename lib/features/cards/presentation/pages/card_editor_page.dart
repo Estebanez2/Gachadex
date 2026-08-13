@@ -15,8 +15,6 @@ import '../../../../core/files/stored_media_image.dart';
 import '../../../../core/identifiers/entity_id.dart';
 import '../../../collection_creator/presentation/controllers/collection_draft_controller.dart';
 import '../../../rarities/domain/entities/rarity.dart';
-import '../../../rarities/presentation/widgets/rarity_preview.dart';
-import '../../../rarities/presentation/widgets/rarity_effect_layer.dart';
 import '../../application/card_photo_processor.dart';
 import '../../application/card_providers.dart';
 import '../../application/card_use_cases.dart';
@@ -24,7 +22,7 @@ import '../../application/card_video_processor.dart';
 import '../../domain/catalogs/card_template_catalog.dart';
 import '../../domain/repositories/card_repository.dart';
 import '../../domain/validation/card_validation.dart';
-import '../../domain/value_objects/card_field_type.dart';
+import '../widgets/gachadex_card.dart';
 
 class CardEditorPage extends ConsumerStatefulWidget {
   const CardEditorPage({super.key, required this.projectId, this.cardId});
@@ -41,7 +39,6 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
   final _healthController = TextEditingController(text: '100');
   final _numberController = TextEditingController(text: '1');
   final _descriptionController = TextEditingController();
-  final _comicFields = <_EditableComicField>[];
 
   RarityId? _rarityId;
   String _templateId = CardTemplateCatalog.defaultTemplateId;
@@ -67,9 +64,6 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
     _healthController.dispose();
     _numberController.dispose();
     _descriptionController.dispose();
-    for (final field in _comicFields) {
-      field.dispose();
-    }
     super.dispose();
   }
 
@@ -109,8 +103,25 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
             error: (error, stackTrace) => _ErrorBody(error: error),
             data: (draft) {
               if (detailsAsync == null) {
-                _initializeForCreate(draft.rarities);
-                return _FormBody(child: _buildForm(context, draft, null));
+                final contentVersionId = draft.project.currentContentVersionId;
+                if (contentVersionId == null) {
+                  return _ErrorBody(error: l10n.projectNotFound);
+                }
+                final cardsAsync = ref.watch(
+                  imageCardsProvider((
+                    collectionId: draft.project.collectionId,
+                    contentVersionId: contentVersionId,
+                  )),
+                );
+                return cardsAsync.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stackTrace) => _ErrorBody(error: error),
+                  data: (cards) {
+                    _initializeForCreate(draft.rarities, cards);
+                    return _FormBody(child: _buildForm(context, draft, null));
+                  },
+                );
               }
 
               return detailsAsync.when(
@@ -149,7 +160,7 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
       templateId: _templateId,
       frameId: _frameId,
       description: _descriptionController.text,
-      comicFields: _comicInputs(),
+      comicFields: const [],
     );
     final canSave =
         validation.canSave &&
@@ -170,6 +181,19 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
           ),
           const SizedBox(height: AppConstants.spacingMd),
         ],
+        _SectionTitle(l10n.preview),
+        Center(
+          child: _CardPreview(
+            pendingPhoto: _pendingPhoto,
+            pendingVideo: _pendingVideo,
+            existing: details,
+            rarity: _rarityFor(draft.rarities),
+            name: _nameController.text,
+            health: health,
+            description: _descriptionController.text,
+          ),
+        ),
+        const SizedBox(height: AppConstants.spacingLg),
         _SectionTitle(l10n.cardContent),
         SegmentedButton<MediaType>(
           segments: [
@@ -237,21 +261,6 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
           onChanged: (_) => _markDirty(),
         ),
         const SizedBox(height: AppConstants.spacingSm),
-        TextFormField(
-          controller: _numberController,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          decoration: InputDecoration(
-            labelText: l10n.collectionNumber,
-            errorText:
-                _submitted &&
-                    validation.has(CardValidationIssue.invalidCollectionNumber)
-                ? l10n.collectionNumberInvalid
-                : null,
-          ),
-          onChanged: (_) => _markDirty(),
-        ),
-        const SizedBox(height: AppConstants.spacingSm),
         DropdownButtonFormField<RarityId>(
           initialValue: _rarityId,
           decoration: InputDecoration(
@@ -290,81 +299,6 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
           onChanged: (_) => _markDirty(),
         ),
         const SizedBox(height: AppConstants.spacingLg),
-        _SectionTitle(l10n.appearance),
-        _ChoiceWrap(
-          label: l10n.template,
-          children: [
-            for (final template in CardTemplateCatalog.templates)
-              ChoiceChip(
-                label: Text(template.name),
-                selected: _templateId == template.id,
-                onSelected: (_) => setState(() {
-                  _templateId = template.id;
-                  _dirty = true;
-                }),
-              ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.spacingMd),
-        _ChoiceWrap(
-          label: l10n.frame,
-          children: [
-            for (final frame in CardTemplateCatalog.frames)
-              ChoiceChip(
-                label: Text(frame.name),
-                selected: _frameId == frame.id,
-                onSelected: (_) => setState(() {
-                  _frameId = frame.id;
-                  _dirty = true;
-                }),
-              ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.spacingMd),
-        _ColorSelector(
-          label: l10n.primaryColor,
-          value: _primaryColor,
-          onChanged: (value) => setState(() {
-            _primaryColor = value;
-            _dirty = true;
-          }),
-        ),
-        const SizedBox(height: AppConstants.spacingMd),
-        _ColorSelector(
-          label: l10n.accentColor,
-          value: _secondaryColor,
-          onChanged: (value) => setState(() {
-            _secondaryColor = value;
-            _dirty = true;
-          }),
-        ),
-        const SizedBox(height: AppConstants.spacingLg),
-        _SectionTitle(l10n.comicFields),
-        _ComicFieldEditor(
-          fields: _comicFields,
-          template: CardTemplateCatalog.templateById(_templateId),
-          onChanged: () => setState(() => _dirty = true),
-        ),
-        const SizedBox(height: AppConstants.spacingLg),
-        _SectionTitle(l10n.preview),
-        Center(
-          child: _CardPreview(
-            pendingPhoto: _pendingPhoto,
-            pendingVideo: _pendingVideo,
-            existing: details,
-            rarity: _rarityFor(draft.rarities),
-            templateId: _templateId,
-            frameId: _frameId,
-            primaryColor: _primaryColor,
-            secondaryColor: _secondaryColor,
-            name: _nameController.text,
-            health: health,
-            collectionNumber: number,
-            description: _descriptionController.text,
-            fields: _comicInputs(),
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingLg),
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
@@ -382,11 +316,21 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
     );
   }
 
-  void _initializeForCreate(List<Rarity> rarities) {
+  void _initializeForCreate(
+    List<Rarity> rarities,
+    List<ImageCardDetails> existingCards,
+  ) {
     if (_initialized) {
       return;
     }
     _rarityId = rarities.isEmpty ? null : rarities.first.id;
+    final nextNumber = existingCards.isEmpty
+        ? 1
+        : existingCards
+                  .map((details) => details.card.collectionNumber)
+                  .reduce((a, b) => a > b ? a : b) +
+              1;
+    _numberController.text = nextNumber.toString();
     _initialized = true;
   }
 
@@ -404,14 +348,6 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
     _primaryColor = details.card.primaryColor;
     _secondaryColor = details.card.secondaryColor;
     _mediaType = details.card.mediaType;
-    _comicFields
-      ..clear()
-      ..addAll(
-        details.fields.map(
-          (field) =>
-              _EditableComicField(type: field.fieldType, value: field.value),
-        ),
-      );
     _initialized = true;
   }
 
@@ -519,7 +455,7 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
         primaryColor: _primaryColor,
         secondaryColor: _secondaryColor,
         description: _descriptionController.text,
-        comicFields: _comicInputs(),
+        comicFields: details == null ? const [] : _hiddenComicInputs(details),
         photo: _pendingPhoto,
         video: _pendingVideo,
       );
@@ -586,14 +522,6 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
     }
   }
 
-  List<ComicFieldInput> _comicInputs() {
-    return [
-      for (final field in _comicFields)
-        if (field.controller.text.trim().isNotEmpty)
-          ComicFieldInput(type: field.type, value: field.controller.text),
-    ];
-  }
-
   Rarity? _rarityFor(List<Rarity> rarities) {
     final rarityId = _rarityId;
     if (rarityId == null) {
@@ -606,6 +534,13 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
       }
     }
     return null;
+  }
+
+  List<ComicFieldInput> _hiddenComicInputs(ImageCardDetails details) {
+    return [
+      for (final field in details.fields)
+        ComicFieldInput(type: field.fieldType, value: field.value),
+    ];
   }
 
   void _markDirty() {
@@ -1044,345 +979,48 @@ String _formatVideoDuration(Duration duration) {
   return '$minutes:${seconds.toString().padLeft(2, '0')}';
 }
 
-class _ChoiceWrap extends StatelessWidget {
-  const _ChoiceWrap({required this.label, required this.children});
-
-  final String label;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: AppConstants.spacingSm),
-        Wrap(
-          spacing: AppConstants.spacingSm,
-          runSpacing: AppConstants.spacingSm,
-          children: children,
-        ),
-      ],
-    );
-  }
-}
-
-class _ColorSelector extends StatelessWidget {
-  const _ColorSelector({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final int value;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return _ChoiceWrap(
-      label: label,
-      children: [
-        for (final option in CardTemplateCatalog.colors)
-          ChoiceChip(
-            avatar: CircleAvatar(backgroundColor: Color(option.value)),
-            label: Text(option.id),
-            selected: value == option.value,
-            onSelected: (_) => onChanged(option.value),
-          ),
-      ],
-    );
-  }
-}
-
-class _EditableComicField {
-  _EditableComicField({required this.type, required String value})
-    : controller = TextEditingController(text: value);
-
-  CardFieldType type;
-  final TextEditingController controller;
-
-  void dispose() => controller.dispose();
-}
-
-class _ComicFieldEditor extends StatefulWidget {
-  const _ComicFieldEditor({
-    required this.fields,
-    required this.template,
-    required this.onChanged,
-  });
-
-  final List<_EditableComicField> fields;
-  final CardTemplate template;
-  final VoidCallback onChanged;
-
-  @override
-  State<_ComicFieldEditor> createState() => _ComicFieldEditorState();
-}
-
-class _ComicFieldEditorState extends State<_ComicFieldEditor> {
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final available = CardTemplateCatalog.fieldOptions.where((option) {
-      return !widget.fields.any((field) => field.type == option.type);
-    }).toList();
-
-    return Column(
-      children: [
-        for (var index = 0; index < widget.fields.length; index++)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppConstants.spacingSm),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: DropdownButtonFormField<CardFieldType>(
-                    initialValue: widget.fields[index].type,
-                    items: [
-                      for (final option in CardTemplateCatalog.fieldOptions)
-                        DropdownMenuItem(
-                          value: option.type,
-                          child: Text(option.label),
-                        ),
-                    ],
-                    onChanged: (value) {
-                      if (value == null ||
-                          widget.fields.any((field) => field.type == value)) {
-                        return;
-                      }
-                      setState(() => widget.fields[index].type = value);
-                      widget.onChanged();
-                    },
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacingSm),
-                Expanded(
-                  flex: 3,
-                  child: TextFormField(
-                    controller: widget.fields[index].controller,
-                    maxLength: widget.template.maxComicFieldLength,
-                    decoration: InputDecoration(labelText: l10n.value),
-                    onChanged: (_) => widget.onChanged(),
-                  ),
-                ),
-                IconButton(
-                  tooltip: l10n.moveUp,
-                  onPressed: index == 0 ? null : () => _move(index, -1),
-                  icon: const Icon(Icons.keyboard_arrow_up),
-                ),
-                IconButton(
-                  tooltip: l10n.delete,
-                  onPressed: () {
-                    final removed = widget.fields.removeAt(index);
-                    removed.dispose();
-                    setState(() {});
-                    widget.onChanged();
-                  },
-                  icon: const Icon(Icons.delete_outline),
-                ),
-              ],
-            ),
-          ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: OutlinedButton.icon(
-            onPressed:
-                widget.fields.length >= widget.template.maxComicFields ||
-                    available.isEmpty
-                ? null
-                : () {
-                    widget.fields.add(
-                      _EditableComicField(
-                        type: available.first.type,
-                        value: '',
-                      ),
-                    );
-                    setState(() {});
-                    widget.onChanged();
-                  },
-            icon: const Icon(Icons.add),
-            label: Text(l10n.addComicField),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _move(int index, int direction) {
-    final target = index + direction;
-    if (target < 0 || target >= widget.fields.length) {
-      return;
-    }
-    final item = widget.fields.removeAt(index);
-    widget.fields.insert(target, item);
-    setState(() {});
-    widget.onChanged();
-  }
-}
-
 class _CardPreview extends StatelessWidget {
   const _CardPreview({
     required this.pendingPhoto,
     required this.pendingVideo,
     required this.existing,
     required this.rarity,
-    required this.templateId,
-    required this.frameId,
-    required this.primaryColor,
-    required this.secondaryColor,
     required this.name,
     required this.health,
-    required this.collectionNumber,
     required this.description,
-    required this.fields,
   });
 
   final PendingCardPhoto? pendingPhoto;
   final PendingCardVideo? pendingVideo;
   final ImageCardDetails? existing;
   final Rarity? rarity;
-  final String templateId;
-  final String frameId;
-  final int primaryColor;
-  final int secondaryColor;
   final String name;
   final int? health;
-  final int? collectionNumber;
   final String description;
-  final List<ComicFieldInput> fields;
 
   @override
   Widget build(BuildContext context) {
-    final template = CardTemplateCatalog.templateById(templateId);
-    final rarityColor = rarity == null
-        ? Theme.of(context).colorScheme.outline
-        : Color(rarity!.colorValue);
-    final radius = frameId == 'snapshot' ? 2.0 : AppConstants.cardRadius;
-
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 320),
-      child: AspectRatio(
-        aspectRatio: template.aspectRatio,
-        child: RarityEffectFrame(
-          effectId: rarity?.effectId,
-          baseColor: rarityColor,
-          borderRadius: BorderRadius.circular(radius),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Color(primaryColor),
-              borderRadius: BorderRadius.circular(radius),
-              border: Border.all(
-                color: rarityColor,
-                width: frameId == 'badge' ? 5 : 3,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          name.trim().isEmpty ? context.l10n.name : name.trim(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                              ),
-                        ),
-                      ),
-                      Text(
-                        '${health ?? 0} HP',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    flex: templateId == 'impact' ? 7 : 6,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.cardRadius,
-                      ),
-                      child: ColoredBox(
-                        color: Colors.white.withValues(alpha: 0.16),
-                        child: _previewMedia(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Color(secondaryColor),
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.cardRadius,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 5,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            rarity == null
-                                ? Icons.auto_awesome_outlined
-                                : rarityIconForId(rarity!.iconId),
-                            color: Colors.black87,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              rarity?.name ?? context.l10n.rarity,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            '#${collectionNumber ?? 0}',
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (description.trim().isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      description.trim(),
-                      maxLines: templateId == 'minimal' ? 2 : 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ],
-                  const SizedBox(height: 6),
-                  for (final field in fields.take(template.maxComicFields))
-                    Text(
-                      '${CardTemplateCatalog.labelForField(field.type)}: ${field.value.trim()}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white, fontSize: 11),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
+      child: GachadexCard(
+        name: name,
+        health: health,
+        description: description,
+        rarityName: rarity?.name ?? context.l10n.rarity,
+        rarityColorValue: rarity?.colorValue,
+        rarityEffectId: rarity?.effectId,
+        mediaType: _previewMediaType(),
+        media: _previewMedia(),
+        animateEffect: true,
       ),
     );
+  }
+
+  MediaType _previewMediaType() {
+    if (pendingVideo != null) {
+      return MediaType.video;
+    }
+    return existing?.card.mediaType ?? MediaType.image;
   }
 
   Widget _previewMedia() {

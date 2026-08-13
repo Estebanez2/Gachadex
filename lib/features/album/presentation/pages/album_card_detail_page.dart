@@ -12,8 +12,8 @@ import '../../../../core/identifiers/entity_id.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../collections/application/installed_collection_providers.dart';
+import '../../../cards/presentation/widgets/gachadex_card.dart';
 import '../../../economy/application/economy_providers.dart';
-import '../../../rarities/presentation/widgets/rarity_effect_layer.dart';
 import '../../application/album_providers.dart';
 import '../../domain/entities/album_card_entry.dart';
 
@@ -53,19 +53,20 @@ class AlbumCardDetailPage extends ConsumerWidget {
             return ListView(
               padding: AppConstants.pagePadding,
               children: [
-                AspectRatio(
-                  aspectRatio: 0.72,
-                  child: RarityEffectFrame(
-                    effectId: entry.rarityEffectId,
-                    baseColor: Color(entry.rarityColorValue ?? 0xFF7A8087),
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.cardRadius,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.cardRadius,
-                      ),
-                      child:
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 380),
+                    child: GachadexCard(
+                      name: entry.name ?? '',
+                      health: entry.health,
+                      description: entry.description ?? '',
+                      rarityName: entry.rarityName ?? '',
+                      rarityColorValue: entry.rarityColorValue,
+                      rarityEffectId: entry.rarityEffectId,
+                      mediaType: entry.mediaType,
+                      animateEffect: true,
+                      showVideoIndicator: entry.mediaType == MediaType.video,
+                      media:
                           entry.mediaType == MediaType.video &&
                               entry.thumbnailRelativePath != null
                           ? CardVideoPlayer(
@@ -113,14 +114,6 @@ class AlbumCardDetailPage extends ConsumerWidget {
                 if (entry.health != null)
                   Text('${l10n.health}: ${entry.health}'),
                 Text('${l10n.rarity}: ${entry.rarityName ?? ''}'),
-                if (entry.description != null) ...[
-                  const SizedBox(height: AppConstants.spacingSm),
-                  Text('${l10n.description}: ${entry.description}'),
-                ],
-                if (entry.templateId != null)
-                  Text('${l10n.template}: ${entry.templateId}'),
-                if (entry.frameId != null)
-                  Text('${l10n.frame}: ${entry.frameId}'),
                 Text('${l10n.copies}: ${entry.quantity}'),
                 if (entry.sellableCopies > 0) ...[
                   const SizedBox(height: AppConstants.spacingMd),
@@ -152,22 +145,6 @@ class AlbumCardDetailPage extends ConsumerWidget {
                       ).formatShortDate(entry.firstObtainedAtUtc!.toLocal()),
                     ),
                   ),
-                if (entry.fieldValues.isNotEmpty) ...[
-                  const SizedBox(height: AppConstants.spacingMd),
-                  Text(
-                    l10n.comicFields,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingSm),
-                  for (final field in entry.fieldValues)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(field.label),
-                      subtitle: Text(field.value),
-                    ),
-                ],
               ],
             );
           },

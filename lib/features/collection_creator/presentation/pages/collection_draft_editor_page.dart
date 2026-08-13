@@ -15,6 +15,7 @@ import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
 import '../../../cards/application/card_providers.dart';
 import '../../../cards/domain/repositories/card_repository.dart';
+import '../../../cards/presentation/widgets/gachadex_card.dart';
 import '../../../packs/application/pack_providers.dart';
 import '../../../packs/domain/entities/pack_configuration.dart';
 import '../../../rarities/application/rarity_use_case_providers.dart';
@@ -1170,64 +1171,79 @@ class _CardGridItem extends StatelessWidget {
     final l10n = context.l10n;
     final thumbnail = details.thumbnailAsset ?? details.mediaAsset;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onEdit,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(child: StoredMediaImage(path: thumbnail.relativePath)),
-            Padding(
-              padding: const EdgeInsets.all(AppConstants.spacingSm),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          details.card.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                      PopupMenuButton<_CardMenuAction>(
-                        tooltip: l10n.cards,
-                        onSelected: (action) {
-                          switch (action) {
-                            case _CardMenuAction.edit:
-                              onEdit();
-                            case _CardMenuAction.delete:
-                              onDelete();
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: _CardMenuAction.edit,
-                            child: Text(l10n.editCard),
-                          ),
-                          PopupMenuItem(
-                            value: _CardMenuAction.delete,
-                            child: Text(l10n.deleteCard),
-                          ),
-                        ],
-                      ),
-                    ],
+    return InkWell(
+      onTap: onEdit,
+      borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: GachadexCard(
+              name: details.card.name,
+              health: details.card.health,
+              description: details.card.description ?? '',
+              rarityName: rarityName,
+              rarityColorValue: details.rarity.colorValue,
+              rarityEffectId: details.rarity.effectId,
+              mediaType: details.card.mediaType,
+              compact: true,
+              media: StoredMediaImage(path: thumbnail.relativePath),
+              showVideoIndicator: details.card.mediaType.name == 'video',
+            ),
+          ),
+          Positioned(
+            right: AppConstants.spacingXs,
+            top: AppConstants.spacingXs,
+            child: Material(
+              color: Theme.of(
+                context,
+              ).colorScheme.surface.withValues(alpha: 0.86),
+              borderRadius: BorderRadius.circular(999),
+              child: PopupMenuButton<_CardMenuAction>(
+                tooltip: l10n.cards,
+                onSelected: (action) {
+                  switch (action) {
+                    case _CardMenuAction.edit:
+                      onEdit();
+                    case _CardMenuAction.delete:
+                      onDelete();
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: _CardMenuAction.edit,
+                    child: Text(l10n.editCard),
                   ),
-                  Text(
-                    '#${details.card.collectionNumber} - $rarityName',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
+                  PopupMenuItem(
+                    value: _CardMenuAction.delete,
+                    child: Text(l10n.deleteCard),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          Positioned(
+            left: AppConstants.spacingXs,
+            bottom: AppConstants.spacingXs,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.88),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.spacingSm,
+                  vertical: AppConstants.spacingXs,
+                ),
+                child: Text(
+                  '#${details.card.collectionNumber}',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
