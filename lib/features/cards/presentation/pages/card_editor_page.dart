@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -60,6 +61,9 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
 
   @override
   void dispose() {
+    unawaited(
+      _deletePendingTempFiles(photo: _pendingPhoto, video: _pendingVideo),
+    );
     _nameController.dispose();
     _healthController.dispose();
     _numberController.dispose();
@@ -364,10 +368,15 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
             context: context,
           );
       if (photo != null && mounted) {
+        final oldPhoto = _pendingPhoto;
+        final oldVideo = _pendingVideo;
         setState(() {
           _pendingPhoto = photo;
+          _pendingVideo = null;
+          _mediaType = MediaType.image;
           _dirty = true;
         });
+        await _deletePendingTempFiles(photo: oldPhoto, video: oldVideo);
       }
     } on Object catch (error) {
       if (mounted) {
@@ -390,12 +399,15 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
           .read(cardVideoProcessorProvider)
           .pickFromGallery(selectTrim: _selectVideoTrimStart);
       if (video != null && mounted) {
+        final oldPhoto = _pendingPhoto;
+        final oldVideo = _pendingVideo;
         setState(() {
           _pendingVideo = video;
           _pendingPhoto = null;
           _mediaType = MediaType.video;
           _dirty = true;
         });
+        await _deletePendingTempFiles(photo: oldPhoto, video: oldVideo);
       }
     } on Object catch (error) {
       if (mounted) {
@@ -408,13 +420,13 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
     }
   }
 
-  Future<Duration?> _selectVideoTrimStart(
+  Future<CardVideoTrim?> _selectVideoTrimStart(
     VideoTrimSelectionRequest request,
   ) async {
     if (!mounted) {
       return null;
     }
-    return showDialog<Duration>(
+    return showDialog<CardVideoTrim>(
       context: context,
       barrierDismissible: false,
       builder: (context) => _VideoTrimDialog(request: request),
@@ -518,7 +530,27 @@ class _CardEditorPageState extends ConsumerState<CardEditorPage> {
       ),
     );
     if (discard == true && mounted) {
+      await _deletePendingTempFiles(photo: _pendingPhoto, video: _pendingVideo);
+      if (!mounted) {
+        return;
+      }
       context.go(AppRoutes.createProjectPath(widget.projectId.value));
+    }
+  }
+
+  Future<void> _deletePendingTempFiles({
+    PendingCardPhoto? photo,
+    PendingCardVideo? video,
+  }) async {
+    for (final path in [...?photo?.tempPaths, ...?video?.tempPaths]) {
+      try {
+        final file = File(path);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } on Object {
+        // Temporary cleanup is best-effort; save flows clean the active files.
+      }
     }
   }
 
@@ -787,7 +819,15 @@ class _VideoTrimDialogState extends State<_VideoTrimDialog> {
   bool _loading = true;
   Object? _error;
 
-  Duration get _end => _start + widget.request.clipDuration;
+  CardVideoTrim get _selection => normalizeCardVideoTrim(
+    sourceDuration: widget.request.sourceDuration,
+    requestedTrim: CardVideoTrim(
+      start: _start,
+      duration: widget.request.clipDuration,
+    ),
+  );
+
+  Duration get _end => _selection.end;
 
   @override
   void initState() {
@@ -872,7 +912,7 @@ class _VideoTrimDialogState extends State<_VideoTrimDialog> {
         FilledButton.icon(
           onPressed: _loading || _error != null
               ? null
-              : () => Navigator.of(context).pop(_start),
+              : () => Navigator.of(context).pop(_selection),
           icon: const Icon(Icons.content_cut),
           label: Text(l10n.useVideoClip),
         ),

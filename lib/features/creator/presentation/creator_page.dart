@@ -10,6 +10,7 @@ import '../../../core/identifiers/entity_id.dart';
 import '../../../core/widgets/app_empty_view.dart';
 import '../../../core/widgets/app_error_view.dart';
 import '../../../core/widgets/app_loading_view.dart';
+import '../../../core/widgets/gachadex_ui.dart';
 import '../../collection_creator/application/collection_draft_use_case_providers.dart';
 import '../../collection_creator/presentation/controllers/collection_draft_controller.dart';
 import '../../collection_creator/presentation/widgets/draft_cover_preview.dart';
@@ -68,23 +69,11 @@ class _CreatorHeader extends StatelessWidget {
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: AppConstants.maxContentWidth),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.create,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: AppConstants.spacingSm),
-          Text(
-            l10n.collectionDraftsDescription,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: AppConstants.spacingMd),
-          const _NewDraftButton(),
-        ],
+      child: GachadexHeroPanel(
+        icon: Icons.edit_note_outlined,
+        title: l10n.create,
+        description: l10n.collectionDraftsDescription,
+        trailing: const _NewDraftButton(),
       ),
     );
   }
@@ -191,22 +180,26 @@ class _DraftListItem extends ConsumerWidget {
               spacing: AppConstants.spacingSm,
               runSpacing: AppConstants.spacingSm,
               children: [
-                Chip(label: Text(l10n.draft)),
-                Chip(label: Text(l10n.rarityCount(summary.rarityCount))),
-                Chip(
-                  label: Text(
-                    l10n.draftSectionsProgress(
-                      summary.completeness.completedRequiredCount,
-                      summary.completeness.requiredSectionCount,
-                    ),
+                GachadexMetricPill(
+                  icon: Icons.edit_note_outlined,
+                  value: l10n.draft,
+                  label: l10n.lastUpdated(date),
+                ),
+                GachadexMetricPill(
+                  icon: Icons.auto_awesome_outlined,
+                  value: summary.rarityCount.toString(),
+                  label: l10n.rarityCount(summary.rarityCount),
+                ),
+                GachadexMetricPill(
+                  icon: Icons.checklist_outlined,
+                  value:
+                      '${summary.completeness.completedRequiredCount}/${summary.completeness.requiredSectionCount}',
+                  label: l10n.draftSectionsProgress(
+                    summary.completeness.completedRequiredCount,
+                    summary.completeness.requiredSectionCount,
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: AppConstants.spacingSm),
-            Text(
-              l10n.lastUpdated(date),
-              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: AppConstants.spacingMd),
             Align(

@@ -11,7 +11,16 @@ const maxCardVideoSourceDuration = Duration(minutes: 1);
 const maxCardVideoDuration = maxCardVideoClipDuration;
 
 typedef VideoTrimSelector =
-    Future<Duration?> Function(VideoTrimSelectionRequest request);
+    Future<CardVideoTrim?> Function(VideoTrimSelectionRequest request);
+
+final class CardVideoTrim {
+  const CardVideoTrim({required this.start, required this.duration});
+
+  final Duration start;
+  final Duration duration;
+
+  Duration get end => start + duration;
+}
 
 final class VideoTrimSelectionRequest {
   const VideoTrimSelectionRequest({
@@ -27,6 +36,22 @@ final class VideoTrimSelectionRequest {
   Duration get latestStart => sourceDuration - clipDuration;
 }
 
+enum CardVideoCompressionPlatform { android, standard }
+
+final class CardVideoCompressionArguments {
+  const CardVideoCompressionArguments({
+    required this.startTimeSeconds,
+    required this.durationSeconds,
+  });
+
+  final int startTimeSeconds;
+
+  /// This follows `video_compress` naming. On Android the plugin forwards this
+  /// value to Transcoder as "trim from end", while other platforms use it as
+  /// clip duration.
+  final int durationSeconds;
+}
+
 bool cardVideoNeedsTrim(Duration sourceDuration) {
   return sourceDuration > maxCardVideoClipDuration;
 }
@@ -34,8 +59,9 @@ bool cardVideoNeedsTrim(Duration sourceDuration) {
 Duration clampCardVideoTrimStart({
   required Duration sourceDuration,
   required Duration requestedStart,
+  Duration clipDuration = maxCardVideoClipDuration,
 }) {
-  final latestStart = sourceDuration - maxCardVideoClipDuration;
+  final latestStart = sourceDuration - clipDuration;
   if (requestedStart <= Duration.zero) {
     return Duration.zero;
   }
@@ -43,6 +69,63 @@ Duration clampCardVideoTrimStart({
     return latestStart <= Duration.zero ? Duration.zero : latestStart;
   }
   return requestedStart;
+}
+
+CardVideoTrim normalizeCardVideoTrim({
+  required Duration sourceDuration,
+  required CardVideoTrim requestedTrim,
+}) {
+  final requestedDuration = requestedTrim.duration <= Duration.zero
+      ? maxCardVideoClipDuration
+      : requestedTrim.duration;
+  final trimDuration = _minDuration(
+    _minDuration(requestedDuration, maxCardVideoClipDuration),
+    sourceDuration,
+  );
+  final trimStart = clampCardVideoTrimStart(
+    sourceDuration: sourceDuration,
+    requestedStart: requestedTrim.start,
+    clipDuration: trimDuration,
+  );
+  final remainingDuration = sourceDuration - trimStart;
+  return CardVideoTrim(
+    start: trimStart,
+    duration: _minDuration(trimDuration, remainingDuration),
+  );
+}
+
+CardVideoCompressionArguments cardVideoCompressionArguments({
+  required Duration sourceDuration,
+  required CardVideoTrim trim,
+  required CardVideoCompressionPlatform platform,
+}) {
+  final startTimeSeconds = _floorWholeSeconds(trim.start);
+  final durationSeconds = platform == CardVideoCompressionPlatform.android
+      ? _ceilWholeSeconds(sourceDuration - trim.end)
+      : _ceilWholeSeconds(trim.duration);
+  return CardVideoCompressionArguments(
+    startTimeSeconds: startTimeSeconds,
+    durationSeconds: durationSeconds,
+  );
+}
+
+Duration _minDuration(Duration first, Duration second) {
+  return first <= second ? first : second;
+}
+
+int _floorWholeSeconds(Duration duration) {
+  if (duration <= Duration.zero) {
+    return 0;
+  }
+  return duration.inMilliseconds ~/ Duration.millisecondsPerSecond;
+}
+
+int _ceilWholeSeconds(Duration duration) {
+  if (duration <= Duration.zero) {
+    return 0;
+  }
+  return (duration.inMilliseconds + Duration.millisecondsPerSecond - 1) ~/
+      Duration.millisecondsPerSecond;
 }
 
 final class PendingCardVideo {
@@ -91,6 +174,7 @@ final class PluginCardVideoProcessor implements CardVideoProcessor {
     String? compressedPath;
     String? thumbnailSourcePath;
     String? thumbnailPath;
+    var keepPendingFiles = false;
     try {
       final sourceTemp = await _storage.createTempCopy(picked.path);
       sourceTempPath = sourceTemp.path;
@@ -105,7 +189,7 @@ final class PluginCardVideoProcessor implements CardVideoProcessor {
           'El video supera la duracion maxima de 1 minuto.',
         );
       }
-      Duration? trimStart;
+      CardVideoTrim? trim;
       if (cardVideoNeedsTrim(sourceDuration)) {
         final selected = await selectTrim?.call(
           VideoTrimSelectionRequest(
@@ -117,18 +201,27 @@ final class PluginCardVideoProcessor implements CardVideoProcessor {
         if (selected == null) {
           return null;
         }
-        trimStart = clampCardVideoTrimStart(
+        trim = normalizeCardVideoTrim(
           sourceDuration: sourceDuration,
-          requestedStart: selected,
+          requestedTrim: selected,
         );
       }
 
+      final compressionArguments = trim == null
+          ? null
+          : cardVideoCompressionArguments(
+              sourceDuration: sourceDuration,
+              trim: trim,
+              platform: Platform.isAndroid
+                  ? CardVideoCompressionPlatform.android
+                  : CardVideoCompressionPlatform.standard,
+            );
       final compressed = await VideoCompress.compressVideo(
         sourceTemp.path,
         quality: VideoQuality.Res1280x720Quality,
         deleteOrigin: false,
-        startTime: trimStart?.inSeconds,
-        duration: trimStart == null ? null : maxCardVideoClipDuration.inSeconds,
+        startTime: compressionArguments?.startTimeSeconds,
+        duration: compressionArguments?.durationSeconds,
         includeAudio: true,
       );
       compressedPath = compressed?.path;
@@ -146,18 +239,21 @@ final class PluginCardVideoProcessor implements CardVideoProcessor {
       await thumbnail.copy(thumbnailPath);
 
       final finalInfo = await VideoCompress.getMediaInfo(compressedPath);
-      return PendingCardVideo(
+      final pending = PendingCardVideo(
         videoPath: compressedPath,
         thumbnailPath: thumbnailPath,
         videoFileSize: await File(compressedPath).length(),
         thumbnailFileSize: await File(thumbnailPath).length(),
         width: finalInfo.width ?? sourceInfo.width,
         height: finalInfo.height ?? sourceInfo.height,
-        duration: Duration(
-          milliseconds: (finalInfo.duration ?? sourceInfo.duration ?? 0)
-              .round(),
+        duration: _processedVideoDuration(
+          finalDurationMs: finalInfo.duration,
+          trim: trim,
+          sourceDuration: sourceDuration,
         ),
       );
+      keepPendingFiles = true;
+      return pending;
     } finally {
       if (sourceTempPath != null) {
         await _storage.deleteAbsolute(sourceTempPath);
@@ -165,6 +261,29 @@ final class PluginCardVideoProcessor implements CardVideoProcessor {
       if (thumbnailSourcePath != null && thumbnailSourcePath != thumbnailPath) {
         await _storage.deleteAbsolute(thumbnailSourcePath);
       }
+      if (!keepPendingFiles && compressedPath != null) {
+        await _storage.deleteAbsolute(compressedPath);
+      }
+      if (!keepPendingFiles && thumbnailPath != null) {
+        await _storage.deleteAbsolute(thumbnailPath);
+      }
     }
+  }
+
+  Duration _processedVideoDuration({
+    required double? finalDurationMs,
+    required CardVideoTrim? trim,
+    required Duration sourceDuration,
+  }) {
+    final fallback = trim?.duration ?? sourceDuration;
+    final mediaDurationMs = finalDurationMs?.round() ?? 0;
+    if (mediaDurationMs <= 0) {
+      return fallback;
+    }
+    final mediaDuration = Duration(milliseconds: mediaDurationMs);
+    if (trim != null && mediaDuration > maxCardVideoClipDuration) {
+      return maxCardVideoClipDuration;
+    }
+    return mediaDuration;
   }
 }

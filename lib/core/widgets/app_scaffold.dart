@@ -16,6 +16,7 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
     final destinations = [
       _NavigationDestination(
         icon: Icons.home_outlined,
@@ -42,26 +43,32 @@ class AppScaffold extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(_titleForIndex(l10n))),
       body: SafeArea(top: false, child: navigationShell),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        onDestinationSelected: (index) {
-          if (index == 0) {
-            onHomeSelected?.call();
-          }
-          navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          );
-        },
-        destinations: [
-          for (final destination in destinations)
-            NavigationDestination(
-              icon: Icon(destination.icon),
-              selectedIcon: Icon(destination.selectedIcon),
-              label: destination.label,
-            ),
-        ],
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLow,
+          border: Border(top: BorderSide(color: scheme.outlineVariant)),
+        ),
+        child: NavigationBar(
+          selectedIndex: navigationShell.currentIndex,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          onDestinationSelected: (index) {
+            if (index == 0) {
+              onHomeSelected?.call();
+            }
+            navigationShell.goBranch(
+              index,
+              initialLocation: index == navigationShell.currentIndex,
+            );
+          },
+          destinations: [
+            for (final destination in destinations)
+              NavigationDestination(
+                icon: Icon(destination.icon),
+                selectedIcon: Icon(destination.selectedIcon),
+                label: destination.label,
+              ),
+          ],
+        ),
       ),
     );
   }

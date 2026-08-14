@@ -15,6 +15,7 @@ import '../../../core/widgets/animated_appear.dart';
 import '../../../core/widgets/app_empty_view.dart';
 import '../../../core/widgets/app_error_view.dart';
 import '../../../core/widgets/app_loading_view.dart';
+import '../../../core/widgets/gachadex_ui.dart';
 import '../../album/application/album_providers.dart';
 import '../../album/domain/entities/album_card_entry.dart';
 import '../../cards/presentation/widgets/gachadex_card.dart';
@@ -198,51 +199,65 @@ class _CollectionDetailHeader extends StatelessWidget {
       padding: AppConstants.pagePadding.copyWith(
         bottom: AppConstants.spacingSm,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-            child: SizedBox.square(
-              dimension: 64,
-              child: collection.coverRelativePath == null
-                  ? ColoredBox(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                      child: Icon(
-                        Icons.collections_bookmark_outlined,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSecondaryContainer,
-                      ),
-                    )
-                  : StoredMediaImage(path: collection.coverRelativePath!),
-            ),
+          GachadexHeroPanel(
+            icon: Icons.collections_bookmark_outlined,
+            title: collection.name,
+            description: collection.author?.trim().isNotEmpty == true
+                ? collection.author!
+                : l10n.installedCollection,
+            trailing: _DetailCollectionCover(collection: collection),
           ),
-          const SizedBox(width: AppConstants.spacingMd),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  collection.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+          const SizedBox(height: AppConstants.spacingSm),
+          Wrap(
+            spacing: AppConstants.spacingSm,
+            runSpacing: AppConstants.spacingSm,
+            children: [
+              GachadexMetricPill(
+                icon: Icons.grid_view_outlined,
+                value: percent,
+                label: l10n.albumProgress(
+                  collection.distinctOwnedCount,
+                  collection.totalCardCount,
+                  percent,
                 ),
-                const SizedBox(height: AppConstants.spacingXs),
-                Text(
-                  l10n.albumProgress(
-                    collection.distinctOwnedCount,
-                    collection.totalCardCount,
-                    percent,
-                  ),
-                ),
-                Text(l10n.gachacoinBalance(collection.coins)),
-              ],
-            ),
+              ),
+              GachadexMetricPill(
+                icon: Icons.toll_outlined,
+                value: collection.coins.toString(),
+                label: l10n.gachacoin,
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DetailCollectionCover extends StatelessWidget {
+  const _DetailCollectionCover({required this.collection});
+
+  final InstalledCollection collection;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+      child: SizedBox.square(
+        dimension: 72,
+        child: collection.coverRelativePath == null
+            ? ColoredBox(
+                color: scheme.secondaryContainer,
+                child: Icon(
+                  Icons.collections_bookmark_outlined,
+                  color: scheme.onSecondaryContainer,
+                ),
+              )
+            : StoredMediaImage(path: collection.coverRelativePath!),
       ),
     );
   }
@@ -309,11 +324,9 @@ class _PacksTab extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppConstants.spacingMd),
               ],
-              Text(
-                l10n.packInventory,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              GachadexSectionHeader(
+                icon: Icons.inventory_2_outlined,
+                title: l10n.packInventory,
               ),
               const SizedBox(height: AppConstants.spacingMd),
               for (final inventory in inventories)
@@ -422,19 +435,29 @@ class _PackInventoryCardState extends ConsumerState<_PackInventoryCard> {
                   ],
                 ),
                 const SizedBox(height: AppConstants.spacingSm),
-                Text(
-                  l10n.availablePacks(
-                    available,
-                    widget.inventory.maxAccumulated,
-                  ),
-                ),
-                const SizedBox(height: AppConstants.spacingXs),
-                Text(
-                  canRecharge
-                      ? l10n.nextPackIn(_formatRemaining(remaining))
-                      : l10n.packRechargePaused(
-                          widget.inventory.maxAccumulated,
-                        ),
+                Wrap(
+                  spacing: AppConstants.spacingSm,
+                  runSpacing: AppConstants.spacingSm,
+                  children: [
+                    GachadexMetricPill(
+                      icon: Icons.inventory_2_outlined,
+                      value: '$available/${widget.inventory.maxAccumulated}',
+                      label: l10n.available,
+                    ),
+                    GachadexMetricPill(
+                      icon: canRecharge
+                          ? Icons.timer_outlined
+                          : Icons.pause_circle_outline,
+                      value: canRecharge
+                          ? _formatRemaining(remaining)
+                          : widget.inventory.maxAccumulated.toString(),
+                      label: canRecharge
+                          ? l10n.nextPackIn(_formatRemaining(remaining))
+                          : l10n.packRechargePaused(
+                              widget.inventory.maxAccumulated,
+                            ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: AppConstants.spacingMd),
                 Wrap(
@@ -739,111 +762,116 @@ class _AlbumTab extends ConsumerWidget {
           data: (stats) => _AlbumStatsCard(stats: stats),
         ),
         const SizedBox(height: AppConstants.spacingMd),
-        Wrap(
-          spacing: AppConstants.spacingSm,
-          runSpacing: AppConstants.spacingSm,
-          children: [
-            DropdownButton<AlbumStatusFilter>(
-              value: query.status,
-              onChanged: (value) {
-                if (value != null) {
-                  ref.read(albumQueryProvider.notifier).setStatus(value);
-                }
-              },
-              items: [
-                DropdownMenuItem(
-                  value: AlbumStatusFilter.all,
-                  child: Text(l10n.all),
-                ),
-                DropdownMenuItem(
-                  value: AlbumStatusFilter.owned,
-                  child: Text(l10n.owned),
-                ),
-                DropdownMenuItem(
-                  value: AlbumStatusFilter.missing,
-                  child: Text(l10n.missing),
-                ),
-                DropdownMenuItem(
-                  value: AlbumStatusFilter.repeated,
-                  child: Text(l10n.repeated),
-                ),
-                DropdownMenuItem(
-                  value: AlbumStatusFilter.favorites,
-                  child: Text(l10n.favorites),
-                ),
-              ],
-            ),
-            raritiesAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-              data: (rarities) => DropdownButton<RarityId?>(
-                value: query.rarityId,
+        GachadexSurfaceCard(
+          child: Wrap(
+            spacing: AppConstants.spacingSm,
+            runSpacing: AppConstants.spacingSm,
+            children: [
+              DropdownButton<AlbumStatusFilter>(
+                value: query.status,
                 onChanged: (value) {
-                  ref.read(albumQueryProvider.notifier).setRarity(value);
+                  if (value != null) {
+                    ref.read(albumQueryProvider.notifier).setStatus(value);
+                  }
                 },
                 items: [
-                  DropdownMenuItem<RarityId?>(
-                    value: null,
-                    child: Text(l10n.allRarities),
+                  DropdownMenuItem(
+                    value: AlbumStatusFilter.all,
+                    child: Text(l10n.all),
                   ),
-                  for (final rarity in rarities)
-                    DropdownMenuItem<RarityId?>(
-                      value: rarity.id,
-                      child: Text(rarity.name),
-                    ),
+                  DropdownMenuItem(
+                    value: AlbumStatusFilter.owned,
+                    child: Text(l10n.owned),
+                  ),
+                  DropdownMenuItem(
+                    value: AlbumStatusFilter.missing,
+                    child: Text(l10n.missing),
+                  ),
+                  DropdownMenuItem(
+                    value: AlbumStatusFilter.repeated,
+                    child: Text(l10n.repeated),
+                  ),
+                  DropdownMenuItem(
+                    value: AlbumStatusFilter.favorites,
+                    child: Text(l10n.favorites),
+                  ),
                 ],
               ),
-            ),
-            DropdownButton<AlbumMediaFilter>(
-              value: query.media,
-              onChanged: (value) {
-                if (value != null) {
-                  ref.read(albumQueryProvider.notifier).setMedia(value);
-                }
-              },
-              items: [
-                DropdownMenuItem(
-                  value: AlbumMediaFilter.all,
-                  child: Text(l10n.allMedia),
+              raritiesAsync.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (rarities) => DropdownButton<RarityId?>(
+                  value: query.rarityId,
+                  onChanged: (value) {
+                    ref.read(albumQueryProvider.notifier).setRarity(value);
+                  },
+                  items: [
+                    DropdownMenuItem<RarityId?>(
+                      value: null,
+                      child: Text(l10n.allRarities),
+                    ),
+                    for (final rarity in rarities)
+                      DropdownMenuItem<RarityId?>(
+                        value: rarity.id,
+                        child: Text(rarity.name),
+                      ),
+                  ],
                 ),
-                DropdownMenuItem(
-                  value: AlbumMediaFilter.image,
-                  child: Text(l10n.photo),
-                ),
-                DropdownMenuItem(
-                  value: AlbumMediaFilter.video,
-                  child: Text(l10n.video),
-                ),
-              ],
-            ),
-            DropdownButton<AlbumSort>(
-              value: query.sort,
-              onChanged: (value) {
-                if (value != null) {
-                  ref.read(albumQueryProvider.notifier).setSort(value);
-                }
-              },
-              items: [
-                DropdownMenuItem(
-                  value: AlbumSort.number,
-                  child: Text(l10n.collectionNumber),
-                ),
-                DropdownMenuItem(value: AlbumSort.name, child: Text(l10n.name)),
-                DropdownMenuItem(
-                  value: AlbumSort.rarity,
-                  child: Text(l10n.rarity),
-                ),
-                DropdownMenuItem(
-                  value: AlbumSort.firstObtained,
-                  child: Text(l10n.firstObtainedSort),
-                ),
-                DropdownMenuItem(
-                  value: AlbumSort.quantity,
-                  child: Text(l10n.quantity),
-                ),
-              ],
-            ),
-          ],
+              ),
+              DropdownButton<AlbumMediaFilter>(
+                value: query.media,
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(albumQueryProvider.notifier).setMedia(value);
+                  }
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: AlbumMediaFilter.all,
+                    child: Text(l10n.allMedia),
+                  ),
+                  DropdownMenuItem(
+                    value: AlbumMediaFilter.image,
+                    child: Text(l10n.photo),
+                  ),
+                  DropdownMenuItem(
+                    value: AlbumMediaFilter.video,
+                    child: Text(l10n.video),
+                  ),
+                ],
+              ),
+              DropdownButton<AlbumSort>(
+                value: query.sort,
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(albumQueryProvider.notifier).setSort(value);
+                  }
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: AlbumSort.number,
+                    child: Text(l10n.collectionNumber),
+                  ),
+                  DropdownMenuItem(
+                    value: AlbumSort.name,
+                    child: Text(l10n.name),
+                  ),
+                  DropdownMenuItem(
+                    value: AlbumSort.rarity,
+                    child: Text(l10n.rarity),
+                  ),
+                  DropdownMenuItem(
+                    value: AlbumSort.firstObtained,
+                    child: Text(l10n.firstObtainedSort),
+                  ),
+                  DropdownMenuItem(
+                    value: AlbumSort.quantity,
+                    child: Text(l10n.quantity),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: AppConstants.spacingMd),
         cardsAsync.when(
@@ -893,30 +921,41 @@ class _AlbumStatsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final percent = (stats.completionRatio * 100).toStringAsFixed(1);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingMd),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.cards,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: AppConstants.spacingSm),
-            Text(
-              l10n.albumProgress(
-                stats.distinctOwnedCount,
-                stats.totalCardCount,
-                percent,
+    return GachadexSurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GachadexSectionHeader(
+            icon: Icons.grid_view_outlined,
+            title: l10n.cards,
+          ),
+          const SizedBox(height: AppConstants.spacingMd),
+          Wrap(
+            spacing: AppConstants.spacingSm,
+            runSpacing: AppConstants.spacingSm,
+            children: [
+              GachadexMetricPill(
+                icon: Icons.done_all_outlined,
+                value: percent,
+                label: l10n.albumProgress(
+                  stats.distinctOwnedCount,
+                  stats.totalCardCount,
+                  percent,
+                ),
               ),
-            ),
-            Text(l10n.totalCopies(stats.totalCopies)),
-            Text(l10n.favoriteCount(stats.favoriteCount)),
-          ],
-        ),
+              GachadexMetricPill(
+                icon: Icons.layers_outlined,
+                value: stats.totalCopies.toString(),
+                label: l10n.totalCopies(stats.totalCopies),
+              ),
+              GachadexMetricPill(
+                icon: Icons.star_border_outlined,
+                value: stats.favoriteCount.toString(),
+                label: l10n.favoriteCount(stats.favoriteCount),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

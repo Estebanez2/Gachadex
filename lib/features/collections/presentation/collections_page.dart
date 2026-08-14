@@ -10,6 +10,7 @@ import '../../../core/value_objects/relative_media_path.dart';
 import '../../../core/widgets/app_empty_view.dart';
 import '../../../core/widgets/app_error_view.dart';
 import '../../../core/widgets/app_loading_view.dart';
+import '../../../core/widgets/gachadex_ui.dart';
 import '../application/album_collection_summary_providers.dart';
 import '../../import_export/presentation/import_collection_flow.dart';
 import '../application/installed_collection_providers.dart';
@@ -87,13 +88,18 @@ class _CollectionsPageState extends ConsumerState<CollectionsPage> {
               const SizedBox(height: AppConstants.spacingSm),
           itemBuilder: (context, index) {
             if (index == 0) {
-              return Text(
-                l10n.albumLibraryDescription,
-                style: Theme.of(context).textTheme.bodyMedium,
+              return GachadexHeroPanel(
+                icon: Icons.collections_bookmark_outlined,
+                title: l10n.album,
+                description: l10n.albumLibraryDescription,
               );
             }
             if (index == 1) {
-              return importButton;
+              return GachadexSectionHeader(
+                icon: Icons.folder_open_outlined,
+                title: l10n.collections,
+                trailing: importButton,
+              );
             }
             final summary = summaries[index - 2];
             return _AlbumCollectionCard(summary: summary);
@@ -173,21 +179,33 @@ class _AlbumCollectionCard extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: AppConstants.spacingSm),
-                    Text(
-                      l10n.albumProgress(
-                        summary.distinctOwnedCount,
-                        summary.totalCardCount,
-                        percent,
-                      ),
+                    Wrap(
+                      spacing: AppConstants.spacingSm,
+                      runSpacing: AppConstants.spacingSm,
+                      children: [
+                        GachadexMetricPill(
+                          icon: Icons.grid_view_outlined,
+                          value: percent,
+                          label: l10n.albumProgress(
+                            summary.distinctOwnedCount,
+                            summary.totalCardCount,
+                            percent,
+                          ),
+                        ),
+                        GachadexMetricPill(
+                          icon: Icons.inventory_2_outlined,
+                          value: summary.totalAvailablePacks.toString(),
+                          label: l10n.totalAvailablePacksCount(
+                            summary.totalAvailablePacks,
+                          ),
+                        ),
+                        GachadexMetricPill(
+                          icon: Icons.toll_outlined,
+                          value: summary.coins.toString(),
+                          label: l10n.gachacoin,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppConstants.spacingXs),
-                    Text(
-                      l10n.totalAvailablePacksCount(
-                        summary.totalAvailablePacks,
-                      ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingXs),
-                    Text(l10n.gachacoinBalance(summary.coins)),
                   ],
                 ),
               ),

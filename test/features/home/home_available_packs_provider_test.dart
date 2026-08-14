@@ -49,6 +49,33 @@ void main() {
     expect(packs.single.maxAccumulated, 3);
   });
 
+  test('includes pack types with no available packs', () async {
+    final database = createInMemoryDatabase();
+    addTearDown(database.close);
+    final definition = await seedDefinition(database, seed: 3);
+    final installedCollectionId = await seedInstalledCollection(
+      database,
+      definition,
+      seed: 53,
+    );
+    await _seedInventory(
+      database,
+      installedCollectionId: installedCollectionId,
+      packTypeId: definition.packTypeId,
+      availableCount: 0,
+    );
+    final container = ProviderContainer(
+      overrides: [appDatabaseProvider.overrideWithValue(database)],
+    );
+    addTearDown(container.dispose);
+
+    final packs = await container.read(homeAvailablePacksProvider.future);
+
+    expect(packs, hasLength(1));
+    expect(packs.single.availableCount, 0);
+    expect(packs.single.maxAccumulated, 3);
+  });
+
   test('combines available packs from two collections', () async {
     final database = createInMemoryDatabase();
     addTearDown(database.close);

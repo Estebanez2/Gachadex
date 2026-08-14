@@ -11,6 +11,7 @@ import '../../../../core/files/stored_media_image.dart';
 import '../../../../core/identifiers/entity_id.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/gachadex_ui.dart';
 import '../../../collections/application/installed_collection_providers.dart';
 import '../../../cards/presentation/widgets/gachadex_card.dart';
 import '../../../economy/application/economy_providers.dart';
@@ -82,69 +83,29 @@ class AlbumCardDetailPage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingMd),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        entry.name ?? l10n.undiscovered,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w800),
-                      ),
-                    ),
-                    IconButton.filledTonal(
-                      tooltip: l10n.favorites,
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        ref
-                            .read(toggleFavoriteCardProvider)
-                            .call(
-                              installedCollectionId: installedCollectionId,
-                              cardId: entry.cardId,
-                            );
-                      },
-                      icon: Icon(
-                        entry.isFavorite
-                            ? Icons.star
-                            : Icons.star_border_outlined,
-                      ),
-                    ),
-                  ],
+                _CardDetailInfo(
+                  entry: entry,
+                  onToggleFavorite: () {
+                    HapticFeedback.selectionClick();
+                    ref
+                        .read(toggleFavoriteCardProvider)
+                        .call(
+                          installedCollectionId: installedCollectionId,
+                          cardId: entry.cardId,
+                        );
+                  },
                 ),
-                Text('${l10n.collectionNumber}: ${entry.collectionNumber}'),
-                if (entry.health != null)
-                  Text('${l10n.health}: ${entry.health}'),
-                Text('${l10n.rarity}: ${entry.rarityName ?? ''}'),
-                Text('${l10n.copies}: ${entry.quantity}'),
                 if (entry.sellableCopies > 0) ...[
                   const SizedBox(height: AppConstants.spacingMd),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.toll_outlined),
-                      title: Text(l10n.sellDuplicates),
-                      subtitle: Text(
-                        '${l10n.sellableCopies(entry.sellableCopies)}\n'
-                        '${l10n.unitSellValue(entry.sellValue ?? 0)}',
-                      ),
-                      trailing: FilledButton.icon(
-                        onPressed: () => _showSellDialog(
-                          context: context,
-                          ref: ref,
-                          entry: entry,
-                        ),
-                        icon: const Icon(Icons.sell_outlined),
-                        label: Text(l10n.sellDuplicates),
-                      ),
+                  _SellDuplicatesPanel(
+                    entry: entry,
+                    onSell: () => _showSellDialog(
+                      context: context,
+                      ref: ref,
+                      entry: entry,
                     ),
                   ),
                 ],
-                if (entry.firstObtainedAtUtc != null)
-                  Text(
-                    l10n.firstObtained(
-                      MaterialLocalizations.of(
-                        context,
-                      ).formatShortDate(entry.firstObtainedAtUtc!.toLocal()),
-                    ),
-                  ),
               ],
             );
           },
@@ -257,5 +218,111 @@ class AlbumCardDetailPage extends ConsumerWidget {
         ).showSnackBar(SnackBar(content: Text(l10n.saveError)));
       }
     }
+  }
+}
+
+class _CardDetailInfo extends StatelessWidget {
+  const _CardDetailInfo({required this.entry, required this.onToggleFavorite});
+
+  final AlbumCardEntry entry;
+  final VoidCallback onToggleFavorite;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final obtainedAt = entry.firstObtainedAtUtc == null
+        ? null
+        : MaterialLocalizations.of(
+            context,
+          ).formatShortDate(entry.firstObtainedAtUtc!.toLocal());
+
+    return GachadexSurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GachadexSectionHeader(
+            icon: Icons.style_outlined,
+            title: entry.name ?? l10n.undiscovered,
+            trailing: IconButton.filledTonal(
+              tooltip: l10n.favorites,
+              onPressed: onToggleFavorite,
+              icon: Icon(
+                entry.isFavorite ? Icons.star : Icons.star_border_outlined,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingMd),
+          Wrap(
+            spacing: AppConstants.spacingSm,
+            runSpacing: AppConstants.spacingSm,
+            children: [
+              GachadexMetricPill(
+                icon: Icons.tag_outlined,
+                value: '#${entry.collectionNumber}',
+                label: l10n.collectionNumber,
+              ),
+              if (entry.health != null)
+                GachadexMetricPill(
+                  icon: Icons.favorite_border_outlined,
+                  value: entry.health.toString(),
+                  label: l10n.health,
+                ),
+              GachadexMetricPill(
+                icon: Icons.auto_awesome_outlined,
+                value: entry.rarityName ?? '',
+                label: l10n.rarity,
+              ),
+              GachadexMetricPill(
+                icon: Icons.layers_outlined,
+                value: entry.quantity.toString(),
+                label: l10n.copies,
+              ),
+              if (obtainedAt != null)
+                GachadexMetricPill(
+                  icon: Icons.event_available_outlined,
+                  value: obtainedAt,
+                  label: l10n.firstObtainedSort,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SellDuplicatesPanel extends StatelessWidget {
+  const _SellDuplicatesPanel({required this.entry, required this.onSell});
+
+  final AlbumCardEntry entry;
+  final VoidCallback onSell;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return GachadexSurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GachadexSectionHeader(
+            icon: Icons.toll_outlined,
+            title: l10n.sellDuplicates,
+            subtitle:
+                '${l10n.sellableCopies(entry.sellableCopies)}\n'
+                '${l10n.unitSellValue(entry.sellValue ?? 0)}',
+          ),
+          const SizedBox(height: AppConstants.spacingMd),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              onPressed: onSell,
+              icon: const Icon(Icons.sell_outlined),
+              label: Text(l10n.sellDuplicates),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../constants/app_constants.dart';
+import 'gachadex_ui.dart';
 
 class AppErrorView extends StatelessWidget {
   const AppErrorView({
@@ -31,40 +32,55 @@ class AppErrorView extends StatelessWidget {
             constraints: const BoxConstraints(
               maxWidth: AppConstants.maxContentWidth,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: theme.colorScheme.error,
-                ),
-                const SizedBox(height: AppConstants.spacingMd),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: AppConstants.spacingSm),
-                Text(
-                  description,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge,
-                ),
-                if (onRetry != null) ...[
-                  const SizedBox(height: AppConstants.spacingLg),
-                  Tooltip(
-                    message: resolvedRetryLabel,
-                    child: FilledButton.icon(
-                      onPressed: onRetry,
-                      icon: const Icon(Icons.refresh),
-                      label: Text(resolvedRetryLabel),
+            child: GachadexSurfaceCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.controlRadius,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppConstants.spacingMd),
+                      child: Icon(
+                        Icons.error_outline,
+                        size: 40,
+                        color: theme.colorScheme.onErrorContainer,
+                      ),
                     ),
                   ),
+                  const SizedBox(height: AppConstants.spacingMd),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.spacingSm),
+                  Text(
+                    description,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  if (onRetry != null) ...[
+                    const SizedBox(height: AppConstants.spacingLg),
+                    Tooltip(
+                      message: resolvedRetryLabel,
+                      child: FilledButton.icon(
+                        onPressed: onRetry,
+                        icon: const Icon(Icons.refresh),
+                        label: Text(resolvedRetryLabel),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

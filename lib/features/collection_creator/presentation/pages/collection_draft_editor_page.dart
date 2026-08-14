@@ -13,6 +13,7 @@ import '../../../../core/identifiers/entity_id.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/app_loading_view.dart';
+import '../../../../core/widgets/gachadex_ui.dart';
 import '../../../cards/application/card_providers.dart';
 import '../../../cards/domain/repositories/card_repository.dart';
 import '../../../cards/presentation/widgets/gachadex_card.dart';
@@ -299,31 +300,26 @@ class _CompletionPanel extends StatelessWidget {
     final l10n = context.l10n;
     final summaries = _sectionSummaries(context, state);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingMd),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.draftSectionsProgress(
-                state.completeness.completedRequiredCount,
-                state.completeness.requiredSectionCount,
-              ),
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+    return GachadexSurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GachadexSectionHeader(
+            icon: Icons.checklist_outlined,
+            title: l10n.draftSectionsProgress(
+              state.completeness.completedRequiredCount,
+              state.completeness.requiredSectionCount,
             ),
-            const SizedBox(height: AppConstants.spacingSm),
-            for (var index = 0; index < summaries.length; index++) ...[
-              if (index > 0) const Divider(),
-              _CompletionRow(
-                summary: summaries[index],
-                onTap: () => onSectionChanged(summaries[index].section),
-              ),
-            ],
+          ),
+          const SizedBox(height: AppConstants.spacingSm),
+          for (var index = 0; index < summaries.length; index++) ...[
+            if (index > 0) const Divider(),
+            _CompletionRow(
+              summary: summaries[index],
+              onTap: () => onSectionChanged(summaries[index].section),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -478,53 +474,62 @@ class _InformationSection extends ConsumerWidget {
       collectionDraftControllerProvider(state.project.id).notifier,
     );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextFormField(
-          key: ValueKey('draft-name-${state.project.id.value}'),
-          initialValue: state.name,
-          maxLength: CollectionDraftValidation.maxNameLength,
-          decoration: InputDecoration(
-            labelText: l10n.collectionName,
-            errorText: state.infoErrors.nameTooLong ? l10n.fieldTooLong : null,
+    return GachadexSurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GachadexSectionHeader(
+            icon: Icons.info_outline,
+            title: l10n.information,
           ),
-          buildCounter: _buildCounter,
-          textInputAction: TextInputAction.next,
-          onChanged: controller.editName,
-        ),
-        const SizedBox(height: AppConstants.spacingMd),
-        TextFormField(
-          key: ValueKey('draft-author-${state.project.id.value}'),
-          initialValue: state.author,
-          maxLength: CollectionDraftValidation.maxAuthorLength,
-          decoration: InputDecoration(
-            labelText: l10n.author,
-            errorText: state.infoErrors.authorTooLong
-                ? l10n.fieldTooLong
-                : null,
+          const SizedBox(height: AppConstants.spacingMd),
+          TextFormField(
+            key: ValueKey('draft-name-${state.project.id.value}'),
+            initialValue: state.name,
+            maxLength: CollectionDraftValidation.maxNameLength,
+            decoration: InputDecoration(
+              labelText: l10n.collectionName,
+              errorText: state.infoErrors.nameTooLong
+                  ? l10n.fieldTooLong
+                  : null,
+            ),
+            buildCounter: _buildCounter,
+            textInputAction: TextInputAction.next,
+            onChanged: controller.editName,
           ),
-          buildCounter: _buildCounter,
-          textInputAction: TextInputAction.next,
-          onChanged: controller.editAuthor,
-        ),
-        const SizedBox(height: AppConstants.spacingMd),
-        TextFormField(
-          key: ValueKey('draft-description-${state.project.id.value}'),
-          initialValue: state.description,
-          maxLength: CollectionDraftValidation.maxDescriptionLength,
-          minLines: 3,
-          maxLines: 7,
-          decoration: InputDecoration(
-            labelText: l10n.description,
-            errorText: state.infoErrors.descriptionTooLong
-                ? l10n.fieldTooLong
-                : null,
+          const SizedBox(height: AppConstants.spacingMd),
+          TextFormField(
+            key: ValueKey('draft-author-${state.project.id.value}'),
+            initialValue: state.author,
+            maxLength: CollectionDraftValidation.maxAuthorLength,
+            decoration: InputDecoration(
+              labelText: l10n.author,
+              errorText: state.infoErrors.authorTooLong
+                  ? l10n.fieldTooLong
+                  : null,
+            ),
+            buildCounter: _buildCounter,
+            textInputAction: TextInputAction.next,
+            onChanged: controller.editAuthor,
           ),
-          buildCounter: _buildCounter,
-          onChanged: controller.editDescription,
-        ),
-      ],
+          const SizedBox(height: AppConstants.spacingMd),
+          TextFormField(
+            key: ValueKey('draft-description-${state.project.id.value}'),
+            initialValue: state.description,
+            maxLength: CollectionDraftValidation.maxDescriptionLength,
+            minLines: 3,
+            maxLines: 7,
+            decoration: InputDecoration(
+              labelText: l10n.description,
+              errorText: state.infoErrors.descriptionTooLong
+                  ? l10n.fieldTooLong
+                  : null,
+            ),
+            buildCounter: _buildCounter,
+            onChanged: controller.editDescription,
+          ),
+        ],
+      ),
     );
   }
 
@@ -563,25 +568,17 @@ class _RaritiesSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                l10n.rarities,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-              ),
+        GachadexSectionHeader(
+          icon: Icons.auto_awesome_outlined,
+          title: l10n.rarities,
+          trailing: Tooltip(
+            message: l10n.addRarity,
+            child: FilledButton.icon(
+              onPressed: () => _showRarityForm(context, ref, state),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.addRarity),
             ),
-            Tooltip(
-              message: l10n.addRarity,
-              child: FilledButton.icon(
-                onPressed: () => _showRarityForm(context, ref, state),
-                icon: const Icon(Icons.add),
-                label: Text(l10n.addRarity),
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: AppConstants.spacingMd),
         if (state.rarities.isEmpty)
@@ -716,26 +713,18 @@ class _CardsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                '${l10n.cards} (${state.cardCount})',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-              ),
-            ),
-            FilledButton.icon(
-              onPressed: state.rarities.isEmpty
-                  ? null
-                  : () => context.go(
-                      AppRoutes.createCardNewPath(state.project.id.value),
-                    ),
-              icon: const Icon(Icons.add),
-              label: Text(l10n.addCard),
-            ),
-          ],
+        GachadexSectionHeader(
+          icon: Icons.style_outlined,
+          title: '${l10n.cards} (${state.cardCount})',
+          trailing: FilledButton.icon(
+            onPressed: state.rarities.isEmpty
+                ? null
+                : () => context.go(
+                    AppRoutes.createCardNewPath(state.project.id.value),
+                  ),
+            icon: const Icon(Icons.add),
+            label: Text(l10n.addCard),
+          ),
         ),
         const SizedBox(height: AppConstants.spacingMd),
         cardsAsync.when(
@@ -840,26 +829,18 @@ class _PacksSection extends ConsumerWidget {
       data: (packs) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.packs,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-                ),
-              ),
-              FilledButton.icon(
-                onPressed: state.cardCount <= 0
-                    ? null
-                    : () => context.go(
-                        AppRoutes.createPackNewPath(state.project.id.value),
-                      ),
-                icon: const Icon(Icons.add),
-                label: Text(l10n.addPack),
-              ),
-            ],
+          GachadexSectionHeader(
+            icon: Icons.inventory_2_outlined,
+            title: l10n.packs,
+            trailing: FilledButton.icon(
+              onPressed: state.cardCount <= 0
+                  ? null
+                  : () => context.go(
+                      AppRoutes.createPackNewPath(state.project.id.value),
+                    ),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.addPack),
+            ),
           ),
           const SizedBox(height: AppConstants.spacingMd),
           if (state.cardCount <= 0)
@@ -943,14 +924,11 @@ class _ReviewSection extends ConsumerWidget {
       data: (report) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.review,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+          GachadexSectionHeader(
+            icon: Icons.fact_check_outlined,
+            title: l10n.review,
+            subtitle: l10n.finalizationReviewDescription,
           ),
-          const SizedBox(height: AppConstants.spacingSm),
-          Text(l10n.finalizationReviewDescription),
           const SizedBox(height: AppConstants.spacingMd),
           _FinalizationSectionCard(
             title: l10n.information,
@@ -995,11 +973,11 @@ class _FinalizationSectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final complete = issues.isEmpty;
+    final scheme = Theme.of(context).colorScheme;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingSm),
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingMd),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppConstants.spacingSm),
+      child: GachadexSurfaceCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1007,6 +985,7 @@ class _FinalizationSectionCard extends StatelessWidget {
               children: [
                 Icon(
                   complete ? Icons.check_circle_outline : Icons.error_outline,
+                  color: complete ? scheme.primary : scheme.error,
                 ),
                 const SizedBox(width: AppConstants.spacingSm),
                 Expanded(

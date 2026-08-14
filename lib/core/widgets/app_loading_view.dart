@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../constants/app_constants.dart';
+import 'gachadex_ui.dart';
 
 class AppLoadingView extends StatelessWidget {
   const AppLoadingView({super.key, this.message});
@@ -18,19 +19,22 @@ class AppLoadingView extends StatelessWidget {
       child: Center(
         child: Padding(
           padding: AppConstants.pagePadding,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(),
-              if (message != null) ...[
-                const SizedBox(height: AppConstants.spacingMd),
-                Text(
-                  message!,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+          child: GachadexSurfaceCard(
+            padding: const EdgeInsets.all(AppConstants.spacingLg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                if (message != null) ...[
+                  const SizedBox(height: AppConstants.spacingMd),
+                  Text(
+                    message!,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

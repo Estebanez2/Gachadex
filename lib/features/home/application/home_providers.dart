@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/database_providers.dart';
 import '../../../core/identifiers/entity_id.dart';
 import '../../packs/application/pack_providers.dart';
-import '../../packs/domain/entities/pack_inventory.dart';
 import '../../packs/domain/value_objects/pack_visual_style.dart';
 
 final homeAvailablePacksProvider =
@@ -23,7 +22,7 @@ final homeAvailablePacksProvider =
       };
       final packs = <HomeAvailablePack>[];
 
-      for (final inventory in inventories.where(_isAvailable)) {
+      for (final inventory in inventories) {
         final collection = collectionsById[inventory.installedCollectionId];
         if (collection == null) {
           continue;
@@ -48,8 +47,6 @@ final homeAvailablePacksProvider =
       packs.sort(_compareHomePacks);
       return packs;
     });
-
-bool _isAvailable(PackInventory inventory) => inventory.availableCount > 0;
 
 int _compareHomePacks(HomeAvailablePack a, HomeAvailablePack b) {
   final collectionCompare = a.collectionName.toLowerCase().compareTo(

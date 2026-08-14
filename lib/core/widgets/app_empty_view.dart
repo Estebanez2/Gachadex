@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_constants.dart';
+import 'gachadex_ui.dart';
 
 class AppEmptyView extends StatelessWidget {
   const AppEmptyView({
@@ -35,29 +36,48 @@ class AppEmptyView extends StatelessWidget {
                 constraints: const BoxConstraints(
                   maxWidth: AppConstants.maxContentWidth,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(icon, size: 48, color: theme.colorScheme.secondary),
-                    const SizedBox(height: AppConstants.spacingMd),
-                    Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                child: GachadexSurfaceCard(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.controlRadius,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppConstants.spacingMd),
+                          child: Icon(
+                            icon,
+                            size: 40,
+                            color: theme.colorScheme.onSecondaryContainer,
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingSm),
-                    Text(
-                      description,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                    if (action != null) ...[
-                      const SizedBox(height: AppConstants.spacingLg),
-                      action!,
+                      const SizedBox(height: AppConstants.spacingMd),
+                      Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingSm),
+                      Text(
+                        description,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (action != null) ...[
+                        const SizedBox(height: AppConstants.spacingLg),
+                        action!,
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
